@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<doc>
+  <assembly>
+    <name>EventDriven.Domain.PoC.Api.Rest</name>
+  </assembly>
+  <members>
+    <member
+      name="M:EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType.BaseController.#ctor(EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.IMyUnitOfWork,AutoMapper.IMapper,Microsoft.Extensions.Options.IOptions{EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration.MyConfigurationValues},Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.AspNetCore.Http.IHttpContextAccessor,EventDriven.Domain.PoC.Application.DomainServices.IUserService)">
+      <summary>
+      </summary>
+      <param name="unitOfWork"></param>
+      <param name="mapper"></param>
+      <param name="configurationValues"></param>
+      <param name="memCache"></param>
+      <param name="contextAccessor"></param>
+      <param name="applicationUserService"></param>
+    </member>
+    <member name="P:EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType.BaseController.Mapper">
+      <summary>
+      </summary>
+    </member>
+    <member name="P:EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType.BaseController.MemCache">
+      <summary>
+      </summary>
+    </member>
+    <member
+      name="M:EventDriven.Domain.PoC.Api.Rest.Middleware.AddCorrelationIdToLogContextMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+      <summary>
+      </summary>
+      <param name="next"></param>
+    </member>
+    <member
+      name="M:EventDriven.Domain.PoC.Api.Rest.Middleware.AddCorrelationIdToResponseMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+      <summary>
+      </summary>
+      <param name="next"></param>
+    </member>
+  </members>
+</doc>

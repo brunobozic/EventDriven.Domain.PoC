@@ -1,0 +1,86 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Domain", "EventDriven.Domain.PoC.Domain\EventDriven.Domain.PoC.Domain.csproj", "{B5D67173-5531-4A63-9AC1-AF4A74794A5E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Application", "EventDriven.Domain.PoC.Application\EventDriven.Domain.PoC.Application.csproj", "{A23D49F2-C91E-418D-8EB2-89F5C90B4114}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.SharedKernel", "EventDriven.Domain.PoC.SharedKernel\EventDriven.Domain.PoC.SharedKernel.csproj", "{693276CA-8825-4485-9626-F2AD680BCDA1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Repository.EF", "EventDriven.Domain.PoC.Repository.EF\EventDriven.Domain.PoC.Repository.EF.csproj", "{D720D7B7-3685-4478-A43B-5B427B2E3400}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Services.BusinessLogic.Test", "EventDriven.Domain.PoC.Services.BusinessLogic.Test\EventDriven.Domain.PoC.Services.BusinessLogic.Test.csproj", "{D980F693-CD23-4239-923E-44F510258663}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Api.Rest.Integration.Test", "EventDriven.Domain.PoC.Api.Rest.IntegrationTest\EventDriven.Domain.PoC.Api.Rest.Integration.Test.csproj", "{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Api.Rest", "EventDriven.Domain.PoC.Api\EventDriven.Domain.PoC.Api.Rest.csproj", "{64F7217D-AB14-464E-898B-38452AF1E89C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5771D67C-2009-4301-BDA7-D0370E61082D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		docker-compose.yml = docker-compose.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.Kafka.Core", "Framework.Kafka.Core\Framework.Kafka.Core.csproj", "{5F5D2E52-4542-4446-B570-8759078D7D49}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.Repository.Dapper", "Framework.Repository.Dapper\Framework.Repository.Dapper.csproj", "{0337CDE5-6A21-43EE-AF96-DD28847F588A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.Serilog.Sink.Kafka", "Framework.Serilog.Sink.Kafka\Framework.Serilog.Sink.Kafka.csproj", "{FF90A720-D1B6-41FB-A1F5-DE49EB872428}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5D67173-5531-4A63-9AC1-AF4A74794A5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5D67173-5531-4A63-9AC1-AF4A74794A5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5D67173-5531-4A63-9AC1-AF4A74794A5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5D67173-5531-4A63-9AC1-AF4A74794A5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A23D49F2-C91E-418D-8EB2-89F5C90B4114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A23D49F2-C91E-418D-8EB2-89F5C90B4114}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A23D49F2-C91E-418D-8EB2-89F5C90B4114}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A23D49F2-C91E-418D-8EB2-89F5C90B4114}.Release|Any CPU.Build.0 = Release|Any CPU
+		{693276CA-8825-4485-9626-F2AD680BCDA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{693276CA-8825-4485-9626-F2AD680BCDA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{693276CA-8825-4485-9626-F2AD680BCDA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{693276CA-8825-4485-9626-F2AD680BCDA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D720D7B7-3685-4478-A43B-5B427B2E3400}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D720D7B7-3685-4478-A43B-5B427B2E3400}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D720D7B7-3685-4478-A43B-5B427B2E3400}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D720D7B7-3685-4478-A43B-5B427B2E3400}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D980F693-CD23-4239-923E-44F510258663}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D980F693-CD23-4239-923E-44F510258663}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D980F693-CD23-4239-923E-44F510258663}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D980F693-CD23-4239-923E-44F510258663}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64F7217D-AB14-464E-898B-38452AF1E89C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64F7217D-AB14-464E-898B-38452AF1E89C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64F7217D-AB14-464E-898B-38452AF1E89C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64F7217D-AB14-464E-898B-38452AF1E89C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F5D2E52-4542-4446-B570-8759078D7D49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F5D2E52-4542-4446-B570-8759078D7D49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F5D2E52-4542-4446-B570-8759078D7D49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F5D2E52-4542-4446-B570-8759078D7D49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0337CDE5-6A21-43EE-AF96-DD28847F588A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0337CDE5-6A21-43EE-AF96-DD28847F588A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0337CDE5-6A21-43EE-AF96-DD28847F588A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0337CDE5-6A21-43EE-AF96-DD28847F588A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF90A720-D1B6-41FB-A1F5-DE49EB872428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF90A720-D1B6-41FB-A1F5-DE49EB872428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF90A720-D1B6-41FB-A1F5-DE49EB872428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF90A720-D1B6-41FB-A1F5-DE49EB872428}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E1F615C-DDC0-416C-86E0-979E40B1D5F3}
+	EndGlobalSection
+EndGlobal

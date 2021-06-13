@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
+    <PackageReference Include="Dapper" Version="2.0.78" />
+    <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+    <PackageReference Include="FluentValidation" Version="9.3.0" />
+    <PackageReference Include="MailKit" Version="2.10.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.1" />
+    <PackageReference Include="MimeKit" Version="2.10.1" />
+    <PackageReference Include="Quartz" Version="3.2.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
+    <PackageReference Include="URF.Core.Abstractions" Version="3.1.3" />
+    <PackageReference Include="URF.Core.Abstractions.Services" Version="3.1.3" />
+    <PackageReference Include="URF.Core.Abstractions.Trackable" Version="3.1.3" />
+    <PackageReference Include="URF.Core.Services" Version="3.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EventDriven.Domain.PoC.Domain\EventDriven.Domain.PoC.Domain.csproj" />
+    <ProjectReference Include="..\EventDriven.Domain.PoC.SharedKernel\EventDriven.Domain.PoC.SharedKernel.csproj" />
+    <ProjectReference Include="..\EventDriven.Domain.PoC.Repository.EF\EventDriven.Domain.PoC.Repository.EF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CommandHandlers\Addresses\CUD\" />
+    <Folder Include="CommandHandlers\Roles\CUD\" />
+    <Folder Include="EventHandlers\Users\PasswordReset\" />
+    <Folder Include="EventHandlers\Addresses\" />
+    <Folder Include="EventHandlers\Users\UserUpdates\Handlers\" />
+    <Folder Include="EventHandlers\Roles\Activation\Handlers\" />
+    <Folder Include="EventHandlers\Roles\RoleUpdates\" />
+    <Folder Include="EventHandlers\Users\VerificationEmail\" />
+    <Folder Include="ViewModels\Address\" />
+    <Folder Include="ViewModels\Contact\" />
+    <Folder Include="ViewModels\CellPhoneNumber\" />
+    <Folder Include="ViewModels\LandLine\" />
+    <Folder Include="ViewModels\City\" />
+    <Folder Include="ViewModels\Municipality\" />
+    <Folder Include="ViewModels\Company\" />
+    <Folder Include="ViewModels\Town\" />
+    <Folder Include="ViewModels\Person\" />
+    <Folder Include="ViewModels\OrganizationUnit\" />
+  </ItemGroup>
+
+</Project>
