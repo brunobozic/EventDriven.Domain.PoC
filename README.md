@@ -16,37 +16,66 @@ dotnet ef database update --project EventDriven.Domain.PoC.Repository.EF
 ## Commands
 
 ## Domain Events
+
 If the Domain Event should be processed outside of the ongoing transaction, you should define a Notification Object for it. 
 This is the object which should be written to the Outbox.
 
-First thing to note is Json.NET library usage to serialize/deserialize event messages. Second thing to note are 2 constructors of CustomerRegisteredNotification class. 
+First thing to note is Json.NET library usage to serialize/deserialize event messages. 
+Second thing to note are 2 constructors of CustomerRegisteredNotification class. 
 First of them is for creating notification based on Domain Event. 
 Second of them is to deserialize message from JSON string which is presented in following section regarding processing.
 
-The most important parts are:
-Line 1 – [DisallowConcurrentExecution] attribute means that scheduler will not start new instance of job if other instance of that job is running. 
-This is important because we don’t want process Outbox concurrently.
-Line 25 – Get all messages to process
-Line 30 – Deserialize the message (which is usually a state carried integration event) to a Notification Object
-Line 32 – Processing the Notification Object (for example sending event to an event bus, or in our example to a Kafka topic)
-Line 38 – Mark message as processed in the outbox
+The most important parts to note here are:
 
-1. Command Handler defines transaction boundary. 
-Transaction is started when Command Handler is invoked and committed **at the end**.
-2. Each Domain Event handler is invoked in context of the same transaction boundary.
-3. If we want to process something **outside** the transaction, or in other words, outside the boundaries of this application, we need to create a public event based on the Domain Event. 
-I call this event an Integration event. These events will be inserted into the Outbox before being picked up by a background worker.
+All intergration events (events to be consumed by other microservices) must be published to a "Outbox" table.
+You can publish [Domain Events] either as part of a single transaction or as part of two different transactions - in which case we are talking about [Integration Events].
+If you want to publish it as part of a different transaction, you must create an [IIntegrationEvent<>] object, objects of that type are inserted into the Outbox.
+Outbox Item(s) must be handled by a separate background worker/job as part of a separate process - a Quartz background job (Quartz scheduler) is used in this application.
+Without a working Quartz scheduler, the outbox items will be piling up and the integration events will not get published. 
+See [IntegrationEventDispatcher.cs] for more information.
+
+In a separate proces the Quartz scheduler will make the following actions:
+
+Each Outbox item is read, deserialized, and the object is then produced to a Kafka topic.
+
+1. [Command Handler] defines a single transaction boundary. Transaction is started when Command Handler is invoked and is committed **at the end** of it.
+2. Each [Domain Event Handler] is invoked in context of the same transaction boundary.
+3. If we want to process something **outside** the original transaction, we need to create a new public integration event ([IIntegrationEvent<>]) based on the original Domain Event
+
+--------------------------------
+Items are inserted into the Outbox
+– after each Command handling (but BEFORE committing transaction)
+– after each Domain Event handling (but WITHOUT committing transaction)
+--------------------------------
+
+--------------------------------
+TBD: Inbox
+
+Provided you are enqueueing another command as a reaction to a specific domain event this event will get inserted into an "Inbox" database table by Quartz scheduler.
+The inserts themselves are handled by [CommandsScheduler.cs].
+MediatR handles the commands enqueued and handled in this way by executing code you can find in [CommandsDispatcher.cs].
+
+This is how you would enqueue such a command:
+
+   await _commandsScheduler.EnqueueAsync(new SendAccountVerificationMailCommand(
+                Guid.NewGuid(),
+                notification.ActivationLink,
+                notification.ActivationLinkGenerated,
+                notification.UserId,
+                notification.Email,
+                notification.FirstName,
+                notification.LastName
+            ));
+
+Inspect [ProcessInternalCommandsCommandHandler.cs] for more detail on how an inbox item is being picked up and handled.
+
+--------------------------------
 
 We need two decorators. The first one will be for command handlers
 we also need a second decorator for the Domain Event handler, which will only publish Domain Events at the very end without committing database transaction
 
-## Integration Events
 
-The second most important thing is when to publish and process Domain Events? Events may be created after each action on the Aggregate, so we must publish them:
-– after each Command handling (but BEFORE committing transaction)
-– after each Domain Event handling (but WITHOUT committing transaction)
-
-
+## TODO
 
             // [RegisterApplicationUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
             // that one will fire an event [ApplicationUserCreatedDomainEvent] (when the user is created, the user has not yet confirmed his email so his account is not yet fully activated)
@@ -84,8 +113,6 @@ The second most important thing is when to publish and process Domain Events? Ev
             deleted
             deactivated, reactivated, activated, undeleted
             user given address, user changed address
-
-## TODO
 
 ### HiLo on MSSQL
 ### Guid as PK (generated up front)
