@@ -14,9 +14,7 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvent
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Verification;
 using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers;
-using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Random;
-using Microsoft.Extensions.Options;
 using TrackableEntities.Common.Core;
 using BC = BCrypt.Net.BCrypt;
 
@@ -29,39 +27,34 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         #region Public Properties
 
-        [EnumDataType(typeof(RoleEnum))] public string BasicRole { get; private set; }
+        //[EnumDataType(typeof(RoleEnum))] public string BasicRole { get; private set; }
 
         public string FullName { get; private init; }
         public string Oib { get; private init; }
         public DateTimeOffset? DateOfBirth { get; private init; }
         public string FirstName { get; private init; }
         public string LastName { get; private init; }
-
-        public void SetEmailWithActivationLinkSent()
-        {
-            var journalEntry =
-                new AccountJournalEntry(DateTime.UtcNow + " => Account activation code sent to users e-mail address.");
-            journalEntry.AttachActingUser(null);
-            journalEntry.AttachUser(this);
-            _journalEntries.Add(journalEntry);
-            _status = RegistrationStatusEnum.VerificationEmailSent;
-        }
-
         public string Email { get; private init; }
         public string UserName { get; private init; }
         public string NormalizedEmail { get; private init; }
         public string NormalizedUserName { get; private init; }
         public bool TwoFactorEnabled { get; private init; }
+
+        #region Email Verification
+
         public DateTime Verified { get; private set; }
         public string VerificationFailureLatestMessage { get; private set; }
         public DateTime LastVerificationFailureDate { get; private set; }
 
         private RegistrationStatusEnum _status { get; set; }
 
+        #endregion Email Verification
 
         #region Token operation
 
         public string ResetToken { get; private set; }
+        public string PasswordResetMsg { get; private set; }
+
         public DateTime? ResetTokenExpires { get; private set; }
         public string PasswordHash { get; private set; }
         public DateTime? PasswordReset { get; private set; }
@@ -69,13 +62,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public DateTime? VerificationTokenExpirationDate { get; private set; }
 
-        public Guid UserIdGuid { get; private init; }
-
         #endregion Token operations
 
-        public DateTime Created { get; private init; }
-        public DateTime Updated { get; private set; }
-        public string PasswordResetMsg { get; private set; }
+        //public DateTime Created { get; private init; }
+        //public DateTime Updated { get; private set; }
 
         #endregion Public Properties
 
@@ -133,10 +123,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 LastName = lastName.Trim(),
                 FullName = lastName.Trim() + " " + firstName.Trim(),
                 TwoFactorEnabled = false,
-                Created = DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow,
                 _status = RegistrationStatusEnum.WaitingForVerification,
-                Oib = "",
-                UserIdGuid = userIdGuid
+                Oib = ""
             };
 
             user.AddPasswordHash(password);
@@ -211,11 +200,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 FullName = lastName.Trim() + " " + firstName.Trim(),
                 TwoFactorEnabled = false,
                 _status = RegistrationStatusEnum.WaitingForVerification,
-                Created = DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow,
                 TrackingState = TrackingState.Added,
                 Oib = oib,
-                DateOfBirth = dateOfBirth,
-                UserIdGuid = userIdGuid
+                DateOfBirth = dateOfBirth
             };
 
             user.Activate(activeFrom, activeTo, creator);
@@ -292,11 +280,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 FullName = lastName.Trim() + " " + firstName.Trim(),
                 _status = RegistrationStatusEnum.Verified,
                 TwoFactorEnabled = false,
-                Created = DateTime.UtcNow,
+                DateCreated = DateTime.UtcNow,
                 TrackingState = TrackingState.Added,
                 Oib = oib,
-                DateOfBirth = dateOfBirth,
-                UserIdGuid = userIdGuid
+                DateOfBirth = dateOfBirth
             };
 
             if (activator == null)
@@ -359,8 +346,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         private readonly List<AccountJournalEntry> _journalEntries;
         public IReadOnlyCollection<AccountJournalEntry> JournalEntries => _journalEntries;
 
-        public IOptions<MyConfigurationValues> _appSettings { get; }
-
         private readonly List<RefreshToken.RefreshToken> _refreshTokens;
         public IReadOnlyCollection<RefreshToken.RefreshToken> RefreshTokens => _refreshTokens;
         private readonly List<UserAddress> _userAddresses;
@@ -385,7 +370,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
             _userAddresses.Add(userAddress);
 
-            Updated = DateTime.UtcNow;
+            base.DateModified = DateTime.UtcNow;
 
             var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => [" + addressType.Name +
                                                        "] address assigned to user. Address assigned: [" +
@@ -416,7 +401,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
             _userAddresses.RemoveAll(userAddress => userAddressIdsToDelete.Contains(userAddress.Id));
 
-            Updated = DateTime.UtcNow;
+            base.DateModified = DateTime.UtcNow;
 
             var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => [" + addressType.Name +
                                                        "] address removed from user. Address removed: [" +
@@ -616,7 +601,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             _userRoles.Add(newJoin);
 
             // this will get audited, but will not show what had changed (audit works on per-table basis, not on object-graph basis)
-            Updated = DateTime.UtcNow;
+            base.DateModified = DateTime.UtcNow;
 
             AddDomainEvent(new RoleAssignedToUserDomainEvent(
                 Id
@@ -654,7 +639,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             _userRoles.Remove(linkTableEntry);
 
             // this will get audited, but will not show what had changed (audit works on per-table basis, not on object-graph basis)
-            Updated = DateTime.UtcNow;
+            base.DateModified = DateTime.UtcNow;
 
             AddDomainEvent(new RoleRemovedFromUserDomainEvent(
                 Id,
@@ -777,7 +762,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         public bool RemoveStaleRefreshTokens()
         {
             if (EnsureIsActive() && EnsureIsVerified() && !Deleted)
-                _refreshTokens.RemoveAll(x => x.Created.AddDays(_appSettings.Value.RefreshTokenTTL) <= DateTime.UtcNow);
+                _refreshTokens.RemoveAll(x => x.Created.AddDays(Consts.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
             else
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove stale refresh tokens from it. Current registration status: {GetCurrentRegistrationStatus()}");
@@ -849,6 +834,16 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         public RegistrationStatusEnum GetCurrentRegistrationStatus()
         {
             return _status;
+        }
+
+        public void SetEmailWithActivationLinkSent()
+        {
+            var journalEntry =
+                new AccountJournalEntry(DateTime.UtcNow + " => Account activation code sent to users e-mail address.");
+            journalEntry.AttachActingUser(null);
+            journalEntry.AttachUser(this);
+            _journalEntries.Add(journalEntry);
+            _status = RegistrationStatusEnum.VerificationEmailSent;
         }
 
         #endregion Public methods

@@ -25,5 +25,7 @@
 
         public static int DEMO_USER_ACTIVE_TO_ADD_YEARS = 1;
         public static double VERIFICATION_TOKEN_EXPIRES_IN_HOURS = 8;
+
+        public static double REFREST_TOKEN_TTL_HOURS = 8;
     }
 }

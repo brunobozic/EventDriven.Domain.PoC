@@ -63,7 +63,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
 
             var user = await _userRepository
                 .Queryable()
-                .Where(u => u.UserIdGuid == command.UserId)
+                .Where(u => u.Id == command.UserId)
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (user == null)

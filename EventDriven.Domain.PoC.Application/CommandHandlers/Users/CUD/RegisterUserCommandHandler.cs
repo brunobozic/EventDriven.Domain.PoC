@@ -55,7 +55,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
                     {
                         Id = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109"),
                         UserName = "User with this username already exists.",
-                        StartingRole = "Not created",
                         Email = "User with this email already exists.",
                         ActiveTo = null,
                         Status = "Not created"
@@ -86,7 +85,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                StartingRole = user.BasicRole,
                 Email = user.Email,
                 ActiveTo = user.ActiveTo,
                 Status = user.GetCurrentRegistrationStatus().ToDescriptionString()

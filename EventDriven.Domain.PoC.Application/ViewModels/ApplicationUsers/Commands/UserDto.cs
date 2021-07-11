@@ -13,6 +13,5 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
         public DateTimeOffset? ActiveTo { get; set; }
         public DateTime HasBeenVerified { get; set; }
         public string Status { get; set; }
-        public string StartingRole { get; set; }
     }
 }
