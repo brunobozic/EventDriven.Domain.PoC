@@ -22,11 +22,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         #region FK
 
-        public long UserId { get; private set; }
+        public Guid UserId { get; private set; }
         public long RoleId { get; private set; }
-        public long? UndeletedById { get; private set; }
-        public long? DeactivatedById { get; private set; }
-        public long? ReactivatedById { get; private set; }
+        public Guid UndeletedById { get; private set; }
+        public Guid DeactivatedById { get; private set; }
+        public Guid ReactivatedById { get; private set; }
 
         #endregion FK
 

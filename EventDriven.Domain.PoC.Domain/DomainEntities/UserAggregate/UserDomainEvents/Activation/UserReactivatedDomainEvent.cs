@@ -10,9 +10,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , string userName
             , Guid userId
             , string oib
-            , long reactivatedByUserId
+            , Guid reactivatedByUserId
             , string reactivationReason
-            , long reactivatedById
+            , Guid reactivatedById
         )
         {
             Email = email;
@@ -24,7 +24,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             ReactivationDateStamp = DateTime.UtcNow;
         }
 
-        public long ReactivatedById { get; set; }
+        public Guid ReactivatedById { get; set; }
 
         public string ReactivationReason { get; set; }
         public DateTime ReactivationDateStamp { get; set; }

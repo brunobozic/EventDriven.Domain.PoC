@@ -6,6 +6,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces
     {
         bool Deleted { get; set; }
         DateTimeOffset? DateDeleted { get; set; }
-        long DeletedBy { get; set; }
+        Guid DeletedBy { get; set; }
     }
 }

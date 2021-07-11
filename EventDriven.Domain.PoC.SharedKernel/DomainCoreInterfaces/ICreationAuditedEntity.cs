@@ -6,6 +6,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces
     {
         DateTimeOffset DateCreated { get; set; }
 
-        long CreatedById { get; set; }
+        Guid CreatedById { get; set; }
     }
 }

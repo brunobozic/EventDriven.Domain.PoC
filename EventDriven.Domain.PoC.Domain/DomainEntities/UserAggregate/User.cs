@@ -331,10 +331,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         #region FK
 
-        public long? UndeletedById { get; private set; }
-        public long? ReactivatedById { get; private set; }
+        public Guid UndeletedById { get; private set; }
+        public Guid ReactivatedById { get; private set; }
 
-        public long? DeactivatedById { get; private set; }
+        public Guid DeactivatedById { get; private set; }
 
         #endregion FK
 

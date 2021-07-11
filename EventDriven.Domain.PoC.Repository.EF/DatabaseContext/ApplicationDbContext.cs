@@ -81,11 +81,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
             // Do the audit trails
             var currentDateTime = DateTime.Now;
 
-            var currentApplicationUserId = 1;
+            var currentApplicationUserId = Guid.Parse(Consts.SYSTEM_USER);
 
             // TODO: fetch user Id from the facade
 
-            currentApplicationUserId = 1;
+            currentApplicationUserId = Guid.Parse(Consts.SYSTEM_USER);
 
             try
             {

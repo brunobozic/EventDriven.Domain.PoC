@@ -43,11 +43,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         private readonly List<UserAddress> _userAddresses;
 
         public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses;
-        public long? ReactivatedById { get; private set; }
-        public long? DeactivatedById { get; private set; }
+        public Guid ReactivatedById { get; private set; }
+        public Guid DeactivatedById { get; private set; }
 
         // ReSharper disable once IdentifierTypo
-        public long? UndeletedById { get; private set; }
+        public Guid UndeletedById { get; private set; }
         public long AddressTypeId { get; private set; }
 
         #endregion Navigation properties

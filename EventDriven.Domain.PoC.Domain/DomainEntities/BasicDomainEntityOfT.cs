@@ -90,15 +90,15 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         public User CreatedBy { get; private set; }
         public DateTimeOffset DateCreated { get; set; }
-        public long CreatedById { get; set; }
+        public Guid CreatedById { get; set; }
         public User ModifiedBy { get; private set; }
 
         public DateTimeOffset? DateModified { get; set; }
-        public long? ModifiedById { get; set; }
+        public Guid ModifiedById { get; set; }
         public User DeletedBy { get; private set; }
         public DateTimeOffset? DateDeleted { get; set; }
 
-        public long? DeletedById { get; set; }
+        public Guid DeletedById { get; set; }
         public string UndeleteReason { get; private set; }
         public string DeleteReason { get; private set; }
 

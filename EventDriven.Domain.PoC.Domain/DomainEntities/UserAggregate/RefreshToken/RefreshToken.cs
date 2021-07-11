@@ -9,7 +9,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToke
     {
         #region FK
 
-        public long ApplicationUserId { get; set; }
+        public Guid ApplicationUserId { get; set; }
 
         #endregion FK
 
