@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using System;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.EmailSending
 {
@@ -7,7 +8,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public AccountAlreadyRegisteredMailReadiedDomainEvent(
             string email
             , string userName
-            , long userId
+            , Guid userId
             , string emailSubject
             , string emailBody
             , string emailFrom
@@ -29,6 +30,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
 
         public string Email { get; }
         public string UserName { get; }
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

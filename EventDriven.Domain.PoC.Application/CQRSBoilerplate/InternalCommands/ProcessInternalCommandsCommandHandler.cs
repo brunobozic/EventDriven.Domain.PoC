@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
 using MediatR;
@@ -35,7 +35,7 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.InternalCommands
 
             foreach (var internalCommand in internalCommandsList)
             {
-                var type = typeof(User).Assembly.GetType(internalCommand.Type);
+                var type = typeof(RegisterUserCommand).Assembly.GetType(internalCommand.Type);
                 dynamic commandToProcess = JsonConvert.DeserializeObject(internalCommand.Data, type);
 
                 await CommandsExecutor.Execute(commandToProcess);

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
+using EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD;
 using FluentValidation;
 
 namespace EventDriven.Domain.PoC.Application.FluentValidators
 {
-    public class RegisterUserCommandValidator : AbstractValidator<RegisterApplicationUserRequest>
+    public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
     {
         private static readonly Regex ValidEmailRegex = CreateValidEmailRegex();
 

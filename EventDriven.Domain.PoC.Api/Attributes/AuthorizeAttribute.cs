@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using EventDriven.Domain.PoC.SharedKernel.Helpers;
+using System.Linq;
+using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Attributes
@@ -8,21 +11,34 @@ namespace EventDriven.Domain.PoC.Api.Rest.Attributes
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class MyAuthorizeAttribute : Attribute, IAuthorizationFilter
     {
-        private readonly IList<RoleEnum> _roles;
+        private readonly IList<string> _roles;
 
-        public MyAuthorizeAttribute(params RoleEnum[] roles)
+        public MyAuthorizeAttribute(params string[] roles)
         {
-            _roles = roles ?? new RoleEnum[] { };
+            _roles = roles ?? new string[] { };
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            //var applicationUser = (ApplicationUser)context.HttpContext.Items["ApplicationUser"];
-            //if (applicationUser == null || (_roles.Any() && !_roles.Contains(applicationUser.UserRoles.Select(r => r.Role.Name).ToList())
-            //{
-            //    // not logged in or role not authorized
-            //    context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
-            //}
+            var applicationUser = (User) context.HttpContext.Items["ApplicationUser"];
+            var rolesOnUser = applicationUser.GetUserRoles().Select(r => r.Name).ToArray();
+
+            if (applicationUser != null && _roles.Any())
+            {
+                var isAuth = false;
+                foreach (var role in rolesOnUser)
+                    if (_roles.Contains(role))
+                        isAuth = true;
+
+                if (!isAuth)
+                    // not logged in or role not authorized
+                    context.Result = new JsonResult(new {message = "Unauthorized"})
+                        {StatusCode = StatusCodes.Status401Unauthorized};
+            }
+
+            // not logged in or role not authorized
+            context.Result = new JsonResult(new {message = "Unauthorized"})
+                {StatusCode = StatusCodes.Status401Unauthorized};
         }
     }
 }

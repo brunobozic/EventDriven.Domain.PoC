@@ -1,16 +1,17 @@
-﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using System;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Verification
 {
     public class EmailVerifiedDomainEvent : DomainEventBase
     {
-        public EmailVerifiedDomainEvent(string email, long id)
+        public EmailVerifiedDomainEvent(string email, Guid id)
         {
             Email = email;
             Id = id;
         }
 
-        public EmailVerifiedDomainEvent(string email, string userName, long id)
+        public EmailVerifiedDomainEvent(string email, string userName, Guid id)
         {
             Email = email;
             UserName = userName;
@@ -18,7 +19,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         }
 
         public string Email { get; }
-        public long Id { get; }
+        public Guid Id { get; }
         public string UserName { get; }
     }
 }

@@ -10,21 +10,21 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
         public string Email;
         public string Name;
         public string RoleGiverEmail;
-        public long RoleGiverId;
+        public Guid RoleGiverId;
         public string RoleGiverUsername;
         public long RoleId;
-        public long UserId;
+        public Guid UserId;
         public string UserName;
         public DateTimeOffset UtcNow;
 
         public RoleAssignedToUserDomainEvent(
-            long userId
+            Guid userId
             , string userName
             , string email
             , long roleId
             , string name
             , DateTimeOffset? activeTo
-            , long roleGiverId
+            , Guid roleGiverId
             , string roleGiverEmail
             , string roleGiverUsername
             , DateTimeOffset utcNow

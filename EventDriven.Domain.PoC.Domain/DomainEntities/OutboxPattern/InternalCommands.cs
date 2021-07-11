@@ -11,5 +11,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern
         public string Data { get; set; }
 
         public DateTime? ProcessedDate { get; set; }
+        public DateTime? EnqueueDate { get; set; }
     }
 }

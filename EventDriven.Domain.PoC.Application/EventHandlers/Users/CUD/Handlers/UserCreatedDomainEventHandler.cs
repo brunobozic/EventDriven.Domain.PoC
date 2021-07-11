@@ -31,7 +31,8 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Handlers
                 notification.UserId,
                 notification.Email,
                 notification.FirstName,
-                notification.LastName
+                notification.LastName,
+                notification.Origin
             ));
 
             // failure to send the email needs to be regulated (this cant be done by using gmail, but by using mandril and similar e-mail sending services)

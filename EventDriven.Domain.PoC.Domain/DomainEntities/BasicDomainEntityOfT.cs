@@ -68,8 +68,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
         public User ReactivatedBy { get; private set; }
         public string ReactivatedReason { get; private set; }
         public User ActivatedBy { get; private set; }
-        public long? ActivatedById { get; private set; }
-        public long? ActivatedByUserId { get; set; }
+        public Guid ActivatedById { get; private set; }
+        public Guid ActivatedByUserId { get; set; }
         public bool Active { get; set; } = true;
         public User DeactivatedBy { get; private set; }
         public string DeactivateReason { get; private set; }
@@ -121,7 +121,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             Active = true;
             ActiveFrom = activeFrom;
             ActiveTo = activeTo;
-            ActivatedByUserId = 1;
+            ActivatedByUserId = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109");
         }
 
         public void Deactivate(User deactivatedBy, string reason)

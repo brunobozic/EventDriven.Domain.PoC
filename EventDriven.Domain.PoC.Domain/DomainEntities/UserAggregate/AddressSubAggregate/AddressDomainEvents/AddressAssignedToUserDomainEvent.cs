@@ -5,13 +5,13 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 {
     public class AddressAssignedToUserDomainEvent : DomainEventBase
     {
-        public long AddressAssignerId;
+        public Guid AddressAssignerId;
 
         public Address NewAddress;
-        public long UserId;
+        public Guid UserId;
         public DateTimeOffset UtcNow;
 
-        public AddressAssignedToUserDomainEvent(long userId, Address address, long addressAssignerId,
+        public AddressAssignedToUserDomainEvent(Guid userId, Address address, Guid addressAssignerId,
             DateTimeOffset utcNow)
         {
             UserId = userId;

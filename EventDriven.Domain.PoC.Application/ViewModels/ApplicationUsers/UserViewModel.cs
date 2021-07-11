@@ -41,7 +41,7 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers
         public UserViewModel DeletedBy { get; set; }
         public UserViewModel ActivatedBy { get; set; }
 
-        #region Token operation
+        #region EmailVerificationToken operation
 
         public string ResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
@@ -49,6 +49,6 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers
         public string VerificationToken { get; set; }
         public DateTime Verified { get; set; }
 
-        #endregion Token operations
+        #endregion EmailVerificationToken operations
     }
 }

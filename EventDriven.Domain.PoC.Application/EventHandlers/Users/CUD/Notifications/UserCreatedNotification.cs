@@ -1,5 +1,4 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Newtonsoft.Json;
@@ -13,7 +12,8 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Notificatio
         public string Email;
         public string FirstName;
         public string LastName;
-        public UserId UserId;
+        public string Origin;
+        public Guid UserId;
 
         public UserCreatedNotification(UserCreatedDomainEvent integrationEvent) : base(integrationEvent)
         {
@@ -23,17 +23,18 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Notificatio
             LastName = integrationEvent.LastName;
             Email = integrationEvent.Email;
             ActivationLinkGenerated = integrationEvent.ActivationLinkGenerated;
-            UserId = integrationEvent.UserId;
+            Origin = integrationEvent.Origin;
         }
 
         [JsonConstructor]
         public UserCreatedNotification(
-            UserId userId,
+            Guid userId,
             string activationLink,
             string firstName,
             string lastName,
             string email,
-            DateTimeOffset? activationLinkGenerated
+            DateTimeOffset? activationLinkGenerated,
+            string Origin
         ) : base(null)
         {
             UserId = userId;
@@ -43,6 +44,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Notificatio
             ActivationLinkGenerated = activationLinkGenerated;
             ActivationLink = activationLink;
             Email = email;
+            Origin = this.Origin;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command
             var connection = _sqlConnectionFactory.GetOpenConnection();
 
             const string sqlInsert =
-                "INSERT INTO [app].[InternalCommands] ([Id], [EnqueueDate] , [Type], [Data]) VALUES " +
+                "INSERT INTO [InternalCommands] ([Id], [EnqueueDate] , [Type], [Data]) VALUES " +
                 "(@Id, @EnqueueDate, @Type, @Data)";
 
             await connection.ExecuteAsync(sqlInsert, new

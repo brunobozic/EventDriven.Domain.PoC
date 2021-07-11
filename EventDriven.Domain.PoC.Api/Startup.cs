@@ -21,7 +21,9 @@ using EventDriven.Domain.PoC.SharedKernel.Helpers.Quartz;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Jaeger;
+using Jaeger.Reporters;
 using Jaeger.Samplers;
+using Jaeger.Senders.Thrift;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -41,7 +43,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using OpenTracing;
-using OpenTracing.Util;
+using OpenTracing.Contrib.NetCore.Configuration;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
@@ -282,25 +284,26 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #region Jaeger wireup
 
-            services.AddSingleton(serviceProvider =>
+            services.AddOpenTracing();
+            // Adds the Jaeger Tracer.
+            services.AddSingleton<ITracer>(sp =>
             {
-                var serviceName = Assembly.GetEntryAssembly().GetName().Name;
-
-                var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-
-                ISampler sampler = new ConstSampler(true);
-
-                ITracer tracer = new Tracer.Builder(serviceName)
-                    .WithLoggerFactory(loggerFactory)
-                    .WithSampler(sampler)
+                var serviceName = sp.GetRequiredService<IWebHostEnvironment>().ApplicationName;
+                var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+                var reporter = new RemoteReporter.Builder().WithLoggerFactory(loggerFactory).WithSender(new UdpSender())
                     .Build();
-
-                GlobalTracer.Register(tracer);
-
+                var tracer = new Tracer.Builder(serviceName)
+                    // The constant sampler reports every span.
+                    .WithSampler(new ConstSampler(true))
+                    // LoggingReporter prints every reported span to the logging framework.
+                    .WithReporter(reporter)
+                    .Build();
                 return tracer;
             });
 
-            services.AddOpenTracing();
+            services.Configure<HttpHandlerDiagnosticOptions>(options =>
+                options.OperationNameResolver =
+                    request => $"{request.Method.Method}: {request?.RequestUri?.AbsoluteUri}");
 
             #endregion Jaeger wireup
 
@@ -413,7 +416,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     .WithCronSchedule("0/15 * * ? * *")
                     .Build();
 
-            //scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
+            scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
 
             var processInternalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().Build();
 
@@ -424,7 +427,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     .WithCronSchedule("0/15 * * ? * *")
                     .Build();
 
-            //scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
+            scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
 
             // ================================================================================================
             // ================================================================================================
@@ -443,7 +446,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
         public void Configure(IApplicationBuilder app
 #pragma warning restore 1591
             , IWebHostEnvironment env
-            , ILoggerFactory loggerFactory
+            //, ILoggerFactory loggerFactory
             //, ApplicationDbContext myDbContext
         )
         {

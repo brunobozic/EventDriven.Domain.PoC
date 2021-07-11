@@ -5,13 +5,13 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 {
     public class AddressRemovedFromUserDomainEvent : DomainEventBase
     {
-        public long AddressRemoverId;
+        public Guid AddressRemoverId;
 
         public Address NewAddress;
-        public long UserId;
+        public Guid UserId;
         public DateTimeOffset UtcNow;
 
-        public AddressRemovedFromUserDomainEvent(long userId, Address address, long addressRemoverId,
+        public AddressRemovedFromUserDomainEvent(Guid userId, Address address, Guid addressRemoverId,
             DateTimeOffset utcNow)
         {
             UserId = userId;

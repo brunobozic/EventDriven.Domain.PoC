@@ -18,7 +18,8 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
             , string role
             , string title
             , string userName
-            , User user
+            , User creatorUser
+            , string origin
         )
         {
             Email = email;
@@ -30,8 +31,8 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
             Role = role;
             Title = title;
             UserName = userName;
-            if (user != null)
-                Creator = user;
+            if (creatorUser != null)
+                Creator = creatorUser;
         }
 
         public string Title { get; set; }
@@ -41,7 +42,7 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
-
+        public string Origin { get; set; }
         [EnumDataType(typeof(RoleEnum))] public string Role { get; set; }
 
         [EmailAddress] public string Email { get; set; }

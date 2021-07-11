@@ -36,7 +36,6 @@
     <Folder Include="EventHandlers\Users\UserUpdates\Handlers\" />
     <Folder Include="EventHandlers\Roles\Activation\Handlers\" />
     <Folder Include="EventHandlers\Roles\RoleUpdates\" />
-    <Folder Include="EventHandlers\Users\VerificationEmail\" />
     <Folder Include="ViewModels\Address\" />
     <Folder Include="ViewModels\Contact\" />
     <Folder Include="ViewModels\CellPhoneNumber\" />

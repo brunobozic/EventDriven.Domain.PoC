@@ -6,33 +6,29 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggre
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
+using EventDriven.Domain.PoC.SharedKernel.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventDriven.Domain.PoC.Repository.EF.Seed
 {
     public static class IdentitySeed
     {
-        private const string UserEmail = "test.admin@gmail.com";
-        private const string UserEmail2 = "bruno.bozic@gmail.com";
-        private const string UserEmail3 = "test.admin3@gmail.com";
-        private const string UserEmail4 = "test.admin4@gmail.com";
-        private const string AdministratorRoleName = "Administrator";
-        private const string Guest = "Guest";
-
         public static async Task SeedUsersAsync(ApplicationDbContext myDbContext, IMyUnitOfWork myUnitOfWork)
         {
-            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "System"))
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.SYSTEM_USER_USERNAME))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    UserEmail
+                    Consts.UserEmail
+                    , Consts.SYSTEM_USER_USERNAME
                     , "System"
                     , "System"
-                    , "System"
-                    , "1111111"
+                    , Consts.SYSTEM_USER_OIB
                     , DateTimeOffset.UtcNow.AddYears(-200)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(100)
-                    , "System"
+                    , DateTimeOffset.UtcNow.AddYears(Consts.SYSTEM_USER_ACTIVE_TO_ADD_YEARS)
+                    , Consts.SYSTEM_USER_PASSWORD
+                    , null
+                    , ""
                 );
 
                 var result = await myDbContext.ApplicationUsers.AddAsync(newUser);
@@ -40,21 +36,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            var creatorUser = myDbContext.ApplicationUsers.FirstOrDefault(u => u.Id == 1);
+            var creatorUser = myDbContext.ApplicationUsers.FirstOrDefault(u => u.Id == Guid.Parse(Consts.SYSTEM_USER));
 
-            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == UserEmail))
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.UserEmail))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    UserEmail
-                    , UserEmail
+                    Consts.UserEmail
+                    , Consts.UserEmail
                     , "Bruno"
                     , "Bozic"
                     , "1111111"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(1)
+                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
+                    , ""
                 );
 
                 var result = await myDbContext.ApplicationUsers.AddAsync(newUser);
@@ -63,9 +60,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             }
 
 
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == Guest) == null)
+            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == Consts.Guest) == null)
             {
-                var role = Role.NewActiveDraft(Guest, "Guest role", DateTimeOffset.UtcNow,
+                var role = Role.NewActiveDraft(Consts.Guest, "Guest role", DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1), creatorUser);
 
                 var result = await myDbContext.ApplicationRoles.AddAsync(role);
@@ -73,9 +70,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == AdministratorRoleName) == null)
+            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == Consts.AdministratorRoleName) == null)
             {
-                var role = Role.NewActiveDraft(AdministratorRoleName, "Admin role", DateTimeOffset.UtcNow,
+                var role = Role.NewActiveDraft(Consts.AdministratorRoleName, "Admin role", DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1), creatorUser);
 
                 var result = await myDbContext.ApplicationRoles.AddAsync(role);
@@ -88,16 +85,17 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "BrunoBozic"))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    UserEmail
+                    Consts.UserEmail
                     , "BrunoBozic"
                     , "Bruno"
                     , "Bozic"
                     , "1111111"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(1)
+                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
+                    , ""
                 );
 
                 var applicationRole = myDbContext.ApplicationRoles
@@ -119,16 +117,17 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin2"))
             {
                 var newUser2 = User.NewActiveWithPasswordAndEmailVerified(
-                    UserEmail2
+                    Consts.UserEmail2
                     , "testadmin2"
                     , "Bruno"
                     , "Bozic"
                     , "22222222"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(1)
+                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
+                    , ""
                 );
 
                 var applicationRole2 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
@@ -149,16 +148,17 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin3"))
             {
                 var newUser3 = User.NewActiveWithPasswordAndEmailVerified(
-                    UserEmail3
+                    Consts.UserEmail3
                     , "testadmin3"
                     , "Test"
                     , "Admin3"
                     , "3333333"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(1)
+                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
+                    , ""
                 );
 
                 var applicationRole3 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
@@ -179,16 +179,17 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin4"))
             {
                 var newUser4 = User.NewActiveWithPasswordAndEmailVerified(
-                    UserEmail4
+                    Consts.UserEmail4
                     , "testadmin4"
                     , "Test"
                     , "Admin4"
                     , "44444444"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(1)
+                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
+                    , ""
                 );
 
                 var applicationRole4 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
@@ -210,10 +211,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
 
             #region Address Types
 
-            if (myDbContext.AddressTypes.SingleOrDefault(r => r.Name == "Primary") == null)
+            if (myDbContext.AddressTypes.SingleOrDefault(r =>
+                r.Name == AddressTypeEnum.Primary.ToDescriptionString()) == null)
             {
                 var addressType = AddressType.NewActiveDraft(
-                    "Primary"
+                    AddressTypeEnum.Primary.ToDescriptionString()
                     , "Primary address"
                     , creatorUser
                     , DateTimeOffset.UtcNow
@@ -226,10 +228,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.AddressTypes.SingleOrDefault(r => r.Name == "Secondary") == null)
+            if (myDbContext.AddressTypes.SingleOrDefault(r =>
+                r.Name == AddressTypeEnum.Secondary.ToDescriptionString()) == null)
             {
                 var addressType = AddressType.NewActiveDraft(
-                    "Secondary"
+                    AddressTypeEnum.Secondary.ToDescriptionString()
                     , "Secondary address"
                     , creatorUser
                     , DateTimeOffset.UtcNow
@@ -242,10 +245,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.AddressTypes.SingleOrDefault(r => r.Name == "Living") == null)
+            if (myDbContext.AddressTypes.SingleOrDefault(r => r.Name == AddressTypeEnum.Living.ToDescriptionString()) ==
+                null)
             {
                 var addressType = AddressType.NewActiveDraft(
-                    "Living"
+                    AddressTypeEnum.Living.ToDescriptionString()
                     , "Living address"
                     , creatorUser
                     , DateTimeOffset.UtcNow

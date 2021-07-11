@@ -66,7 +66,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         //    if (string.IsNullOrEmpty(refreshToken))
         //    {
-        //        return BadRequest(new { message = "Refresh Token (Request cookie) is required" });
+        //        return BadRequest(new { message = "Refresh EmailVerificationToken (Request cookie) is required" });
         //    }
 
         //    var serviceLayerResponse = await _applicationUserService.RefreshTheTokenAsync(refreshToken, IpAddress());
@@ -92,10 +92,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //public async Task<ActionResult<RevokeTokenResponse>> RevokeToken(RevokeTokenRequest model, CancellationToken ct)
         //{
         //    // accept token from request body or cookie
-        //    var token = model.Token ?? Request.Cookies["refreshToken"];
+        //    var token = model.EmailVerificationToken ?? Request.Cookies["refreshToken"];
 
         //    if (string.IsNullOrEmpty(token))
-        //        return BadRequest("Token is required");
+        //        return BadRequest("EmailVerificationToken is required");
 
         //    //// users can revoke their own tokens and admins can revoke any tokens
         //    //if (!applicationUser.OwnsToken(token) && applicationUser.Role != Role.Admin)
@@ -126,7 +126,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         [MyAuthorize]
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<RefreshTokenViewModel>> GetByUserIdAsync(int userId)
+        public async Task<ActionResult<RefreshTokenViewModel>> GetByUserIdAsync(Guid userId)
         {
             var refreshToken = await _refreshTokenService
                 .Queryable()

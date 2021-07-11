@@ -1,10 +1,11 @@
-﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using System;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.PasswordReset
 {
     public class PasswordResetCompletedDomainEvent : DomainEventBase
     {
-        public PasswordResetCompletedDomainEvent(string email, string userName, long id)
+        public PasswordResetCompletedDomainEvent(string email, string userName, Guid id)
         {
             Email = email;
             UserName = userName;
@@ -13,6 +14,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
 
         public string Email { get; }
         public string UserName { get; }
-        public long Id { get; }
+        public Guid Id { get; }
     }
 }

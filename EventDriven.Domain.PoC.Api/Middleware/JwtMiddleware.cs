@@ -52,10 +52,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Middleware
                 }, out var validatedToken);
 
                 var jwtToken = (JwtSecurityToken) validatedToken;
-                var applicationUserId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var applicationUserId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 // attach applicationUser to context on successful jwt validation
-                var user = myDbContext.ApplicationUsers.Where(user => user.Id == applicationUserId).SingleOrDefault();
+                var user = myDbContext.ApplicationUsers.SingleOrDefault(user => user.Id == applicationUserId);
 
                 context.Items["ApplicationUser"] = user;
             }

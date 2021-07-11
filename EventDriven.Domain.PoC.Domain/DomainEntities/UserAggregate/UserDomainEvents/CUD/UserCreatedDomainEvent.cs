@@ -7,13 +7,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
     {
         public string ActivationLink;
         public DateTimeOffset? ActivationLinkGenerated;
-        public long? CreatorUserId;
+        public Guid CreatorUserId;
         public DateTimeOffset? DateOfBirth;
         public string Email;
         public string FirstName;
         public string LastName;
         public string Oib;
-        public UserId UserId;
+        public string Origin;
+        public Guid UserId;
         public string UserName;
 
         public UserCreatedDomainEvent(
@@ -26,19 +27,21 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , DateTimeOffset? dateOfBirth
             , DateTimeOffset? activationLinkGenerated
             , string activationLink
-            , long? creatorUserId
+            , Guid creatorUserId
+            , string origin
         )
         {
             Email = email;
             UserName = userName;
             FirstName = firstName;
             LastName = lastName;
-            UserId = new UserId(userId);
+            UserId = userId;
             Oib = oib;
             DateOfBirth = dateOfBirth;
             ActivationLinkGenerated = activationLinkGenerated;
             ActivationLink = activationLink;
             CreatorUserId = creatorUserId;
+            Origin = origin;
         }
     }
 }

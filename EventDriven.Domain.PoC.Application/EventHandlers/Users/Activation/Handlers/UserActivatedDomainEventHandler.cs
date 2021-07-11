@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using EventDriven.Domain.PoC.Application.EventHandlers.Users.Activation.Notifications;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using Serilog;
 
 namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.Activation.Handlers
 {
@@ -17,6 +18,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.Activation.Hand
 
         public async Task Handle(UserActivatedNotification notification, CancellationToken cancellationToken)
         {
+            Log.Information("User activated domain event fired.");
         }
     }
 }

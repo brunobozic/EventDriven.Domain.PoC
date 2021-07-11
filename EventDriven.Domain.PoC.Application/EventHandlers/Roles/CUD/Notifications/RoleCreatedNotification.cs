@@ -9,7 +9,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.CUD.Notificatio
     public class RoleCreatedNotification : IntegrationEventBase<RoleCreatedDomainEvent>
     {
         public string CreatorEmail;
-        public long CreatorId;
+        public Guid CreatorId;
         public string CreatorUsername;
         public DateTimeOffset? DateCreated;
         public string Description;

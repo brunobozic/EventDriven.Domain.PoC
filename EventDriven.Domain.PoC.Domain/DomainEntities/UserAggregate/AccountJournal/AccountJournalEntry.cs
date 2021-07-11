@@ -5,7 +5,7 @@ using EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal
 {
-    public class AccountJournalEntry : JournalEntityOfT<long>
+    public class AccountJournalEntry : JournalEntityOfT<Guid>
     {
         #region Public Methods
 
@@ -24,10 +24,13 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
 
         public void AttachActingUser(User activatedBy)
         {
-            ActingUser = activatedBy;
-            ActingUserId = activatedBy.Id;
-            ActingEmail = activatedBy.Email;
-            ActingUserName = activatedBy.UserName;
+            if (activatedBy != null)
+            {
+                ActingUser = activatedBy;
+                ActingUserId = activatedBy.Id;
+                ActingEmail = activatedBy.Email;
+                ActingUserName = activatedBy.UserName;
+            }
         }
 
         #endregion Public Methods
@@ -66,8 +69,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
 
         #region FK
 
-        public long? ActingUserId { get; private set; }
-        public long? UserActedUponId { get; private set; }
+        public Guid ActingUserId { get; private set; }
+        public Guid UserActedUponId { get; private set; }
 
         #endregion FK
     }

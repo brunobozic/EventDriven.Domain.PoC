@@ -9,15 +9,15 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
         public string Name;
         public string RemoverEmail;
 
-        public long RemoverUserId;
+        public Guid RemoverUserId;
         public string RemoverUsername;
         public long RoleId;
         public string UserEmail;
-        public long UserId;
+        public Guid UserId;
         public string UserName;
 
-        public RoleRemovedFromUserDomainEvent(long userId, string userName, string userEmail, long roleId,
-            string roleName, long removerUserId, string removerUserName, string removerEmail,
+        public RoleRemovedFromUserDomainEvent(Guid userId, string userName, string userEmail, long roleId,
+            string roleName, Guid removerUserId, string removerUserName, string removerEmail,
             DateTimeOffset dateRemoved)
         {
             UserId = userId;

@@ -82,7 +82,8 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.Email == model.Email);
 
-            if (applicationUser == null || applicationUser.GetStatus() != RegistrationStatusEnum.Verified ||
+            if (applicationUser == null ||
+                applicationUser.GetCurrentRegistrationStatus() != RegistrationStatusEnum.Verified ||
                 !BC.Verify(model.Password, applicationUser.PasswordHash))
                 throw new AppException("Email or password is incorrect");
 
@@ -125,7 +126,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
         public async Task<AuthenticateResponse> RefreshTheTokenAsync(string token, string ipAddress)
         {
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(ipAddress))
-                throw new ArgumentNullException("Token and/or ip address are invalid");
+                throw new ArgumentNullException("EmailVerificationToken and/or ip address are invalid");
 
             var (refreshToken, applicationUser) = await GetRefreshTokenAsync(token);
 
@@ -154,7 +155,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 response.JwtToken = jwtToken;
                 response.RefreshToken = newRefreshToken.Token;
                 response.Success = true;
-                response.Message = "Token refreshed";
+                response.Message = "EmailVerificationToken refreshed";
 
                 return response;
             }
@@ -174,7 +175,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
         public async Task<RevokeTokenResponse> RevokeTokenAsync(string token, string ipAddress)
         {
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(ipAddress))
-                throw new ArgumentNullException("Token and/or ip address are invalid");
+                throw new ArgumentNullException("EmailVerificationToken and/or ip address are invalid");
 
             var (refreshToken, applicationUser) = await GetRefreshTokenAsync(token);
 
@@ -187,12 +188,12 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             try
             {
                 // revoke token and save
-                //applicationUser.RevokeToken(refreshToken.Token, ipAddress);
+                //applicationUser.RevokeToken(refreshToken.EmailVerificationToken, ipAddress);
                 Repository.Update(applicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();
 
                 returnValue.Success = true;
-                returnValue.Message = "Token revoked";
+                returnValue.Message = "EmailVerificationToken revoked";
             }
             catch (Exception ex)
             {
@@ -245,7 +246,8 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             var defaultRole = await RoleRepository.Queryable().Where(r => r.Name.Trim().ToUpper() == "GUEST")
                 .SingleOrDefaultAsync();
-            var roleAssigner = await Repository.Queryable().Where(u => u.Id == 0).SingleOrDefaultAsync();
+            var roleAssigner = await Repository.Queryable()
+                .Where(u => u.Id == Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109")).SingleOrDefaultAsync();
             applicationUser.AddRole(defaultRole, roleAssigner);
             applicationUser.AddVerificationToken(RandomTokenString());
             applicationUser.AddPasswordHash(model.Password);
@@ -273,7 +275,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
         public async Task<VerifyEmailResponse> VerifyEmailAsync(string token, string origin)
         {
-            if (string.IsNullOrEmpty(token)) throw new ArgumentNullException("Token invalid");
+            if (string.IsNullOrEmpty(token)) throw new ArgumentNullException("EmailVerificationToken invalid");
 
             var returnValue = new VerifyEmailResponse
             {
@@ -287,7 +289,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             try
             {
-                applicationUser.SetEmailIsVerified();
+                applicationUser.VerifyEmailVerificationToken();
                 Repository.Update(applicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();
 
@@ -307,56 +309,56 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return returnValue;
         }
 
-        public async Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest model, string origin)
-        {
-            if (model == null || string.IsNullOrEmpty(origin))
-                throw new ArgumentNullException("ForgotPasswordRequest and/or origin are invalid");
-            if (string.IsNullOrEmpty(model.Email))
-                throw new ArgumentNullException("ForgotPasswordRequest Email invalid");
+        //public async Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest model, string origin)
+        //{
+        //    if (model == null || string.IsNullOrEmpty(origin))
+        //        throw new ArgumentNullException("ForgotPasswordRequest and/or origin are invalid");
+        //    if (string.IsNullOrEmpty(model.Email))
+        //        throw new ArgumentNullException("ForgotPasswordRequest Email invalid");
 
-            var returnValue = new ForgotPasswordResponse
-            {
-                Success = false,
-                Message = ""
-            };
+        //    var returnValue = new ForgotPasswordResponse
+        //    {
+        //        Success = false,
+        //        Message = ""
+        //    };
 
-            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.Email == model.Email);
+        //    var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.Email == model.Email);
 
-            // always return ok response to prevent email enumeration
-            if (applicationUser == null)
-            {
-                returnValue.Message = "The requested user does not exist, unable to change password.";
-                returnValue.InnerMessage = "";
-                returnValue.UserFriendlyMessage = "The requested user does not exist, unable to change password.";
+        //    // always return ok response to prevent email enumeration
+        //    if (applicationUser == null)
+        //    {
+        //        returnValue.Message = "The requested user does not exist, unable to change password.";
+        //        returnValue.InnerMessage = "";
+        //        returnValue.UserFriendlyMessage = "The requested user does not exist, unable to change password.";
 
-                return returnValue;
-            }
+        //        return returnValue;
+        //    }
 
-            try
-            {
-                // create reset token that expires after 1 day
-                applicationUser.CreatePasswordResetToken(RandomTokenString());
-                Repository.Update(applicationUser);
-                var saveResult = await UnitOfWork.SaveChangesAsync();
+        //    try
+        //    {
+        //        // create reset token that expires after 1 day
+        //        applicationUser.CreatePasswordResetToken(RandomTokenString());
+        //        Repository.Update(applicationUser);
+        //        var saveResult = await UnitOfWork.SaveChangesAsync();
 
-                // send email
-                SendPasswordResetEmail(applicationUser, origin);
+        //        // send email
+        //        SendPasswordResetEmail(applicationUser, origin);
 
-                returnValue.Success = true;
-                returnValue.Message = "Forgotten password recovery success";
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Problem recovering password for user with email: [ " + applicationUser.Email + " ]", ex);
+        //        returnValue.Success = true;
+        //        returnValue.Message = "Forgotten password recovery success";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error("Problem recovering password for user with email: [ " + applicationUser.Email + " ]", ex);
 
-                returnValue.Success = false;
-                returnValue.Message = ex.Message;
-                returnValue.InnerMessage = ex.InnerException?.Message;
-                returnValue.UserFriendlyMessage = "Problem recovering password";
-            }
+        //        returnValue.Success = false;
+        //        returnValue.Message = ex.Message;
+        //        returnValue.InnerMessage = ex.InnerException?.Message;
+        //        returnValue.UserFriendlyMessage = "Problem recovering password";
+        //    }
 
-            return returnValue;
-        }
+        //    return returnValue;
+        //}
 
         public async Task<ValidateResetTokenResponse> ValidateResetTokenAsync(ValidateResetTokenRequest model)
         {
@@ -389,47 +391,47 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return returnValue;
         }
 
-        public async Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest model)
-        {
-            if (model == null) throw new ArgumentNullException("ResetPasswordRequest invalid");
-            if (string.IsNullOrEmpty(model.Token))
-                throw new ArgumentNullException("ResetPasswordRequest token invalid");
-            if (string.IsNullOrEmpty(model.Password))
-                throw new ArgumentNullException("ResetPasswordRequest password invalid");
+        //public async Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest model)
+        //{
+        //    if (model == null) throw new ArgumentNullException("ResetPasswordRequest invalid");
+        //    if (string.IsNullOrEmpty(model.Token))
+        //        throw new ArgumentNullException("ResetPasswordRequest token invalid");
+        //    if (string.IsNullOrEmpty(model.Password))
+        //        throw new ArgumentNullException("ResetPasswordRequest password invalid");
 
-            var returnValue = new ResetPasswordResponse
-            {
-                Success = false,
-                Message = ""
-            };
+        //    var returnValue = new ResetPasswordResponse
+        //    {
+        //        Success = false,
+        //        Message = ""
+        //    };
 
-            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x =>
-                x.ResetToken == model.Token &&
-                x.ResetTokenExpires > DateTime.UtcNow);
+        //    var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x =>
+        //        x.ResetToken == model.Token &&
+        //        x.ResetTokenExpires > DateTime.UtcNow);
 
-            if (applicationUser == null)
-                throw new AppException("Invalid token");
+        //    if (applicationUser == null)
+        //        throw new AppException("Invalid token");
 
-            try
-            {
-                // update password and remove reset token
-                applicationUser.UpdatePasswordRemoveResetToken(model.Password);
-                Repository.Update(applicationUser);
-                var saveResult = await UnitOfWork.SaveChangesAsync();
+        //    try
+        //    {
+        //        // update password and remove reset token
+        //        applicationUser.UpdatePasswordRemoveResetToken(model.Password);
+        //        Repository.Update(applicationUser);
+        //        var saveResult = await UnitOfWork.SaveChangesAsync();
 
-                returnValue.Success = true;
-                returnValue.Message = "Password reset.";
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Problem resetting password for user with email: [ " + applicationUser.Email + " ]", ex);
-                returnValue.Message = ex.Message;
-                returnValue.InnerMessage = ex.InnerException?.Message;
-                returnValue.UserFriendlyMessage = "Problem resetting password";
-            }
+        //        returnValue.Success = true;
+        //        returnValue.Message = "Password reset.";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error("Problem resetting password for user with email: [ " + applicationUser.Email + " ]", ex);
+        //        returnValue.Message = ex.Message;
+        //        returnValue.InnerMessage = ex.InnerException?.Message;
+        //        returnValue.UserFriendlyMessage = "Problem resetting password";
+        //    }
 
-            return returnValue;
-        }
+        //    return returnValue;
+        //}
 
         public async Task<ApplicationUserResponse> GetAllAsync()
         {
@@ -444,7 +446,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return retVal;
         }
 
-        public async Task<ApplicationUserResponse> GetByIdAsync(int id)
+        public async Task<ApplicationUserResponse> GetByIdAsync(Guid id)
         {
             var applicationUser = await Repository.Queryable().Where(user => user.Id == id).SingleOrDefaultAsync();
 
@@ -474,7 +476,8 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             // validate
             if (await Repository.Queryable().AnyAsync(x => x.Email == model.Email))
                 throw new AppException($"Email '{model.Email}' is already registered");
-            var creator = await Repository.Queryable().Where(u => u.Id == 1).SingleOrDefaultAsync();
+            var creator = await Repository.Queryable()
+                .Where(u => u.Id == Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109")).SingleOrDefaultAsync();
             // map model to new applicationUser object
             var newApplicationUser = User.NewDraft(
                 model.Email
@@ -484,13 +487,15 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 , model.Role
                 , "Guest"
                 , creator
+                , model.Origin
             );
 
             try
             {
                 var defaultRole = await RoleRepository.Queryable().Where(r => r.Name.Trim().ToUpper() == "GUEST")
                     .SingleOrDefaultAsync();
-                var roleAssigner = await Repository.Queryable().Where(u => u.Id == 1).SingleOrDefaultAsync();
+                var roleAssigner = await Repository.Queryable()
+                    .Where(u => u.Id == Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109")).SingleOrDefaultAsync();
                 newApplicationUser.AddRole(defaultRole, roleAssigner);
                 Repository.Insert(newApplicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();
@@ -515,7 +520,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return returnValue;
         }
 
-        public async Task<UpdateRequestResponse> UpdateAsync(int id, UpdateApplicationUserRequest model,
+        public async Task<UpdateRequestResponse> UpdateAsync(Guid id, UpdateApplicationUserRequest model,
             User currentlyLoggedUser)
         {
             if (model == null) throw new ArgumentNullException("UpdateApplicationUserRequest invalid");
@@ -567,9 +572,9 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return returnValue;
         }
 
-        public async Task<DeleteUserResponse> DeleteAsync(int id, User currentlyLoggedUser)
+        public async Task<DeleteUserResponse> DeleteAsync(Guid id, User currentlyLoggedUser)
         {
-            if (id <= 0) throw new ArgumentNullException("Delete invalid");
+            if (id == Guid.Empty) throw new ArgumentNullException("Delete invalid");
 
             var applicationUser = await Repository.Queryable().Where(user => user.Id == id).SingleAsync();
 
@@ -607,7 +612,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
         private async Task<(RefreshToken, User)> GetRefreshTokenAsync(string token)
         {
-            if (string.IsNullOrEmpty(token)) throw new ArgumentNullException("Token invalid");
+            if (string.IsNullOrEmpty(token)) throw new ArgumentNullException("EmailVerificationToken invalid");
             var applicationUser = await Repository.Queryable()
                 .SingleOrDefaultAsync(u => u.Active && u.RefreshTokens.Any(t => t.Token == token));
             if (applicationUser == null) throw new AppException("Invalid token");
@@ -648,32 +653,6 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             // convert random bytes to hex string
             return BitConverter.ToString(randomBytes).Replace("-", "");
-        }
-
-        private void SendPasswordResetEmail(User applicationUser, string origin)
-        {
-            string message;
-
-            if (!string.IsNullOrEmpty(origin))
-            {
-                var resetUrl = $"{origin}/applicationUser/reset-password?token={applicationUser.ResetToken}";
-                message =
-                    $@"<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
-                             <p><a href=""{resetUrl}"">{resetUrl}</a></p>";
-            }
-            else
-            {
-                message =
-                    $@"<p>Please use the below token to reset your password with the <code>/applicationUsers/reset-password</code> api route:</p>
-                             <p><code>{applicationUser.ResetToken}</code></p>";
-            }
-
-            _emailService.Send(
-                applicationUser.Email,
-                "Sign-up Verification API - Reset Password",
-                $@"<h4>Reset Password Email</h4>
-                         {message}"
-            );
         }
 
         #endregion private methods

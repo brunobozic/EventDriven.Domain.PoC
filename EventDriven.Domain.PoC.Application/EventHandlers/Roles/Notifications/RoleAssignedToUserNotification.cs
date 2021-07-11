@@ -10,12 +10,12 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.Notifications
         public DateTimeOffset DateAssigned;
         public DateTimeOffset? RoleActiveTo;
         public string RoleGiverEmail;
-        public long RoleGiverId;
+        public Guid RoleGiverId;
         public string RoleGiverUsername;
         public long RoleId;
         public string RoleName;
         public string UserEmail;
-        public long UserId;
+        public Guid UserId;
         public string UserName;
 
         public RoleAssignedToUserNotification(RoleAssignedToUserDomainEvent integrationEvent) : base(integrationEvent)
@@ -33,8 +33,8 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.Notifications
         }
 
         [JsonConstructor]
-        public RoleAssignedToUserNotification(long userId, string userName, string userEmail, long roleId,
-            string roleName, string roleGiverEmail, string roleGiverUsername, long roleGiverId, DateTimeOffset activeTo,
+        public RoleAssignedToUserNotification(Guid userId, string userName, string userEmail, long roleId,
+            string roleName, string roleGiverEmail, string roleGiverUsername, Guid roleGiverId, DateTimeOffset activeTo,
             DateTimeOffset dateAssigned) : base(null)
         {
             UserId = userId;

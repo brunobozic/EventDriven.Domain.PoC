@@ -89,3 +89,8 @@ The second most important thing is when to publish and process Domain Events? Ev
 
 ### HiLo on MSSQL
 ### Guid as PK (generated up front)
+
+
+### Jaeger
+docker run -d -p 6831:6831/udp -p 6832:6832/udp -p 14268:14268 -p 14250:14250 -p 16686:16686 -p 5778:5778 --name jaeger jaegertracing/all-in-one:1.22
+http://localhost:16686/

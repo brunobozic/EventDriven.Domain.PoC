@@ -9,12 +9,12 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.Notifications
     {
         public DateTimeOffset? DateRemoved;
         public string RemoverEmail;
-        public long RemoverUserId;
+        public Guid RemoverUserId;
         public string RemoverUsername;
         public long RoleId;
         public string RoleName;
         public string UserEmail;
-        public long UserId;
+        public Guid UserId;
         public string UserName;
 
         public RoleRemovedFromUserNotification(RoleRemovedFromUserDomainEvent integrationEvent) : base(integrationEvent)
@@ -31,7 +31,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.Notifications
         }
 
         [JsonConstructor]
-        public RoleRemovedFromUserNotification(long userId, long roleId) : base(null)
+        public RoleRemovedFromUserNotification(Guid userId, long roleId) : base(null)
         {
             UserId = userId;
             RoleId = roleId;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
@@ -10,7 +11,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.RefreshTokenServices
     public interface IRefreshTokenService : IService<RefreshToken>
     {
         Task<IEnumerable<RefreshTokenViewModel>> GetAllAsync();
-        Task<RefreshTokenViewModel> GetByUserIdAsync(int id);
+        Task<RefreshTokenViewModel> GetByUserIdAsync(Guid id);
         Task<AuthenticateResponse> RefreshTheTokenAsync(string token, string ipAddress);
         Task<RevokeTokenResponse> RevokeTokenAsync(string token, string ipAddress);
         Task<RefreshTokenResponse> DeleteAsync(int tokenId, User applicationUser);

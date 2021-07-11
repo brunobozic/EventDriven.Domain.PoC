@@ -7,7 +7,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
     public class AssignAddressToUserCommand : CommandBase<AddressAssignmentDto>
     {
         public AssignAddressToUserCommand(
-            long userId
+            Guid userId
             , string addressTypeName
             , string addressName
             , string description
@@ -48,7 +48,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
         }
 
 
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
         public User AssignerUser { get; set; }
         public string AddressTypeName { get; set; }
         public string AddressName { get; set; }
@@ -68,5 +68,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
         public DateTimeOffset DateCreated { get; set; }
         public DateTimeOffset ActiveFrom { get; set; }
         public DateTimeOffset ActiveTo { get; set; }
+        public string Origin { get; set; }
     }
 }

@@ -68,5 +68,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
         public DateTimeOffset DateCreated { get; set; }
         public DateTimeOffset ActiveFrom { get; set; }
         public DateTimeOffset ActiveTo { get; set; }
+        public string Origin { get; set; }
     }
 }

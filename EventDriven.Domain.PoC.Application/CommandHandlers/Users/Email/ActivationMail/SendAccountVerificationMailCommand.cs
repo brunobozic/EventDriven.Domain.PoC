@@ -1,5 +1,4 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.ActivationMail
@@ -12,16 +11,17 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
         public string FirstName;
         public Guid Id;
         public string LastName;
-        public UserId UserId;
+        public Guid UserId;
 
         public SendAccountVerificationMailCommand(
             Guid id,
             string activationLink,
             DateTimeOffset? activationLinkGenerated,
-            UserId userId,
+            Guid userId,
             string email,
             string firstName,
-            string lastName
+            string lastName,
+            string origin
         )
         {
             Id = id;
@@ -31,6 +31,9 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
             Email = email;
             FirstName = firstName;
             LastName = lastName;
+            Origin = origin;
         }
+
+        public string Origin { get; set; }
     }
 }

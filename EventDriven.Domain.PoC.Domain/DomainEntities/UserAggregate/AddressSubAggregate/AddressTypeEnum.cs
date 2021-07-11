@@ -12,6 +12,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         [Description("Primary")] Primary = 3,
         [Description("Secondary")] Secondary = 4,
         [Description("Shipping")] Shipping = 5,
-        [Description("Default")] Default = 6
+        [Description("Default")] Default = 6,
+        [Description("Living")] Living = 7
     }
 }

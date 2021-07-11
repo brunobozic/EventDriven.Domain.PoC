@@ -56,6 +56,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
                 , request.ActiveTo
                 , request.Password
                 , creator
+                , request.Origin
             );
 
             UserRepository.Attach(user);

@@ -6,15 +6,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
 {
     public class RegisterUserCommand : CommandBase<UserDto>
     {
-        public string ConfirmPassword;
-        public DateTimeOffset? DateOfBirth;
-        public string Email;
-        public string FirstName;
-        public string LastName;
-        public string Oib;
-        public string Password;
-        public string UserName;
-
         public RegisterUserCommand(
             string email
             , string confirmPassword
@@ -24,7 +15,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
             , string password
             , string userName
             , string oib
-            , long? userId
+            , Guid userId
         )
         {
             Email = email;
@@ -38,6 +29,16 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
             CreatorId = userId;
         }
 
-        public long? CreatorId { get; set; }
+        public string ConfirmPassword { get; set; }
+        public DateTimeOffset? DateOfBirth { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Oib { get; set; }
+        public string Password { get; set; }
+        public string UserName { get; set; }
+
+        public Guid CreatorId { get; set; }
+        public string Origin { get; set; }
     }
 }

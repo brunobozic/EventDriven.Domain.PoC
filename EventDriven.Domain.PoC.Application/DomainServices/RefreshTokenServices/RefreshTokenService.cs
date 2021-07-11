@@ -56,7 +56,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.RefreshTokenServices
             return _mapper.Map<IList<RefreshTokenViewModel>>(refreshTokens);
         }
 
-        public async Task<RefreshTokenViewModel> GetByUserIdAsync(int id)
+        public async Task<RefreshTokenViewModel> GetByUserIdAsync(Guid id)
         {
             var refreshToken = await Repository.Queryable().Where(rt => rt.ApplicationUser.Id == id)
                 .SingleOrDefaultAsync();

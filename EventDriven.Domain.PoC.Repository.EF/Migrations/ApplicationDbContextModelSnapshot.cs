@@ -59,6 +59,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 b.Property<string>("Data")
                     .HasColumnType("TEXT");
 
+                b.Property<DateTime?>("EnqueueDate")
+                    .HasColumnType("TEXT");
+
                 b.Property<DateTime?>("ProcessedDate")
                     .HasColumnType("TEXT");
 
@@ -111,7 +114,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue(new DateTimeOffset(
-                            new DateTime(2021, 6, 8, 18, 24, 28, 718, DateTimeKind.Unspecified).AddTicks(7108),
+                            new DateTime(2021, 7, 10, 10, 21, 8, 698, DateTimeKind.Unspecified).AddTicks(1712),
                             new TimeSpan(0, 0, 0, 0, 0)));
 
                     b.Property<DateTimeOffset?>("DateDeleted")

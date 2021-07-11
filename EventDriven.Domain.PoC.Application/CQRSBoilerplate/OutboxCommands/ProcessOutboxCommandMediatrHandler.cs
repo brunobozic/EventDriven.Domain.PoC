@@ -2,12 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Notifications;
 using EventDriven.Domain.PoC.Application.ViewModels.OutboxMessage;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
 using MediatR;
 using Newtonsoft.Json;
+using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
@@ -36,34 +37,44 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
                                "FROM [OutboxMessages] AS [OutboxMessage] " +
                                "WHERE [OutboxMessage].[ProcessedDate] IS NULL";
 
-            var messages = await connection.QueryAsync<OutboxMessageDto>(sql);
-            var messagesList = messages.AsList();
+            try
+            {
+                var messages = await connection.QueryAsync<OutboxMessageDto>(sql);
+                var messagesList = messages.AsList();
 
-            const string sqlUpdateProcessedDate = "UPDATE [app].[OutboxMessages] " +
-                                                  "SET [ProcessedDate] = @Date " +
-                                                  "WHERE [Id] = @Id";
-            if (messagesList.Count > 0)
-                foreach (var message in messagesList)
-                {
-                    var type = typeof(User).Assembly.GetType(message.Type);
-
-                    var request = JsonConvert.DeserializeObject(message.Data, type) as IIntegrationEventNotification;
-
-                    using (LogContext.Push(new OutboxMessageContextEnricher(request)))
+                const string sqlUpdateProcessedDate = "UPDATE [OutboxMessages] " +
+                                                      "SET [ProcessedDate] = @Date " +
+                                                      "WHERE [Id] = @Id";
+                if (messagesList.Count > 0)
+                    foreach (var message in messagesList)
                     {
-                        #region Publish the integration event to mediatR
+                        var type = typeof(UserCreatedNotification).Assembly.GetType(message.Type);
 
-                        await _mediator.Publish(request, cancellationToken);
+                        var request =
+                            JsonConvert.DeserializeObject(message.Data, type) as IIntegrationEventNotification;
 
-                        #endregion Publish the integration event to mediatR
-
-                        await connection.ExecuteAsync(sqlUpdateProcessedDate, new
+                        using (LogContext.Push(new OutboxMessageContextEnricher(request)))
                         {
-                            Date = DateTime.UtcNow,
-                            message.Id
-                        });
+                            #region Publish the integration event to mediatR
+
+                            await _mediator.Publish(request, cancellationToken);
+
+                            #endregion Publish the integration event to mediatR
+
+                            await connection.ExecuteAsync(sqlUpdateProcessedDate, new
+                            {
+                                Date = DateTime.UtcNow,
+                                message.Id
+                            });
+                        }
                     }
-                }
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e.Message, e);
+                throw;
+            }
+
 
             return Unit.Value;
         }

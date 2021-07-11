@@ -8,15 +8,17 @@ using EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType;
 using EventDriven.Domain.PoC.Api.Rest.Controllers.Contracts;
 using EventDriven.Domain.PoC.Application;
 using EventDriven.Domain.PoC.Application.CommandHandlers.Addresses;
+using EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseOne;
+using EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseTwo;
 using EventDriven.Domain.PoC.Application.CommandHandlers.Roles;
 using EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD;
+using EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
-using EventDriven.Domain.PoC.SharedKernel.Helpers;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +30,8 @@ using OpenTracing;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 {
+    /// <summary>
+    /// </summary>
     [ApiController]
     [Produces("application/json")]
     [Route("user")]
@@ -35,6 +39,16 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
     {
         #region ctor
 
+        /// <summary>
+        /// </summary>
+        /// <param name="applicationUserService"></param>
+        /// <param name="unitOfWork"></param>
+        /// <param name="configurationValues"></param>
+        /// <param name="mapper"></param>
+        /// <param name="mediator"></param>
+        /// <param name="memCache"></param>
+        /// <param name="contextAccessor"></param>
+        /// <param name="tracer"></param>
         public UserController(
             IUserService applicationUserService,
             IMyUnitOfWork unitOfWork
@@ -56,28 +70,45 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         #endregion ctor
 
-        [HttpPost("authenticate")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest model,
-            CancellationToken ct)
-        {
-            var serviceLayerResponse = await _applicationUserService.AuthenticateAsync(model, IpAddress());
+        #region Private props
 
-            if (serviceLayerResponse.Success)
-            {
-                SetTokenCookie(serviceLayerResponse.RefreshToken);
+        private readonly MyConfigurationValues _configurationValues;
+        private readonly IUserService _applicationUserService;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly ITracer _tracer;
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly IMapper _mapper;
+#pragma warning restore IDE0052 // Remove unread private members
+        private readonly IMediator _mediator;
 
-                if (_contextAccessor.HttpContext != null)
-                    _contextAccessor.HttpContext.Items["ApplicationUser"] = serviceLayerResponse;
+        #endregion Private props
 
-                return Ok(serviceLayerResponse);
-            }
+        #region Public props
 
-            return BadRequest(serviceLayerResponse.Message);
-        }
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
+        public string FirstName { get; private set; }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
+        public string LastName { get; private set; }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
+        public string Email { get; private set; }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable 1591
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
+        public string UserName { get; private set; }
+#pragma warning restore 1591
 
+        #endregion Public props
+
+        #region Token
+
+        /// <summary>
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("refresh-token")]
         [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
@@ -88,7 +119,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             var refreshToken = Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest(new {message = "Refresh Token (Request cookie) is required"});
+                return BadRequest(new {message = "Refresh EmailVerificationToken (Request cookie) is required"});
 
             var serviceLayerResponse = await _applicationUserService.RefreshTheTokenAsync(refreshToken, IpAddress());
 
@@ -102,6 +133,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return BadRequest(serviceLayerResponse.Message);
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("revoke-token")]
         [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
@@ -115,7 +151,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             var token = model.Token ?? Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(token))
-                return BadRequest("Token is required");
+                return BadRequest("EmailVerificationToken is required");
 
             //// users can revoke their own tokens and admins can revoke any tokens
             //if (!applicationUser.OwnsToken(token) && applicationUser.Role != Role.Admin)
@@ -128,26 +164,337 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return BadRequest(serviceLayerResponse.Message);
         }
 
+        #endregion Token
+
+        #region CUD CQRS
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [HttpPost("register")]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RegisterAsync(RegisterUserCommand command, CancellationToken ct)
+        {
+            // As an example of a non-trivial event based flow we got the following:
+
+            // [RegisterUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
+            // that one will fire an event [ApplicationUserCreatedDomainEvent] (when the user is created, the user has not yet confirmed his email so his account is not yet fully activated)
+            // this will get handled by [ApplicationUserCreatedDomainEventHandler]
+            // this will fire [SendAccountVerificationMailCommand]
+            // this will get handled by [SendAccountVerificationMailCommandHandler] that will send an email containing the activation link
+            // the flow continues when the user clicks on the provided url (found in an email that we had sent to the user)
+            // [EmailVerifiedDomainEvent] is then fired, and is handled by [EmailVerifiedDomainEventHandler] and the user will be marked as "verified"
+            // finally a greeting mail is sent to the user
+            // this will fire a new command: [SendAWelcomeMailCommand]
+            // this command will get handled by [SendAWelcomeMailCommandHandler], that will send a greeting email to the users email address
+            // a domain event is fired in response to this => [MarkApplicationUserAsWelcomedDomainEvent] is sent
+            // and is handled by [MarkApplicationUserAsWelcomedDomainEventHandler] marking the user as "welcomed"
+
+            // this flow if naturally extended by the "forgot password" flow and the "resend activation link" flow, both of which supplement the "happy road" flow with logical contingencies
+            // => Forgot password Flow
+            // => Resend activation link Flow
+
+            #region For development purposes this is unfortunately needed
+
+            // ReSharper disable once PossibleNullReferenceException
+            var creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+
+            command.Origin = Request.Headers["origin"];
+
+            var creatorId = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109");
+            if (creator == null)
+            {
+                if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
+                    _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
+                    creatorId = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109"); // User 1 is a "system" user
+            }
+            else
+            {
+                creatorId = creator.Id;
+            }
+
+            #endregion For development purposes this is unfortunately needed
+
+            command.CreatorId = creatorId;
+
+            using var scope = _tracer.BuildSpan("RegisterAsync").StartActive(true);
+            var user = await _mediator.Send(command, ct);
+
+            return Created(string.Empty, user);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [MyAuthorize("Admin")]
+        [HttpPost("create")]
+        [Produces(typeof(ApplicationUserResponse))]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.Created)]
+        public async Task<ActionResult<UserDto>> CreateAsync([FromBody] CreateUserCommand command,
+            CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            // ReSharper disable once PossibleNullReferenceException
+            command.Creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+
+            using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
+            var user = await _mediator.Send(command, ct);
+
+            return Created(string.Empty, user);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [MyAuthorize("Admin")]
+        [HttpPost("assign-role-to-user")]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
         [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RegisterAsync(RegisterApplicationUserRequest model, CancellationToken ct)
+        public async Task<IActionResult> AssignRoleToUserAsync(AssignRoleToUserCommand command,
+            CancellationToken ct)
         {
-            var serviceLayerResponse = await _applicationUserService.RegisterAsync(model, Request.Headers["origin"]);
+            command.Origin = Request.Headers["origin"];
 
-            if (serviceLayerResponse.Success)
-                // TODO: return Ok(new { message = "Verification successful, you can now login" });
-                return Ok(serviceLayerResponse.Message);
-            return BadRequest(serviceLayerResponse.Message);
+            command.AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
+            // ReSharper disable once PossibleNullReferenceException
+            await _mediator.Send(command, ct);
+
+            return Ok();
         }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [MyAuthorize("Admin")]
+        [HttpPost("remove-role-from-user")]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), 200)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RemoveRoleFromUserAsync(RemoveRoleFromUserCommand command,
+            CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            command.RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
+            // ReSharper disable once PossibleNullReferenceException
+            await _mediator.Send(command, ct);
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [MyAuthorize("Admin")]
+        [HttpPost("assign-address")]
+        [Produces(typeof(AssignAddressToUserResponse))]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.OK)]
+        public async Task<ActionResult<UserDto>> AssignAddressToUserAsync(
+            [FromBody] AssignAddressToUserCommand command,
+            CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            // ReSharper disable once PossibleNullReferenceException
+            command.AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
+            var user = await _mediator.Send(command, ct);
+
+            return Ok("Address assigned to user.");
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [MyAuthorize("Admin")]
+        [HttpPost("remove-address-from-user")]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), 200)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RemoveAddressFromUserAsync(RemoveAddressFromUserCommand command,
+            CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            using var scope = _tracer.BuildSpan("RemoveAddressFromUserAsync").StartActive(true);
+            // ReSharper disable once PossibleNullReferenceException
+            command.RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            await _mediator.Send(command, ct);
+
+            return Ok();
+        }
+
+
+        /// <summary>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("update/{id:int}")]
+        public async Task<ActionResult<ApplicationUserResponse>> UpdateAsync(int id,
+            [FromBody] UpdateUserCommand command, CancellationToken ct)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpDelete("delete/{id:int}")]
+        public async Task<ActionResult<ApplicationUserResponse>> DeleteAsync(int id, CancellationToken ct)
+        {
+            return null;
+        }
+
+        #endregion CUD CQRS
+
+        #region Other
+
+        /// <summary>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("password-reset/{id:int}")]
+        public async Task<ActionResult<ApplicationUserResponse>> PasswordResetAsync(int id, CancellationToken ct)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("resend-activation-link/{id:int}")]
+        public async Task<ActionResult<ApplicationUserResponse>> ResendActivationLinkAsync(int id,
+            CancellationToken ct)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [HttpPost("verify-email")]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> VerifyEmailAsync(VerifyEmailCommand command, CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
+
+            // this might not be true CQRS but I simply need synchronous feedback at this point because I cant rely on the email provided to be valid
+            // so I cant send an email and be certain that the user will receive it
+            var response = await _mediator.Send(command, ct);
+
+            if (response.Success)
+                return Ok(response.Message);
+            return BadRequest(response.Message);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordCommand command, CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            using var scope = _tracer.BuildSpan("ForgotPasswordAsync").StartActive(true);
+            var response = await _mediator.Send(command, ct);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [HttpPost("validate-reset-token")]
+        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> ValidateResetTokenAsync(ValidatePasswordResetTokenCommand command,
+            CancellationToken ct)
+        {
+            command.Origin = Request.Headers["origin"];
+
+            using var scope = _tracer.BuildSpan("ValidateResetTokenAsync").StartActive(true);
+            var response = await _mediator.Send(command, ct);
+
+            return Ok(response);
+        }
+
+        #endregion Other
+
+
+        #region Helpers
+
+        private void SetTokenCookie(string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("refreshToken", token, cookieOptions);
+        }
+
+        private string IpAddress()
+        {
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                return Request.Headers["X-Forwarded-For"];
+            // ReSharper disable once PossibleNullReferenceException
+            return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        }
+
+        #endregion Helpers
+
 
         //[HttpPost("verify-email")]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         //[ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         //public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest model, CancellationToken ct)
         //{
-        //    var serviceLayerResponse = await _applicationUserService.VerifyEmailAsync(model.Token);
+        //    var serviceLayerResponse = await _applicationUserService.VerifyEmailAsync(model.EmailVerificationToken);
 
         //    if (serviceLayerResponse.Success)
         //        //return Ok(new { message = "Verification successful, you can now login" });
@@ -177,7 +524,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //    var serviceLayerResponse = await _applicationUserService.ValidateResetTokenAsync(model);
 
         //    if (serviceLayerResponse.Success)
-        //        //  return Ok(new { message = "Token is valid" });
+        //        //  return Ok(new { message = "EmailVerificationToken is valid" });
         //        return Ok(serviceLayerResponse.Message);
         //    return BadRequest(serviceLayerResponse.Message);
         //}
@@ -402,7 +749,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //            DateOfBirth = i.DateOfBirth,
         //            RefreshTokens = i.RefreshTokens.Select(refreshToken => new RefreshTokenViewModel
         //            {
-        //                Token = refreshToken.Token,
+        //                EmailVerificationToken = refreshToken.EmailVerificationToken,
         //                Created = refreshToken.Created,
         //                CreatedByIp = refreshToken.CreatedByIp,
         //                Expires = refreshToken.Expires,
@@ -612,7 +959,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //            DateOfBirth = i.DateOfBirth,
         //            RefreshTokens = i.RefreshTokens.Select(refreshTokenViewModel => new RefreshTokenViewModel
         //            {
-        //                Token = refreshTokenViewModel.Token,
+        //                EmailVerificationToken = refreshTokenViewModel.EmailVerificationToken,
         //                Created = refreshTokenViewModel.Created,
         //                CreatedByIp = refreshTokenViewModel.CreatedByIp,
         //                Expires = refreshTokenViewModel.Expires,
@@ -629,383 +976,65 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //    return Ok(user);
         //}
 
-        #region Private props
-
-        private readonly MyConfigurationValues _configurationValues;
-        private readonly IUserService _applicationUserService;
-        private readonly IHttpContextAccessor _contextAccessor;
-        private readonly ITracer _tracer;
-        private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
-
-        #endregion Private props
-
-        #region Public props
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        public string FirstName { get; private set; }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        public string LastName { get; private set; }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        public string Email { get; private set; }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable 1591
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        public string UserName { get; private set; }
-#pragma warning restore 1591
-
-        #endregion Public props
-
         #region CUD non CQRS
 
-        [MyAuthorize(RoleEnum.Admin)]
-        [HttpPost]
-        [Produces(typeof(ApplicationUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.Created)]
-        public async Task<ActionResult<ApplicationUserResponse>> CreateAsync(CreateApplicationUserRequest model,
-            CancellationToken ct)
-        {
-            var serviceLayerResponse = await _applicationUserService.CreateAsync(model,
-                (User) _contextAccessor.HttpContext.Items["ApplicationUser"]);
+        //[MyAuthorize(RoleEnum.Admin)]
+        //[HttpPost]
+        //[Produces(typeof(ApplicationUserResponse))]
+        //[ProducesResponseType((int) HttpStatusCode.OK)]
+        //[ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        //[ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        //[ProducesResponseType((int) HttpStatusCode.Created)]
+        //public async Task<ActionResult<ApplicationUserResponse>> CreateAsync(CreateApplicationUserRequest model,
+        //    CancellationToken ct)
+        //{
+        //    var serviceLayerResponse = await _applicationUserService.CreateAsync(model,
+        //        (User) _contextAccessor.HttpContext.Items["ApplicationUser"]);
 
-            if (!serviceLayerResponse.Success)
-                return BadRequest(serviceLayerResponse.Message);
-            return CreatedAtAction(nameof(CreateAsync), new {id = serviceLayerResponse.ViewModel.Id},
-                serviceLayerResponse.ViewModel);
-        }
+        //    if (!serviceLayerResponse.Success)
+        //        return BadRequest(serviceLayerResponse.Message);
+        //    return CreatedAtAction(nameof(CreateAsync), new {id = serviceLayerResponse.ViewModel.Id},
+        //        serviceLayerResponse.ViewModel);
+        //}
 
-        [Authorize]
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> UpdateAsync(int id, UpdateApplicationUserRequest model,
-            CancellationToken ct)
-        {
-            //// users can update their own applicationUser and admins can update any applicationUser
-            //if (id != this.applicationUser.Id && this.applicationUser.Role != Role.Admin)
-            //    return Unauthorized(new { message = "Unauthorized" });
+        //[Authorize]
+        //[HttpPut("{id:int}")]
+        //public async Task<ActionResult<ApplicationUserResponse>> UpdateAsync(int id, UpdateApplicationUserRequest model,
+        //    CancellationToken ct)
+        //{
+        //    //// users can update their own applicationUser and admins can update any applicationUser
+        //    //if (id != this.applicationUser.Id && this.applicationUser.Role != Role.Admin)
+        //    //    return Unauthorized(new { message = "Unauthorized" });
 
-            // only admins can update role
-            //if (this.applicationUser.Role != Role.Admin)
-            //    model.Role = null;
+        //    // only admins can update role
+        //    //if (this.applicationUser.Role != Role.Admin)
+        //    //    model.Role = null;
 
-            var serviceLayerResponse = await _applicationUserService.UpdateAsync(id, model,
-                (User) _contextAccessor.HttpContext.Items["ApplicationUser"]);
+        //    var serviceLayerResponse = await _applicationUserService.UpdateAsync(id, model,
+        //        (User) _contextAccessor.HttpContext.Items["ApplicationUser"]);
 
-            if (!serviceLayerResponse.Success)
-                return BadRequest(serviceLayerResponse.Message);
-            return Ok(serviceLayerResponse.ViewModel);
-        }
+        //    if (!serviceLayerResponse.Success)
+        //        return BadRequest(serviceLayerResponse.Message);
+        //    return Ok(serviceLayerResponse.ViewModel);
+        //}
 
-        [Authorize]
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> DeleteAsync(int id, CancellationToken ct)
-        {
-            //// users can delete their own applicationUser and admins can delete any applicationUser
-            //if (id != applicationUser.Id && applicationUser.Role != Role.Admin)
-            //    return Unauthorized(new { message = "Unauthorized" });
+        //[Authorize]
+        //[HttpDelete("{id:int}")]
+        //public async Task<ActionResult<ApplicationUserResponse>> DeleteAsync(int id, CancellationToken ct)
+        //{
+        //    //// users can delete their own applicationUser and admins can delete any applicationUser
+        //    //if (id != applicationUser.Id && applicationUser.Role != Role.Admin)
+        //    //    return Unauthorized(new { message = "Unauthorized" });
 
-            var serviceLayerResponse =
-                await _applicationUserService.DeleteAsync(id,
-                    (User) _contextAccessor.HttpContext.Items["ApplicationUser"]);
+        //    var serviceLayerResponse =
+        //        await _applicationUserService.DeleteAsync(id,
+        //            (User) _contextAccessor.HttpContext.Items["ApplicationUser"]);
 
-            if (!serviceLayerResponse.Success)
-                return BadRequest(serviceLayerResponse.Message);
-            return Ok(serviceLayerResponse.ViewModel);
-        }
+        //    if (!serviceLayerResponse.Success)
+        //        return BadRequest(serviceLayerResponse.Message);
+        //    return Ok(serviceLayerResponse.ViewModel);
+        //}
 
         #endregion CUD non CQRS
-
-        #region CUD CQRS
-
-        [HttpPost("register-cqrs")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), 201)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RegisterCqrsAsync(RegisterApplicationUserRequest request, CancellationToken ct)
-        {
-            // As an example of a non-trivial event based flow we got the following:
-
-            // [RegisterUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
-            // that one will fire an event [ApplicationUserCreatedDomainEvent] (when the user is created, the user has not yet confirmed his email so his account is not yet fully activated)
-            // this will get handled by [ApplicationUserCreatedDomainEventHandler]
-            // this will fire [SendAccountVerificationMailCommand]
-            // this will get handled by [SendAccountVerificationMailCommandHandler] that will send an email containing the activation link
-            // the flow continues when the user clicks on the provided url (found in an email that we had sent to the user)
-            // [EmailVerifiedDomainEvent] is then fired, and is handled by [EmailVerifiedDomainEventHandler] and the user will be marked as "verified"
-            // finally a greeting mail is sent to the user
-            // this will fire a new command: [SendAWelcomeMailCommand]
-            // this command will get handled by [SendAWelcomeMailCommandHandler], that will send a greeting email to the users email address
-            // a domain event is fired in response to this => [MarkApplicationUserAsWelcomedDomainEvent] is sent
-            // and is handled by [MarkApplicationUserAsWelcomedDomainEventHandler] marking the user as "welcomed"
-
-            // this flow if naturally extended by the "forgot password" flow and the "resend activation link" flow, both of which supplement the "happy road" flow with logical contingencies
-            // => Forgot password Flow
-            // => Resend activation link Flow
-
-            #region For development purposes this is unfortunately needed
-
-            var creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
-            long creatorId = -1;
-            if (creator == null)
-            {
-                if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
-                    _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
-                    creatorId = 1; // User 1 is a "system" user
-            }
-            else
-            {
-                creatorId = creator.Id;
-            }
-
-            #endregion For development purposes this is unfortunately needed
-
-            using var scope = _tracer.BuildSpan("RegisterCqrsAsync").StartActive(true);
-            var user = await _mediator.Send(new RegisterUserCommand(
-                request.Email
-                , request.ConfirmPassword
-                , request.DateOfBirth
-                , request.FirstName
-                , request.LastName
-                , request.Password
-                , request.UserName
-                , request.Oib
-                , creatorId
-            ), ct);
-
-            return Created(string.Empty, user);
-        }
-
-        //[MyAuthorize(Role.Admin)]
-        [HttpPost("create-cqrs")]
-        [Produces(typeof(ApplicationUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.Created)]
-        public async Task<ActionResult<UserDto>> CreateCqrsAsync([FromBody] CreateApplicationUserRequest request,
-            CancellationToken ct)
-        {
-            using var scope = _tracer.BuildSpan("CreateCqrsAsync").StartActive(true);
-            var user = await _mediator.Send(new CreateUserCommand(
-                request.Email
-                , request.ConfirmPassword
-                , request.DateOfBirth
-                , request.FirstName
-                , request.LastName
-                , request.Password
-                , request.Role
-                , request.Title
-                , request.UserName
-                , (User) _contextAccessor.HttpContext.Items["ApplicationUser"]
-            ), ct);
-
-            return Created(string.Empty, user);
-        }
-
-        [HttpPost("assign-role-to-user-cqrs")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AssignRoleToUserCqrsAsync(AssignRoleToUserCommand command,
-            CancellationToken ct)
-        {
-            using var scope = _tracer.BuildSpan("AssignRoleToUserCqrsAsync").StartActive(true);
-            command.AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
-            await _mediator.Send(command, ct);
-
-            return Ok();
-        }
-
-        [HttpPost("remove-role-from-user-cqrs")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RemoveRoleFromUserCqrsAsync(RemoveRoleFromUserCommand command,
-            CancellationToken ct)
-        {
-            using var scope = _tracer.BuildSpan("RemoveRoleFromUserCqrsAsync").StartActive(true);
-            command.RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
-            await _mediator.Send(command, ct);
-
-            return Ok();
-        }
-
-
-        [HttpPost("assign-address-cqrs")]
-        [Produces(typeof(AssignAddressToUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.OK)]
-        public async Task<ActionResult<UserDto>> AssignAddressToUserCqrsAsync(
-            [FromBody] AssignAddressToUserRequest request,
-            CancellationToken ct)
-        {
-            using var scope = _tracer.BuildSpan("AssignAddressToUserCqrsAsync").StartActive(true);
-            var user = await _mediator.Send(new AssignAddressToUserCommand(
-                request.UserId
-                , request.AddressTypeName
-                , request.AddressName
-                , request.Description
-                , request.Line1
-                , request.Line2
-                , request.FlatNr
-                , request.PostalCode
-                , request.HouseNumber
-                , request.HouseNumberSuffix
-                , request.UserComment
-                , request.CityBlockName
-                , request.CountryName
-                , request.TownName
-                , request.CountyName
-                , (User) _contextAccessor.HttpContext.Items["ApplicationUser"]
-                , request.ActiveFrom
-                , request.ActiveTo
-            ), ct);
-
-            return Ok("Address assigned to user.");
-        }
-
-        [HttpPost("remove-address-from-user-cqrs")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RemoveAddressFromUserCqrsAsync(RemoveAddressFromUserCommand command,
-            CancellationToken ct)
-        {
-            using var scope = _tracer.BuildSpan("RemoveAddressFromUserCqrsAsync").StartActive(true);
-            command.RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
-            await _mediator.Send(command, ct);
-
-            return Ok();
-        }
-
-
-        /// <summary>
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="model"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPut("update-cqrs/{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> UpdateCqrsAsync(int id,
-            [FromBody] UpdateApplicationUserRequest model, CancellationToken ct)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpDelete("delete-cqrs/{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> DeleteCqrsAsync(int id, CancellationToken ct)
-        {
-            return null;
-        }
-
-        #endregion CUD CQRS
-
-        #region Other
-
-        /// <summary>
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpGet("password-reset-cqrs/{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> PasswordResetCqrsAsync(int id, CancellationToken ct)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpGet("resend-activation-link-cqrs/{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> ResendActivationLinkCqrsAsync(int id,
-            CancellationToken ct)
-        {
-            return null;
-        }
-
-        [HttpPost("verify-email-cqrs")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        public async Task<IActionResult> VerifyEmailCQRSAsync(VerifyEmailRequest model, CancellationToken ct)
-        {
-            var serviceLayerResponse =
-                await _applicationUserService.VerifyEmailAsync(model.Token, Request.Headers["origin"]);
-
-            if (serviceLayerResponse.Success)
-                //return Ok(new { message = "Verification successful, you can now login" });
-                return Ok(serviceLayerResponse.Message);
-            return BadRequest(serviceLayerResponse.Message);
-        }
-
-        [HttpPost("forgot-password-cqrs")]
-        public async Task<IActionResult> ForgotPasswordCQRSAsync(ForgotPasswordRequest model, CancellationToken ct)
-        {
-            var serviceLayerResponse =
-                await _applicationUserService.ForgotPasswordAsync(model, Request.Headers["origin"]);
-
-            if (serviceLayerResponse.Success)
-                //return Ok(new { message = "Please check your email for password reset instructions" });
-                return Ok(serviceLayerResponse.Message);
-            return BadRequest(serviceLayerResponse.Message);
-        }
-
-        [HttpPost("validate-reset-token-cqrs")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> ValidateResetTokenCQRSAsync(ValidateResetTokenRequest model,
-            CancellationToken ct)
-        {
-            var serviceLayerResponse = await _applicationUserService.ValidateResetTokenAsync(model);
-
-            if (serviceLayerResponse.Success)
-                //  return Ok(new { message = "Token is valid" });
-                return Ok(serviceLayerResponse.Message);
-            return BadRequest(serviceLayerResponse.Message);
-        }
-
-        #endregion Other
-
-
-        #region Helpers
-
-        private void SetTokenCookie(string token)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-
-            Response.Cookies.Append("refreshToken", token, cookieOptions);
-        }
-
-        private string IpAddress()
-        {
-            if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                return Request.Headers["X-Forwarded-For"];
-            return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-        }
-
-        #endregion Helpers
     }
 }

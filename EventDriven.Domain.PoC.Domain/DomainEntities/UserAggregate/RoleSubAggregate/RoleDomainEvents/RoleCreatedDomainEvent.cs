@@ -6,19 +6,18 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
     public class RoleCreatedDomainEvent : DomainEventBase
     {
         public string CreatorEmail;
-        public long CreatorId;
+        public Guid CreatorId;
         public string CreatorUsername;
         public DateTimeOffset? DateCreated;
         public string Description;
         public string Name;
-
         public RoleId RoleId;
 
         public RoleCreatedDomainEvent(
             string name
             , string description
             , Guid roleId
-            , long creatorId
+            , Guid creatorId
             , string creatorUsername
             , string creatorEmail
             , DateTimeOffset dateCreated

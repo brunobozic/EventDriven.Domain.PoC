@@ -40,7 +40,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
         {
             if (string.IsNullOrEmpty(command.AddressTypeName))
                 throw new ArgumentNullException(nameof(command.AddressTypeName));
-            if (command.UserId <= 0) throw new ArgumentNullException(nameof(command.UserId));
+            if (command.UserId == Guid.Empty) throw new ArgumentNullException(nameof(command.UserId));
             if (command.HouseNumber <= 0) throw new ArgumentNullException(nameof(command.HouseNumber));
             if (string.IsNullOrEmpty(command.Line1)) throw new ArgumentNullException(nameof(command.HouseNumber));
             if (string.IsNullOrEmpty(command.CountryName)) throw new ArgumentNullException(nameof(command.HouseNumber));
@@ -68,7 +68,8 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
 
             if (command.AssignerUser == null)
             {
-                command.AssignerUser = await UserRepository.Queryable().Where(auser => auser.Id == 1)
+                command.AssignerUser = await UserRepository.Queryable().Where(auser =>
+                        auser.Id == Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109"))
                     .SingleOrDefaultAsync(cancellationToken);
                 if (command.AssignerUser == null)
                     throw new DomainException(

@@ -12,6 +12,7 @@ using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Serilog;
 using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.ActivationMail
@@ -62,26 +63,26 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
 
             var user = await _userRepository
                 .Queryable()
-                .Where(u => u.UserIdGuid == command.UserId.Value)
+                .Where(u => u.UserIdGuid == command.UserId)
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (user == null)
-                throw new DomainException("Application user not found by requested Id of: [ " + command.UserId.Value +
+                throw new DomainException("Application user not found by requested Id of: [ " + command.UserId +
                                           " ]");
 
             string message;
-            var origin = "";
+            var origin = command.Origin;
 
             if (!string.IsNullOrEmpty(origin))
             {
-                var verifyUrl = $"{origin}/user/verify-email-cqrs?token={command.ActivationLink}";
+                var verifyUrl = $"{origin}/user/verify-email?token={command.ActivationLink}";
                 message = $@"<p>Please click the below link to activate your account:</p>
                              <p><a href=""{verifyUrl}"">{verifyUrl}</a></p>";
             }
             else
             {
                 message =
-                    $@"<p>Please use the below token to activate your account with the <code>/user/verify-email-cqrs</code> api route:</p>
+                    $@"<p>Please use the below token to activate your account with the <code>/user/verify-email</code> api route:</p>
                              <p><code>{command.ActivationLink}</code></p>";
             }
 
@@ -91,7 +92,29 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
                          {message}";
             var emailFrom = "admin.poc@gmail.com";
 
-            _emailService.Send(user.Email, emailSubject, completeEmailMessageBody, emailFrom);
+            try
+            {
+                _emailService.Send(user.Email, emailSubject, completeEmailMessageBody, emailFrom);
+
+                user.SetEmailWithActivationLinkSent();
+
+                // await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e.Message, e);
+
+                retVal.SuccessfullySent = false;
+                retVal.FirstName = command.FirstName;
+                retVal.LastName = command.LastName;
+                retVal.Email = command.Email;
+                retVal.ActivationLink = command.ActivationLink;
+                retVal.ActivationLinkGenerated = command.ActivationLinkGenerated;
+                retVal.UserId = command.UserId;
+
+                return retVal;
+            }
+
 
             retVal.SuccessfullySent = true;
             retVal.FirstName = command.FirstName;
@@ -99,7 +122,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
             retVal.Email = command.Email;
             retVal.ActivationLink = command.ActivationLink;
             retVal.ActivationLinkGenerated = command.ActivationLinkGenerated;
-            retVal.UserId = command.UserId.Value;
+            retVal.UserId = command.UserId;
 
             return retVal;
         }
