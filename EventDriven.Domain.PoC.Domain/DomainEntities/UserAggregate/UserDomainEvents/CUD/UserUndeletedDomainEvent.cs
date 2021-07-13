@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using System;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD
 {
@@ -8,7 +9,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public long Id;
         public long UndeletedByUser;
         public string UndeletionReason;
-        public UserId UserId;
+        public Guid UserId;
         public string UserName;
 
         public UserUndeletedDomainEvent(string email, long undeletedByUser, string undeletionReason)

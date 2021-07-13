@@ -7,17 +7,17 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.Phas
 {
     public class ValidatePasswordResetTokenCommand : ICommand<bool>
     {
-        private Guid guid;
-        private UserId userId;
 
-        public ValidatePasswordResetTokenCommand(Guid guid, UserId userId)
+        private Guid UserId;
+
+        public ValidatePasswordResetTokenCommand(Guid userId, string token)
         {
-            this.guid = guid;
-            this.userId = userId;
+            this.Token = token;
+            this.UserId = userId;
         }
 
         public StringValues Origin { get; set; }
-        public string Token { get; internal set; }
+        public string Token { get; set; }
 
         public Guid Id => throw new NotImplementedException();
     }

@@ -7,9 +7,9 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email
     public class SendAccountAlreadyRegisteredMailReadiedCommand : ICommand<bool>
     {
         private Guid guid;
-        private UserId userId;
+        private Guid userId;
 
-        public SendAccountAlreadyRegisteredMailReadiedCommand(Guid guid, UserId userId)
+        public SendAccountAlreadyRegisteredMailReadiedCommand(Guid guid, Guid userId)
         {
             this.guid = guid;
             this.userId = userId;

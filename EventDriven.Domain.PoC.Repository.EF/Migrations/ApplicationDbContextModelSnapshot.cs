@@ -34,14 +34,17 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<long?>("TableIdValue")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("TableIdValueGuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("TableName")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserName")
                         .HasColumnType("TEXT");
@@ -103,7 +106,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("ActingEmail")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ActingUserId")
+                    b.Property<Guid?>("ActingUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ActingUserName")
@@ -112,7 +115,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset>("DateCreated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTimeOffset(new DateTime(2021, 7, 11, 22, 58, 39, 254, DateTimeKind.Unspecified).AddTicks(8951), new TimeSpan(0, 0, 0, 0, 0)));
+                        .HasDefaultValue(new DateTimeOffset(new DateTime(2021, 7, 12, 12, 53, 5, 664, DateTimeKind.Unspecified).AddTicks(7591), new TimeSpan(0, 0, 0, 0, 0)));
 
                     b.Property<DateTimeOffset?>("DateDeleted")
                         .HasColumnType("TEXT");
@@ -148,10 +151,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -181,7 +181,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("CountyId1");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -196,7 +196,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeactivateReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("DeactivatedById")
+                    b.Property<Guid?>("DeactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeleteReason")
@@ -205,7 +205,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -220,6 +220,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("HouseNumberSuffix")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Line1")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -227,7 +230,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("Line2")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -236,7 +239,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("PostalCode")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ReactivatedById")
+                    b.Property<Guid?>("ReactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReactivatedReason")
@@ -249,7 +252,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UndeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UndeletedById")
+                    b.Property<Guid?>("UndeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserComment")
@@ -308,10 +311,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -323,7 +323,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -338,7 +338,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeactivateReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("DeactivatedById")
+                    b.Property<Guid?>("DeactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeleteReason")
@@ -347,19 +347,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ReactivatedById")
+                    b.Property<Guid?>("ReactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReactivatedReason")
@@ -368,7 +371,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UndeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UndeletedById")
+                    b.Property<Guid?>("UndeletedById")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -396,10 +399,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -411,7 +411,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -435,13 +435,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -484,10 +487,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -499,7 +499,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -523,13 +523,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -572,10 +575,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -587,7 +587,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -611,13 +611,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -660,10 +663,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -675,7 +675,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -699,13 +699,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -751,10 +754,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -769,7 +769,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<long>("AddressId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -784,7 +784,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeactivateReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("DeactivatedById")
+                    b.Property<Guid?>("DeactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeleteReason")
@@ -793,19 +793,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ReactivatedById")
+                    b.Property<Guid?>("ReactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReactivatedReason")
@@ -814,7 +817,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UndeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UndeletedById")
+                    b.Property<Guid?>("UndeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserId")
@@ -906,10 +909,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -921,7 +921,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -936,7 +936,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeactivateReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("DeactivatedById")
+                    b.Property<Guid?>("DeactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeleteReason")
@@ -945,19 +945,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ReactivatedById")
+                    b.Property<Guid?>("ReactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReactivatedReason")
@@ -969,7 +972,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UndeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UndeletedById")
+                    b.Property<Guid?>("UndeletedById")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -997,10 +1000,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -1012,7 +1012,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -1027,7 +1027,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeactivateReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("DeactivatedById")
+                    b.Property<Guid?>("DeactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeleteReason")
@@ -1036,19 +1036,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ReactivatedById")
+                    b.Property<Guid?>("ReactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReactivatedReason")
@@ -1060,7 +1063,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UndeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UndeletedById")
+                    b.Property<Guid?>("UndeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserId")
@@ -1098,10 +1101,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ActivatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ActivatedByUserId")
+                    b.Property<Guid?>("ActivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -1113,7 +1113,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset?>("ActiveTo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("DateCreated")
@@ -1131,7 +1131,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeactivateReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("DeactivatedById")
+                    b.Property<Guid?>("DeactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DeleteReason")
@@ -1140,13 +1140,15 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<bool>("Deleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("DeletedById")
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FirstName")
@@ -1155,13 +1157,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("FullName")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("LastName")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastVerificationFailureDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ModifiedById")
+                    b.Property<Guid?>("ModifiedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -1174,6 +1179,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Oib")
+                        .IsRequired()
+                        .HasMaxLength(12)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
@@ -1185,7 +1192,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("PasswordResetMsg")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ReactivatedById")
+                    b.Property<Guid?>("ReactivatedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReactivatedReason")
@@ -1203,16 +1210,18 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UndeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UndeletedById")
+                    b.Property<Guid?>("UndeletedById")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VerificationFailureLatestMessage")
+                    b.Property<string>("LatestVerificationFailureMessage")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VerificationToken")
+                    b.Property<string>("AccountActivationToken")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("VerificationTokenExpirationDate")
@@ -1235,11 +1244,19 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasIndex("DeletedById");
 
+                    b.HasIndex("Email");
+
                     b.HasIndex("ModifiedById");
+
+                    b.HasIndex("Oib")
+                        .IsUnique();
 
                     b.HasIndex("ReactivatedById");
 
                     b.HasIndex("UndeletedById");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.ToTable("ApplicationUsers");
                 });
@@ -1249,8 +1266,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ActingUser")
                         .WithMany()
                         .HasForeignKey("ActingUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UserActedUpon")
                         .WithMany("JournalEntries")
@@ -1284,27 +1300,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
                         .HasForeignKey("DeactivatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
                         .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1318,8 +1329,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UndeletedBy")
                         .WithMany()
                         .HasForeignKey("UndeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ActivatedBy");
 
@@ -1353,27 +1363,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
                         .HasForeignKey("DeactivatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
                         .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1383,8 +1388,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UndeletedBy")
                         .WithMany()
                         .HasForeignKey("UndeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ActivatedBy");
 
@@ -1405,15 +1409,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 {
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ActivatedBy")
                         .WithMany()
-                        .HasForeignKey("ActivatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ActivatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
@@ -1421,15 +1421,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
-                        .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("DeletedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
-                        .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ModifiedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1458,15 +1454,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 {
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ActivatedBy")
                         .WithMany()
-                        .HasForeignKey("ActivatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ActivatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
@@ -1474,15 +1466,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
-                        .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("DeletedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
-                        .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ModifiedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1511,15 +1499,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 {
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ActivatedBy")
                         .WithMany()
-                        .HasForeignKey("ActivatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ActivatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
@@ -1527,15 +1511,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
-                        .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("DeletedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
-                        .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ModifiedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1564,15 +1544,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 {
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ActivatedBy")
                         .WithMany()
-                        .HasForeignKey("ActivatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ActivatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
@@ -1580,15 +1556,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
-                        .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("DeletedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
-                        .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ModifiedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1629,26 +1601,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
                         .HasForeignKey("DeactivatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
                         .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1658,8 +1626,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UndeletedBy")
                         .WithMany()
                         .HasForeignKey("UndeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "User")
                         .WithMany("UserAddresses")
@@ -1712,27 +1679,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
                         .HasForeignKey("DeactivatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
                         .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1742,8 +1704,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UndeletedBy")
                         .WithMany()
                         .HasForeignKey("UndeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ActivatedBy");
 
@@ -1769,27 +1730,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
                         .HasForeignKey("DeactivatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
                         .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1805,8 +1761,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UndeletedBy")
                         .WithMany()
                         .HasForeignKey("UndeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "User")
                         .WithMany("UserRoles")
@@ -1843,26 +1798,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeactivatedBy")
                         .WithMany()
                         .HasForeignKey("DeactivatedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "DeletedBy")
                         .WithMany()
                         .HasForeignKey("DeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "ReactivatedBy")
                         .WithMany()
@@ -1872,8 +1823,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.HasOne("EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User", "UndeletedBy")
                         .WithMany()
                         .HasForeignKey("UndeletedById")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ActivatedBy");
 

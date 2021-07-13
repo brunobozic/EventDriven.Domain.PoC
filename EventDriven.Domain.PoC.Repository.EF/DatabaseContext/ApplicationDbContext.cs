@@ -17,6 +17,7 @@ using EventDriven.Domain.PoC.Repository.EF.Extensions;
 using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Serilog;
 
 namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
 {
@@ -81,11 +82,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
             // Do the audit trails
             var currentDateTime = DateTime.Now;
 
-            var currentApplicationUserId = Guid.Parse(Consts.SYSTEM_USER);
-
             // TODO: fetch user Id from the facade
-
-            currentApplicationUserId = Guid.Parse(Consts.SYSTEM_USER);
+            var currentApplicationUserId = await ApplicationUsers.Where(user => user.UserName == Consts.SYSTEM_USER_USERNAME).Select(i => i.Id).SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
             try
             {
@@ -147,7 +145,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                 {
                     Console.WriteLine(e);
                     Debug.WriteLine(e);
-                    // TODO: do logging here
+                    Log.Fatal("Unable to create an audit trail.", e);
                 }
 
                 #endregion Full audit trail
@@ -205,7 +203,10 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                     if (auditableEntity.State == EntityState.Added)
                     {
                         auditableEntity.Entity.DateCreated = currentDateTime;
-                        auditableEntity.Entity.CreatedById = currentApplicationUserId;
+                        if (!auditableEntity.Entity.IsSeed)
+                        {
+                            auditableEntity.Entity.CreatedById = currentApplicationUserId;
+                        }
                     }
 
                 changes = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -216,8 +217,12 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                     foreach (var audit in _auditList)
                     {
                         if (audit.Actions == AuditActions.I.ToString())
-                            audit.TableIdValue = _auditFactory.GetKeyValue(_list[i]);
-                        AuditTrail.Add(audit);
+                        {
+                            audit.TableIdValue = _auditFactory.GetKeyValueLong(_list[i]);
+                            audit.TableIdValueGuid = _auditFactory.GetKeyValueGuid(_list[i]);
+                        }
+
+                        await AuditTrail.AddAsync(audit, cancellationToken);
                         i++;
                     }
 
@@ -247,12 +252,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
 
             //    throw new ModelValidationException(result.ToString(), entityException, allErrors);
             //}
-            catch (DbUpdateConcurrencyException ex
-            ) // This will fire only for entities that have the [RowVersion] property implemented...
+            catch (DbUpdateConcurrencyException ex) // This will fire only for entities that have the [RowVersion] property implemented...
             {
                 var entry = ex.Entries.Single();
                 var clientValues = entry.Entity;
-                var databaseEntry = entry.GetDatabaseValues();
+                var databaseEntry = await entry.GetDatabaseValuesAsync(cancellationToken);
 
                 if (databaseEntry == null)
                 {
@@ -285,7 +289,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                 //}
 
                 // Update the values of the entity that failed to save from the store 
-                ex.Entries.Single().Reload();
+                await ex.Entries.Single().ReloadAsync(cancellationToken);
 
                 var result = new StringBuilder();
                 result.Append("The record you attempted to edit "

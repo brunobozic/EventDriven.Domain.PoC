@@ -15,7 +15,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
             , string password
             , string userName
             , string oib
-            , Guid userId
         )
         {
             Email = email;
@@ -26,7 +25,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
             Password = password;
             UserName = userName;
             Oib = oib;
-            CreatorId = userId;
         }
 
         public string ConfirmPassword { get; set; }
@@ -37,8 +35,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
         public string Oib { get; set; }
         public string Password { get; set; }
         public string UserName { get; set; }
-
-        public Guid CreatorId { get; set; }
         public string Origin { get; set; }
+        public Guid? CreatorId { get; set; }
     }
 }

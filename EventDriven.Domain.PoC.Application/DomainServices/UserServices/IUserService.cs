@@ -19,7 +19,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
         Task<ApplicationUserResponse> GetByIdAsync(Guid id);
         Task<AuthenticateResponse> RefreshTheTokenAsync(string token, string ipAddress);
 
-        Task<RegisterResponse> RegisterAsync(RegisterApplicationUserRequest model, string origin);
+        Task<RegisterResponse> RegisterAsync(RegisterUserRequest model, string origin);
 
         // Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest model);
         Task<RevokeTokenResponse> RevokeTokenAsync(string token, string ipAddress);

@@ -10,9 +10,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
     {
         #region Public properties
 
-        public Guid ReactivatedById { get; set; }
-        public Guid DeactivatedById { get; set; }
-        public Guid UndeletedById { get; set; }
+        public Guid? ReactivatedById { get; set; }
+        public Guid? DeactivatedById { get; set; }
+        public Guid? UndeletedById { get; set; }
 
         #endregion Public properties
 

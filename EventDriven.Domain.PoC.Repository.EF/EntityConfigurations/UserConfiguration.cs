@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -10,12 +11,41 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasKey(user => user.Id);
+            builder.Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            builder.Property(p => p.Oib)
+                .HasMaxLength(12)
+                .IsRequired()
+                ;
+            builder.HasIndex(p => p.Oib)
+                .IsUnique();
+            
+
+            builder.Property(p => p.Email)
+                .HasMaxLength(50)
+                .IsRequired()
+                ;
+            builder.HasIndex(p => p.Email);
+
+            builder.Property(p => p.UserName)
+                .HasMaxLength(50)
+                .IsRequired()
+                ;
+
+            builder.HasIndex(p => p.UserName)
+                .IsUnique()
+                ;
 
             // not for SQLite unfortunately
             //builder.Property(user => user.Id).UseHiLo("Sequence", "dbo");
 
+            #region Shadow
+
             builder.Property("_status").HasColumnName("StatusId")
                 .HasConversion(new EnumToNumberConverter<RegistrationStatusEnum, byte>());
+
+            #endregion Shadow
 
             builder.HasMany(user => user.RefreshTokens)
                 .WithOne(refreshToken => refreshToken.ApplicationUser)
@@ -37,6 +67,13 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            builder.HasOne(user => user.CreatedBy)
+                .WithMany()
+                .HasForeignKey(user => user.CreatedById)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull)
+                ;
+
             builder.HasOne(user => user.ReactivatedBy)
                 .WithMany()
                 .HasForeignKey(user => user.ReactivatedById)
@@ -54,24 +91,28 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
             builder.HasOne(user => user.DeactivatedBy)
                 .WithMany()
                 .HasForeignKey(user => user.DeactivatedById)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 
             builder.HasOne(user => user.DeletedBy)
                 .WithMany()
                 .HasForeignKey(user => user.DeletedById)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 
             builder.HasOne(user => user.UndeletedBy)
                 .WithMany()
                 .HasForeignKey(user => user.UndeletedById)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 
             builder.HasOne(user => user.ModifiedBy)
                 .WithMany()
                 .HasForeignKey(user => user.ModifiedById)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 

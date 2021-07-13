@@ -25,9 +25,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         #region FK
 
-        public Guid ReactivatedById { get; set; }
-        public Guid DeactivatedById { get; set; }
-        public Guid UndeletedById { get; set; }
+        public Guid? ReactivatedById { get; set; }
+        public Guid? DeactivatedById { get; set; }
+        public Guid? UndeletedById { get; set; }
 
         #endregion FK
 
@@ -90,18 +90,33 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
                 RoleIdGuid = roleIdGuid
             };
 
-            role.Activate(from, to, creatorUser);
-            role.AssignCreatedBy(creatorUser);
+            if (creatorUser != null) // when seeding, the creator user may not yet be inserted - hence this might be null
+            {
+                role.Activate(from, to, creatorUser);
+                role.AssignCreatedBy(creatorUser);
 
-            role.AddDomainEvent(new RoleCreatedDomainEvent(
-                name
-                , description
-                , roleIdGuid
-                , creatorUser.Id
-                , creatorUser.UserName
-                , creatorUser.Email
-                , DateTimeOffset.UtcNow
-            ));
+                role.AddDomainEvent(new RoleCreatedDomainEvent(
+                    name
+                    , description
+                    , roleIdGuid
+                    , creatorUser.Id
+                    , creatorUser.UserName
+                    , creatorUser.Email
+                    , DateTimeOffset.UtcNow
+                ));
+            }
+            else
+            {
+                role.AddDomainEvent(new RoleCreatedDomainEvent(
+                    name
+                    , description
+                    , roleIdGuid
+                    , null
+                    , "Seed"
+                    , "Seed"
+                    , DateTimeOffset.UtcNow
+                ));
+            }
 
             return role;
         }

@@ -24,9 +24,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public Guid UserId { get; private set; }
         public long AddressId { get; private set; }
-        public Guid UndeletedById { get; private set; }
-        public Guid DeactivatedById { get; private set; }
-        public Guid ReactivatedById { get; private set; }
+        public Guid? UndeletedById { get; private set; }
+        public Guid? DeactivatedById { get; private set; }
+        public Guid? ReactivatedById { get; private set; }
 
         #endregion FK
 
@@ -54,7 +54,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             // activated by the creator
             userAddress.Activate(DateTimeOffset.UtcNow,
                 DateTimeOffset.UtcNow.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
-            userAddress.ActivatedByUserId = creator.Id;
+            userAddress.ActivatedById = creator.Id;
 
             return userAddress;
         }

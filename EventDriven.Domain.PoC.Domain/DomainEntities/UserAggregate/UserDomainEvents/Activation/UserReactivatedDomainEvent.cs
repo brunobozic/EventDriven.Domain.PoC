@@ -10,16 +10,15 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , string userName
             , Guid userId
             , string oib
-            , Guid reactivatedByUserId
-            , string reactivationReason
             , Guid reactivatedById
+            , string reactivationReason
         )
         {
             Email = email;
             UserName = userName;
-            UserId = new UserId(userId);
+            UserId = userId;
             Oib = oib;
-            ReactivatedById = reactivatedByUserId;
+            ReactivatedById = reactivatedById;
             ReactivationReason = reactivationReason;
             ReactivationDateStamp = DateTime.UtcNow;
         }
@@ -31,6 +30,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public string Email { get; set; }
         public string UserName { get; set; }
         public string Oib { get; set; }
-        public UserId UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

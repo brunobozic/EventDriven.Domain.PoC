@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.Domain;
+﻿using System;
+using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Newtonsoft.Json;
@@ -14,11 +15,11 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.UserUpdates.Not
         }
 
         [JsonConstructor]
-        public UserUpdatedMailAddressNotification(UserId userId) : base(null)
+        public UserUpdatedMailAddressNotification(Guid userId) : base(null)
         {
             UserId = userId;
         }
 
-        public UserId UserId { get; }
+        public Guid UserId { get; }
     }
 }

@@ -43,11 +43,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         private readonly List<UserAddress> _userAddresses;
 
         public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses;
-        public Guid ReactivatedById { get; private set; }
-        public Guid DeactivatedById { get; private set; }
+        public Guid? ReactivatedById { get; private set; }
+        public Guid? DeactivatedById { get; private set; }
 
         // ReSharper disable once IdentifierTypo
-        public Guid UndeletedById { get; private set; }
+        public Guid? UndeletedById { get; private set; }
         public long AddressTypeId { get; private set; }
 
         #endregion Navigation properties
@@ -205,7 +205,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 Line1 = line1;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {
@@ -220,7 +220,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 Line2 = line2;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {
@@ -235,7 +235,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 FlatNr = flatNumber;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {
@@ -250,7 +250,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 PostalCode = postalCode;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {
@@ -265,7 +265,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 HouseNumber = houseNumber;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {
@@ -280,7 +280,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 HouseNumberSuffix = houseNumberSuffix;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {
@@ -297,7 +297,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
                 {
                     AddressType = addressType;
                     AddDomainEvent(new UserUpdatedAddressDomainEvent
-                        {AddressId = Id, UserId = new UserId(changedBy.Id)});
+                    { AddressId = Id, UserId = changedBy.Id });
                 }
                 else
                 {

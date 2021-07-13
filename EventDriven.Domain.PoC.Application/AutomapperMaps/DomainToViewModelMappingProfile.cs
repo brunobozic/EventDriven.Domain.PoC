@@ -73,7 +73,7 @@ namespace EventDriven.Domain.PoC.Application.AutomapperMaps
                 ;
 
             CreateMap<User, AuthenticateResponse>();
-            CreateMap<RegisterApplicationUserRequest, User>();
+            CreateMap<RegisterUserRequest, User>();
             CreateMap<CreateUserCommand, User>();
             CreateMap<Role, UserRoleViewModel>();
 

@@ -208,7 +208,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return returnValue;
         }
 
-        public async Task<RegisterResponse> RegisterAsync(RegisterApplicationUserRequest model, string origin)
+        public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest model, string origin)
         {
             if (model == null || string.IsNullOrEmpty(origin))
                 throw new ArgumentNullException("RegisterApplicationUserRequest and/or origin are invalid");
@@ -283,7 +283,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 Message = ""
             };
 
-            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.VerificationToken == token);
+            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.AccountActivationToken == token);
 
             if (applicationUser == null) throw new AppException("Verification failed");
 

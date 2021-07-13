@@ -13,7 +13,6 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvent
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.PasswordReset;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Verification;
 using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
-using EventDriven.Domain.PoC.SharedKernel.Helpers;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Random;
 using TrackableEntities.Common.Core;
 using BC = BCrypt.Net.BCrypt;
@@ -40,10 +39,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         public string NormalizedUserName { get; private init; }
         public bool TwoFactorEnabled { get; private init; }
 
+        private int _accountActivationMailsSendAttempts { get; set; }
+        private string _latestVerificationFailureMessage { get; set; }
+        private DateTime _latestVerificationFailureTime { get; set; }
+
         #region Email Verification
 
         public DateTime Verified { get; private set; }
-        public string VerificationFailureLatestMessage { get; private set; }
+        public string LatestVerificationFailureMessage { get; private set; }
         public DateTime LastVerificationFailureDate { get; private set; }
 
         private RegistrationStatusEnum _status { get; set; }
@@ -58,14 +61,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         public DateTime? ResetTokenExpires { get; private set; }
         public string PasswordHash { get; private set; }
         public DateTime? PasswordReset { get; private set; }
-        public string VerificationToken { get; private set; }
+        public string AccountActivationToken { get; private set; }
 
         public DateTime? VerificationTokenExpirationDate { get; private set; }
 
         #endregion Token operations
-
-        //public DateTime Created { get; private init; }
-        //public DateTime Updated { get; private set; }
 
         #endregion Public Properties
 
@@ -211,6 +211,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             user.AddPasswordHash(password);
             user.AddVerificationToken(RandomStringHelper.RandomTokenString());
 
+            var creatorId = creator?.Id;
+
             user.AddDomainEvent(new UserCreatedDomainEvent(
                 email
                 , userName
@@ -220,8 +222,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 , oib
                 , dateOfBirth
                 , DateTime.UtcNow
-                , user.VerificationToken
-                , creator.Id
+                , user.AccountActivationToken
+                , creatorId
                 , origin
             ));
 
@@ -242,6 +244,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         /// <param name="password"></param>
         /// <param name="activator"></param>
         /// <param name="origin"></param>
+        /// <param name="isSeed"></param>
         /// <returns></returns>
         public static User NewActiveWithPasswordAndEmailVerified(
             string email
@@ -255,6 +258,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             , string password
             , User activator
             , string origin
+            , bool isSeed
         )
         {
             if (string.IsNullOrEmpty(email)) throw new ArgumentNullException(nameof(email));
@@ -283,7 +287,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 DateCreated = DateTime.UtcNow,
                 TrackingState = TrackingState.Added,
                 Oib = oib,
-                DateOfBirth = dateOfBirth
+                DateOfBirth = dateOfBirth,
+                IsSeed = isSeed
             };
 
             if (activator == null)
@@ -305,7 +310,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                     , oib
                     , dateOfBirth
                     , DateTime.UtcNow
-                    , user.VerificationToken
+                    , user.AccountActivationToken
                     , activator.Id
                     , origin
                 ));
@@ -319,22 +324,23 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                     , oib
                     , dateOfBirth
                     , DateTime.UtcNow
-                    , user.VerificationToken
-                    , Guid.Parse(Consts.SYSTEM_USER) // <== this will happen when seeding
+                    , user.AccountActivationToken
+                    , null // <== this will happen when seeding, the first user inserted (via seeding) does not have a [User] entity as its own creator
                     , origin
                 ));
 
             return user;
         }
 
+
         #endregion Ctor
 
         #region FK
 
-        public Guid UndeletedById { get; private set; }
-        public Guid ReactivatedById { get; private set; }
+        public Guid? UndeletedById { get; private set; }
+        public Guid? ReactivatedById { get; private set; }
 
-        public Guid DeactivatedById { get; private set; }
+        public Guid? DeactivatedById { get; private set; }
 
         #endregion FK
 
@@ -349,6 +355,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         private readonly List<RefreshToken.RefreshToken> _refreshTokens;
         public IReadOnlyCollection<RefreshToken.RefreshToken> RefreshTokens => _refreshTokens;
         private readonly List<UserAddress> _userAddresses;
+
         public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses;
 
         #endregion Navigation properties
@@ -461,7 +468,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool VerificationTokenIsValid()
         {
-            return !string.IsNullOrEmpty(VerificationToken) && Verified == DateTime.MinValue;
+            return !string.IsNullOrEmpty(AccountActivationToken) && Verified == DateTime.MinValue;
         }
 
         #endregion Email templates
@@ -666,7 +673,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             if (EnsureIsActive() && !Deleted && VerificationTokenExpirationDate >= DateTime.UtcNow)
             {
                 Verified = DateTime.UtcNow;
-                VerificationToken = null;
+                AccountActivationToken = null;
                 VerificationTokenExpirationDate = null;
                 _status = RegistrationStatusEnum.Verified;
 
@@ -682,7 +689,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 friendlyErrorResponse +=
                     $"Unable to verify user account [{UserName} / {Email}], the account is inactive. Current registration status: {GetCurrentRegistrationStatus()}" +
                     ", ";
-                VerificationFailureLatestMessage = friendlyErrorResponse + ", ";
+                LatestVerificationFailureMessage = friendlyErrorResponse + ", ";
             }
 
             if (Deleted)
@@ -690,7 +697,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 friendlyErrorResponse +=
                     $"Unable to verify user account [{UserName} / {Email}], the account is deleted. Current registration status: {GetCurrentRegistrationStatus()}" +
                     ", ";
-                VerificationFailureLatestMessage += friendlyErrorResponse + ", ";
+                LatestVerificationFailureMessage += friendlyErrorResponse + ", ";
             }
 
             if (VerificationTokenExpirationDate <= DateTime.UtcNow)
@@ -698,12 +705,12 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 friendlyErrorResponse +=
                     $"Unable to verify user account [{UserName} / {Email}], the account verification URL has expired. Current registration status: {GetCurrentRegistrationStatus()}" +
                     ", ";
-                VerificationFailureLatestMessage += friendlyErrorResponse;
+                LatestVerificationFailureMessage += friendlyErrorResponse;
                 LastVerificationFailureDate = DateTime.UtcNow;
                 _status = RegistrationStatusEnum.VerificationFailed;
             }
 
-            AddDomainEvent(new EmailNotVerifiedDomainEvent(Email, UserName, Id, VerificationFailureLatestMessage));
+            AddDomainEvent(new EmailNotVerifiedDomainEvent(Email, UserName, Id, LatestVerificationFailureMessage));
 
             return friendlyErrorResponse;
         }
@@ -747,7 +754,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         {
             if (EnsureIsActive() && !Deleted)
             {
-                VerificationToken = verificationToken;
+                AccountActivationToken = verificationToken;
                 VerificationTokenExpirationDate = DateTime.UtcNow.AddHours(Consts.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
             }
             else
@@ -836,8 +843,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             return _status;
         }
 
-        public void SetEmailWithActivationLinkSent()
+        public void AccountActivationMailSent()
         {
+            _accountActivationMailsSendAttempts += 1;
             var journalEntry =
                 new AccountJournalEntry(DateTime.UtcNow + " => Account activation code sent to users e-mail address.");
             journalEntry.AttachActingUser(null);
@@ -847,5 +855,18 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         }
 
         #endregion Public methods
+
+        public void AccountActivationMailNotSent(string eMessage)
+        {
+            _accountActivationMailsSendAttempts += 1;
+            var journalEntry =
+                new AccountJournalEntry(DateTime.UtcNow + " => Exception -> unable to send account activation code sent to users e-mail address.");
+            journalEntry.AttachActingUser(null);
+            journalEntry.AttachUser(this);
+            _journalEntries.Add(journalEntry);
+            _status = RegistrationStatusEnum.VerificationEmailSent;
+            _latestVerificationFailureMessage = eMessage;
+            _latestVerificationFailureTime = DateTime.UtcNow;
+        }
     }
 }

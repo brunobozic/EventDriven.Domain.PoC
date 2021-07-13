@@ -64,6 +64,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
             builder.HasOne(userAddress => userAddress.CreatedBy)
                 .WithMany()
                 .HasForeignKey(userAddress => userAddress.CreatedById)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 

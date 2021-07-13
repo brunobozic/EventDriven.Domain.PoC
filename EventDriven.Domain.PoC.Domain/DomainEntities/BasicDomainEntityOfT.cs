@@ -61,15 +61,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         #region Public Props
 
-        [NotMapped] public bool IsDraft { get; } = false;
+        [NotMapped] public bool IsDraft { get; set; } = false;
 
         public DateTimeOffset? ActiveFrom { get; private set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? ActiveTo { get; private set; }
         public User ReactivatedBy { get; private set; }
         public string ReactivatedReason { get; private set; }
         public User ActivatedBy { get; private set; }
-        public Guid ActivatedById { get; private set; }
-        public Guid ActivatedByUserId { get; set; }
+        public Guid? ActivatedById { get; set; }
         public bool Active { get; set; } = true;
         public User DeactivatedBy { get; private set; }
         public string DeactivateReason { get; private set; }
@@ -90,15 +89,15 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         public User CreatedBy { get; private set; }
         public DateTimeOffset DateCreated { get; set; }
-        public Guid CreatedById { get; set; }
+        public Guid? CreatedById { get; set; }
         public User ModifiedBy { get; private set; }
 
         public DateTimeOffset? DateModified { get; set; }
-        public Guid ModifiedById { get; set; }
+        public Guid? ModifiedById { get; set; }
         public User DeletedBy { get; private set; }
         public DateTimeOffset? DateDeleted { get; set; }
 
-        public Guid DeletedById { get; set; }
+        public Guid? DeletedById { get; set; }
         public string UndeleteReason { get; private set; }
         public string DeleteReason { get; private set; }
 
@@ -121,7 +120,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             Active = true;
             ActiveFrom = activeFrom;
             ActiveTo = activeTo;
-            ActivatedByUserId = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109");
+            ActivatedById = null;
         }
 
         public void Deactivate(User deactivatedBy, string reason)
@@ -213,6 +212,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents?.AsReadOnly();
 
+        public bool IsSeed { get; set; } = false;
 
         protected void AddDomainEvent(IDomainEvent domainEvent)
         {

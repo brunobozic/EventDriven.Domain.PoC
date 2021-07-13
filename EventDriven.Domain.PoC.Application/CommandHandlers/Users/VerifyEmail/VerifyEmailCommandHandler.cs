@@ -31,7 +31,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail
 
             var userWithToken = await UserRepository
                 .Queryable()
-                .Where(user => user.VerificationToken.Trim() == command.EmailVerificationToken.Trim())
+                .Where(user => user.AccountActivationToken.Trim() == command.EmailVerificationToken.Trim())
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (userWithToken == null)

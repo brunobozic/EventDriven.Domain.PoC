@@ -12,11 +12,12 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.Audit
     {
         public long AuditTrailId { get; set; }
         public string TableName { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string UserName { get; set; }
         public string OldData { get; set; }
         public string NewData { get; set; }
         public long? TableIdValue { get; set; }
+        public Guid TableIdValueGuid { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
         public string Actions { get; set; }
 

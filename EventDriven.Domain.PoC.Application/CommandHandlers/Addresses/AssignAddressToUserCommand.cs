@@ -22,7 +22,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
             , string countryName
             , string townName
             , string countyName
-            , User creatorUser
             , DateTimeOffset activeFrom
             , DateTimeOffset activeTo
         )
@@ -42,7 +41,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
             CountryName = countryName;
             TownName = townName;
             CountyName = countyName;
-            CreatorUser = creatorUser;
             ActiveFrom = activeFrom;
             ActiveTo = activeTo;
         }
@@ -64,7 +62,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
         public string CountryName { get; set; }
         public string TownName { get; set; }
         public string CountyName { get; set; }
-        public User CreatorUser { get; set; }
         public DateTimeOffset DateCreated { get; set; }
         public DateTimeOffset ActiveFrom { get; set; }
         public DateTimeOffset ActiveTo { get; set; }

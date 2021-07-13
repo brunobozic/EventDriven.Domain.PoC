@@ -7,9 +7,9 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email
     public class MarkUserAsWelcomedCommand : ICommand<object>
     {
         private Guid guid;
-        private UserId userId;
+        private Guid userId;
 
-        public MarkUserAsWelcomedCommand(Guid guid, UserId userId)
+        public MarkUserAsWelcomedCommand(Guid guid, Guid userId)
         {
             this.guid = guid;
             this.userId = userId;

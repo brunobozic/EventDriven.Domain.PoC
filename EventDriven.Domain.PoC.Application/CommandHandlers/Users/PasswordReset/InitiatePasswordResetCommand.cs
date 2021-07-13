@@ -7,9 +7,9 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.PasswordReset
     public class InitiatePasswordResetCommand : ICommand<object>
     {
         private Guid guid;
-        private UserId userId;
+        private Guid userId;
 
-        public InitiatePasswordResetCommand(Guid guid, UserId userId)
+        public InitiatePasswordResetCommand(Guid guid, Guid userId)
         {
             this.guid = guid;
             this.userId = userId;

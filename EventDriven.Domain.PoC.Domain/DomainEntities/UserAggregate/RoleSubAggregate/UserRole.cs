@@ -24,9 +24,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         public Guid UserId { get; private set; }
         public long RoleId { get; private set; }
-        public Guid UndeletedById { get; private set; }
-        public Guid DeactivatedById { get; private set; }
-        public Guid ReactivatedById { get; private set; }
+        public Guid? UndeletedById { get; private set; }
+        public Guid? DeactivatedById { get; private set; }
+        public Guid? ReactivatedById { get; private set; }
 
         #endregion FK
 
@@ -50,7 +50,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
             // activated by the creator
             userRole.Activate(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(1), activator);
-            userRole.ActivatedByUserId = activator.Id;
+            userRole.ActivatedById = activator.Id;
 
             return userRole;
         }

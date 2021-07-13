@@ -34,8 +34,9 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
 
         public async Task<UserDto> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
         {
+            // cant log the creator user because when registering a new user, we dont have the creator user in the db
             var creator = await UserRepository.Queryable().AsNoTrackingWithIdentityResolution()
-                .SingleOrDefaultAsync(user => user.Id == command.CreatorId, cancellationToken);
+                .SingleOrDefaultAsync(user => user.Id == Guid.Parse(Consts.SYSTEM_USER), cancellationToken);
 
             var doesTheUserAlreadyExist = await UserRepository.Queryable().AsNoTrackingWithIdentityResolution()
                 .AnyAsync(user => user.NormalizedEmail == command.Email.Trim().ToUpper(), cancellationToken);
@@ -53,7 +54,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
 
                     return new UserDto
                     {
-                        Id = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109"),
+                        Id = null,
                         UserName = "User with this username already exists.",
                         Email = "User with this email already exists.",
                         ActiveTo = null,

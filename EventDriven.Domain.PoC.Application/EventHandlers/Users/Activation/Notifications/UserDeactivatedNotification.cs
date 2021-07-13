@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.Domain;
+﻿using System;
+using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Newtonsoft.Json;
@@ -13,11 +14,11 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.Activation.Noti
         }
 
         [JsonConstructor]
-        public UserDeactivatedNotification(UserId userId) : base(null)
+        public UserDeactivatedNotification(Guid userId) : base(null)
         {
             UserId = userId;
         }
 
-        public UserId UserId { get; }
+        public Guid UserId { get; }
     }
 }

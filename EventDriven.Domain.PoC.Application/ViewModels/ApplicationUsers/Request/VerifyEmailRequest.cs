@@ -2,6 +2,6 @@
 {
     public class VerifyEmailRequest
     {
-        public string Token { get; set; }
+        public string EmailVerificationToken { get; set; }
     }
 }

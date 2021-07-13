@@ -4,7 +4,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 {
     public class AssignAddressToUserRequest
     {
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
         public string AddressTypeName { get; set; }
         public string AddressName { get; set; }
         public string Description { get; set; }

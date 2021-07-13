@@ -29,6 +29,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , Consts.SYSTEM_USER_PASSWORD
                     , null
                     , ""
+                    , true
                 );
 
                 var result = await myDbContext.ApplicationUsers.AddAsync(newUser);
@@ -36,7 +37,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            var creatorUser = myDbContext.ApplicationUsers.FirstOrDefault(u => u.Id == Guid.Parse(Consts.SYSTEM_USER));
+            var creatorUser = myDbContext.ApplicationUsers.SingleOrDefault(u => u.NormalizedUserName == Consts.SYSTEM_USER_USERNAME.ToUpper());
 
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.UserEmail))
             {
@@ -45,13 +46,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , Consts.UserEmail
                     , "Bruno"
                     , "Bozic"
-                    , "1111111"
+                    , "1111112"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
                     , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
+                    , false
                 );
 
                 var result = await myDbContext.ApplicationUsers.AddAsync(newUser);
@@ -89,13 +91,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , "BrunoBozic"
                     , "Bruno"
                     , "Bozic"
-                    , "1111111"
+                    , "1111113"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
                     , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
+                    , false
                 );
 
                 var applicationRole = myDbContext.ApplicationRoles
@@ -128,6 +131,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , "Pwd01!"
                     , creatorUser
                     , ""
+                    , false
                 );
 
                 var applicationRole2 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
@@ -159,6 +163,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , "Pwd01!"
                     , creatorUser
                     , ""
+                    , false
                 );
 
                 var applicationRole3 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
@@ -190,6 +195,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , "Pwd01!"
                     , creatorUser
                     , ""
+                    , false
                 );
 
                 var applicationRole4 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")

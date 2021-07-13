@@ -13,7 +13,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public string LastName;
         public string Oib;
         public RoleEnum Role;
-        public UserId UserId;
+        public Guid UserId;
         public string UserName;
         public string UserRole;
 
@@ -33,7 +33,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             FirstName = firstName;
             LastName = lastName;
             UserRole = role;
-            UserId = new UserId(userId);
+            UserId = userId;
             Oib = oib;
             DateOfBirth = dateOfBirth;
         }

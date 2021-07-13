@@ -6,18 +6,19 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.Phas
 {
     public class ForgotPasswordCommand : ICommand<bool>
     {
-        private Guid guid;
-        private UserId userId;
+ 
+        private Guid UserId;
 
-        public ForgotPasswordCommand(Guid guid, UserId userId)
+        public ForgotPasswordCommand(Guid userId, string email, string userName)
         {
-            this.guid = guid;
-            this.userId = userId;
+            Email = email;
+            UserId = userId;
+            UserName = userName;
         }
 
-        public string Email { get; set; }
-        public string UserName { get; set; }
-        public string Origin { get; set; }
+        internal string Email;
+        internal string UserName;
+        public string Origin;
 
         public Guid Id => throw new NotImplementedException();
     }

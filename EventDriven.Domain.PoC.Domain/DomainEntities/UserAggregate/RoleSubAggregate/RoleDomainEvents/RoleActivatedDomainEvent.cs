@@ -5,7 +5,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 {
     public class RoleActivatedDomainEvent : DomainEventBase
     {
-        public long ActivatedByUserId;
+        public long ActivatedById;
 
         public string ActivationReason;
         public string ActivatorEmail;
@@ -16,12 +16,12 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
         public string Name;
         public long RoleId;
 
-        public RoleActivatedDomainEvent(long roleId, long activatedByUserId, string activatedByUserEmail,
+        public RoleActivatedDomainEvent(long roleId, long activatedById, string activatedByUserEmail,
             string activatedByUserUserName, string activationReason,
             DateTimeOffset dateActivated)
         {
             RoleId = roleId;
-            ActivatedByUserId = activatedByUserId;
+            ActivatedById = activatedById;
             ActivationReason = activationReason;
             DateActivated = dateActivated;
             ActivatorEmail = activatedByUserEmail;

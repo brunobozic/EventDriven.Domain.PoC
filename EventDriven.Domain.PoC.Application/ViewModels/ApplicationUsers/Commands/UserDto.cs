@@ -6,7 +6,7 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
 {
     public class UserDto
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public string UserName { get; set; }
         public List<Role> UserRoles { get; set; }
         public string Email { get; set; }

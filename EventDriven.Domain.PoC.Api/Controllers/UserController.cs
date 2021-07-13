@@ -12,12 +12,12 @@ using EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseOne
 using EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseTwo;
 using EventDriven.Domain.PoC.Application.CommandHandlers.Roles;
 using EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD;
+using EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.ActivationMail;
 using EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using MediatR;
@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using OpenTracing;
+using User = EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.User;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 {
@@ -77,6 +78,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ITracer _tracer;
 #pragma warning disable IDE0052 // Remove unread private members
+        // ReSharper disable once NotAccessedField.Local
         private readonly IMapper _mapper;
 #pragma warning restore IDE0052 // Remove unread private members
         private readonly IMediator _mediator;
@@ -110,16 +112,16 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync()
         {
             var refreshToken = Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest(new {message = "Refresh EmailVerificationToken (Request cookie) is required"});
+                return BadRequest(new { message = "Refresh EmailVerificationToken (Request cookie) is required" });
 
             var serviceLayerResponse = await _applicationUserService.RefreshTheTokenAsync(refreshToken, IpAddress());
 
@@ -140,10 +142,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost("revoke-token")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<RevokeTokenResponse>> RevokeTokenAsync(RevokeTokenRequest model,
             CancellationToken ct)
         {
@@ -170,14 +172,14 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("register")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 201)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RegisterAsync(RegisterUserCommand command, CancellationToken ct)
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RegisterAsync(RegisterUserRequest request, CancellationToken ct)
         {
             // As an example of a non-trivial event based flow we got the following:
 
@@ -201,21 +203,27 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             #region For development purposes this is unfortunately needed
 
             // ReSharper disable once PossibleNullReferenceException
-            var creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
 
-            command.Origin = Request.Headers["origin"];
+            var command = new RegisterUserCommand(request.Email, request.ConfirmPassword,
+                request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
+                request.Oib)
+            { Origin = Request.Headers["origin"] };
 
-            var creatorId = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109");
+            Guid? creatorId = Guid.Empty;
+
             if (creator == null)
             {
                 if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
                     _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
-                    creatorId = Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109"); // User 1 is a "system" user
+                    creatorId = null; // User 1 is a "system" user
             }
             else
             {
                 creatorId = creator.Id;
             }
+
+            command.Origin = Request.Headers["origin"];
 
             #endregion For development purposes this is unfortunately needed
 
@@ -229,22 +237,32 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("create")]
         [Produces(typeof(ApplicationUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.Created)]
-        public async Task<ActionResult<UserDto>> CreateAsync([FromBody] CreateUserCommand command,
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        public async Task<ActionResult<UserDto>> CreateAsync([FromBody] RegisterUserRequest request,
             CancellationToken ct)
         {
+
+            var command = new RegisterUserCommand(request.Email, request.ConfirmPassword,
+                    request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
+                    request.Oib)
+            { Origin = Request.Headers["origin"] };
+
             command.Origin = Request.Headers["origin"];
 
             // ReSharper disable once PossibleNullReferenceException
-            command.Creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
+            if (creator != null)
+            {
+                command.CreatorId = creator.Id;
+            }
 
             using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
             var user = await _mediator.Send(command, ct);
@@ -254,22 +272,26 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("assign-role-to-user")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AssignRoleToUserAsync(AssignRoleToUserCommand command,
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AssignRoleToUserAsync(AssignRoleToUserRequest request,
             CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            var command = new AssignRoleToUserCommand(request.UserIdToAssignTo, request.RoleName)
+            {
+                Origin = Request.Headers["origin"],
+                // ReSharper disable once PossibleNullReferenceException
+                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
+            };
 
-            command.AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
             using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
-            // ReSharper disable once PossibleNullReferenceException
+
             await _mediator.Send(command, ct);
 
             return Ok();
@@ -277,22 +299,26 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("remove-role-from-user")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RemoveRoleFromUserAsync(RemoveRoleFromUserCommand command,
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RemoveRoleFromUserAsync(RemoveRoleFromUserRequest request,
             CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            var command = new AssignRoleToUserCommand(request.UserIdToRemoveFrom, request.RoleName)
+            {
+                Origin = Request.Headers["origin"],
+                // ReSharper disable once PossibleNullReferenceException
+                RemoverUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
+            };
 
-            command.RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
             using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
-            // ReSharper disable once PossibleNullReferenceException
+
             await _mediator.Send(command, ct);
 
             return Ok();
@@ -300,47 +326,63 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("assign-address")]
         [Produces(typeof(AssignAddressToUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<ActionResult<UserDto>> AssignAddressToUserAsync(
-            [FromBody] AssignAddressToUserCommand command,
+            [FromBody] AssignAddressToUserRequest request,
             CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            var command = new AssignAddressToUserCommand(request.UserId, request.AddressTypeName,
+                request.AddressName, request.Description, request.Line1, request.Line2, request.FlatNr,
+                request.PostalCode, request.HouseNumber, request.HouseNumberSuffix, request.UserComment,
+                request.CityBlockName, request.CountryName, request.TownName, request.CountyName,
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow.AddMonths(12))
+            {
+                Origin = Request.Headers["origin"],
+                // ReSharper disable once PossibleNullReferenceException
+                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
+            };
 
-            // ReSharper disable once PossibleNullReferenceException
-            command.AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
             using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
-            var user = await _mediator.Send(command, ct);
+            await _mediator.Send(command, ct);
 
             return Ok("Address assigned to user.");
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("remove-address-from-user")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RemoveAddressFromUserAsync(RemoveAddressFromUserCommand command,
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RemoveAddressFromUserAsync(RemoveAddressFromUserRequest request,
             CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            // ReSharper disable once PossibleNullReferenceException
+            var remover = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
+
+            var command = new RemoveAddressFromUserCommand(request.UserId, request.RoleId, request.AddressName)
+            {
+                Origin = Request.Headers["origin"]
+            };
 
             using var scope = _tracer.BuildSpan("RemoveAddressFromUserAsync").StartActive(true);
-            // ReSharper disable once PossibleNullReferenceException
-            command.RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+
+            if (remover != null)
+                command.RemoverUser = remover.Id;
+
             await _mediator.Send(command, ct);
 
             return Ok();
@@ -391,28 +433,34 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="userId"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [Authorize]
         [HttpGet("resend-activation-link/{id:int}")]
-        public async Task<ActionResult<ApplicationUserResponse>> ResendActivationLinkAsync(int id,
+        public async Task<ActionResult<bool>> ResendActivationLinkAsync(Guid userId,
             CancellationToken ct)
         {
-            return null;
+
+            var command = new ResendAccountActivationCommand(userId) { Origin = Request.Headers["origin"] };
+
+            using var scope = _tracer.BuildSpan("ResendActivationLinkAsync").StartActive(true);
+            var response = await _mediator.Send(command, ct);
+
+            return true;
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("verify-email")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        public async Task<IActionResult> VerifyEmailAsync(VerifyEmailCommand command, CancellationToken ct)
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            var command = new VerifyEmailCommand(request.EmailVerificationToken) { Origin = Request.Headers["origin"] };
 
             using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
 
@@ -427,13 +475,16 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordCommand command, CancellationToken ct)
+        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            var command = new ForgotPasswordCommand(request.UserId, request.Email, request.UserName)
+            {
+                Origin = Request.Headers["origin"]
+            };
 
             using var scope = _tracer.BuildSpan("ForgotPasswordAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
@@ -443,18 +494,21 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         /// <summary>
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("validate-reset-token")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> ValidateResetTokenAsync(ValidatePasswordResetTokenCommand command,
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> ValidateResetTokenAsync(ValidatePasswordResetTokenRequest request,
             CancellationToken ct)
         {
-            command.Origin = Request.Headers["origin"];
+            var command = new ValidatePasswordResetTokenCommand(request.UserId, request.Token)
+            {
+                Origin = Request.Headers["origin"]
+            };
 
             using var scope = _tracer.BuildSpan("ValidateResetTokenAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
@@ -726,12 +780,12 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //            //    //},
         //            //    DateModified = i.DateModified
         //            //}).ToList(),
-        //            VerificationToken = i.VerificationToken,
+        //            AccountActivationToken = i.AccountActivationToken,
         //            Verified = i.Verified,
         //            UserName = i.UserName,
         //            Email = i.Email,
         //            VerificationTokenExpirationDate = i.VerificationTokenExpirationDate,
-        //            VerificationFailureLatestMessage = i.VerificationFailureLatestMessage,
+        //            LatestVerificationFailureMessage = i.LatestVerificationFailureMessage,
         //            UndeleteReason = i.UndeleteReason,
         //            LastVerificationFailureDate = i.LastVerificationFailureDate,
         //            DeletedBy = i.DeletedBy != null
@@ -936,12 +990,12 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //            //    //},
         //            //    DateModified = i.DateModified
         //            //}).ToList(),
-        //            VerificationToken = i.VerificationToken,
+        //            AccountActivationToken = i.AccountActivationToken,
         //            Verified = i.Verified,
         //            UserName = i.UserName,
         //            Email = i.Email,
         //            VerificationTokenExpirationDate = i.VerificationTokenExpirationDate,
-        //            VerificationFailureLatestMessage = i.VerificationFailureLatestMessage,
+        //            LatestVerificationFailureMessage = i.LatestVerificationFailureMessage,
         //            UndeleteReason = i.UndeleteReason,
         //            LastVerificationFailureDate = i.LastVerificationFailureDate,
         //            DeletedBy = i.DeletedBy != null
@@ -1036,5 +1090,24 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //}
 
         #endregion CUD non CQRS
+    }
+
+    public class RemoveAddressFromUserRequest
+    {
+        public Guid UserId { get; set; }
+        public string AddressName { get; set; }
+        public Guid RoleId { get; set; }
+    }
+
+    public class RemoveRoleFromUserRequest
+    {
+        public string RoleName { get; internal set; }
+        public Guid UserIdToRemoveFrom { get; internal set; }
+    }
+
+    public class AssignRoleToUserRequest
+    {
+        public Guid UserIdToAssignTo { get; set; }
+        public string RoleName { get; set; }
     }
 }

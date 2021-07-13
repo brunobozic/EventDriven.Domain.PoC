@@ -84,21 +84,22 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         [Column("DateCreated", Order = 1005)]
         public DateTimeOffset DateCreated { get; set; } = DateTimeOffset.UtcNow;
 
-        public Guid CreatedById { get; set; }
-
+        public Guid? CreatedById { get; set; }
+        public bool IsDraft { get; set; } = false;
+        public bool IsSeed { get; set; } = false;
         #endregion ICreationAuditedEntity
 
         #region IModificationAuditedEntity
 
         [Column("DateModified", Order = 1010)] public DateTimeOffset? DateModified { get; set; }
-        public Guid ModifiedById { get; set; }
+        public Guid? ModifiedById { get; set; }
 
         #endregion IModificationAuditedEntity
 
         #region IDeletionAuditedEntity
 
         [Column("DateDeleted", Order = 1020)] public DateTimeOffset? DateDeleted { get; set; }
-        public Guid DeletedById { get; set; }
+        public Guid? DeletedById { get; set; }
 
         #endregion IDeletionAuditedEntity
 

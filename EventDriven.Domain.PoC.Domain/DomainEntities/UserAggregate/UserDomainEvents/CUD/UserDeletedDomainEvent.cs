@@ -22,7 +22,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public long DeletedByUserId { get; set; }
         public string DeletionReason { get; set; }
         public string UserName { get; set; }
-        public UserId UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 
     public class UserDeletedDomainByEmailEvent : DomainEventBase

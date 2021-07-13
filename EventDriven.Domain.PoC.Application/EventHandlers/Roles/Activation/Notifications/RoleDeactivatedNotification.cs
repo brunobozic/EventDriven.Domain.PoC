@@ -15,7 +15,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.Activation.Noti
             DateDeactivated = integrationEvent.DateDeactivated;
             DeactivatorEmail = integrationEvent.DeactivatorEmail;
             DeactivatorUsername = integrationEvent.DeactivatorUsername;
-            DeactivatorId = integrationEvent.DeactivatedByUserId;
+            DeactivatorId = integrationEvent.DeactivatedById;
         }
 
         [JsonConstructor]
@@ -25,7 +25,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.Activation.Noti
         }
 
         public string DeactivatorUsername { get; set; }
-        public long DeactivatorId { get; set; }
+        public Guid DeactivatorId { get; set; }
         public string DeactivatorEmail { get; set; }
 
         public DateTimeOffset DateDeactivated { get; set; }

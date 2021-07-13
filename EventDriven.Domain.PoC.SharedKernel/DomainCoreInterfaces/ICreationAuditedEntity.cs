@@ -6,6 +6,8 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces
     {
         DateTimeOffset DateCreated { get; set; }
 
-        Guid CreatedById { get; set; }
+        Guid? CreatedById { get; set; }
+        bool IsDraft { get; set; }
+        bool IsSeed { get; set; }
     }
 }

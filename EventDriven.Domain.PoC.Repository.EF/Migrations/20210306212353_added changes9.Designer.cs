@@ -399,10 +399,10 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VerificationFailureLatestMessage")
+                    b.Property<string>("LatestVerificationFailureMessage")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VerificationToken")
+                    b.Property<string>("AccountActivationToken")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("VerificationTokenExpirationDate")

@@ -6,7 +6,12 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail
 {
     public class VerifyEmailCommand : ICommand<VerifyEmailResponse>
     {
-        public string EmailVerificationToken { get; set; } = "";
+        public VerifyEmailCommand(string emailVerificationToken)
+        {
+            EmailVerificationToken = emailVerificationToken;
+        }
+
+        public string EmailVerificationToken { get; set; }
         public string Origin { get; set; } = "";
 
         public Guid Id { get; set; } = Guid.NewGuid();

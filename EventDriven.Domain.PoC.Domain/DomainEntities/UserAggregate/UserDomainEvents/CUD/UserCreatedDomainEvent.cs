@@ -7,7 +7,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
     {
         public string ActivationLink;
         public DateTimeOffset? ActivationLinkGenerated;
-        public Guid CreatorUserId;
+        public Guid? CreatorUserId;
         public DateTimeOffset? DateOfBirth;
         public string Email;
         public string FirstName;
@@ -27,7 +27,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , DateTimeOffset? dateOfBirth
             , DateTimeOffset? activationLinkGenerated
             , string activationLink
-            , Guid creatorUserId
+            , Guid? creatorUserId
             , string origin
         )
         {

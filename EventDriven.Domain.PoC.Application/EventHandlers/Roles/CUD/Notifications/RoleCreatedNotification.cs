@@ -9,12 +9,12 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.CUD.Notificatio
     public class RoleCreatedNotification : IntegrationEventBase<RoleCreatedDomainEvent>
     {
         public string CreatorEmail;
-        public Guid CreatorId;
+        public Guid? CreatorId;
         public string CreatorUsername;
         public DateTimeOffset? DateCreated;
         public string Description;
         public string Name;
-        public RoleId RoleId;
+        public Guid RoleId;
 
         public RoleCreatedNotification(RoleCreatedDomainEvent integrationEvent) : base(integrationEvent)
         {
@@ -29,7 +29,7 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Roles.CUD.Notificatio
         }
 
         [JsonConstructor]
-        public RoleCreatedNotification(RoleId roleId) : base(null)
+        public RoleCreatedNotification(Guid roleId) : base(null)
         {
             RoleId = roleId;
         }

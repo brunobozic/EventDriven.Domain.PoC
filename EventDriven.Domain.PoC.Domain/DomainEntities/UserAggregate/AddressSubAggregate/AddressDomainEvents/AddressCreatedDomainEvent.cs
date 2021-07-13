@@ -5,7 +5,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 {
     public class AddressCreatedDomainEvent : DomainEventBase
     {
-        public AddressId AddressId;
+        public Guid AddressId;
 
         public AddressCreatedDomainEvent(Guid addressId, string line1, string line2, int? flatNr, string postalCode,
             int houseNumber,
@@ -14,7 +14,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             string townId, string countyId, string creatorUserEmail, string creatorUserUserName,
             string creatorUserFullName)
         {
-            AddressId = new AddressId(addressId);
+            AddressId = addressId;
         }
     }
 }

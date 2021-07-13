@@ -10,28 +10,26 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , string userName
             , Guid userId
             , string oib
-            , long activatedByUserId
+            , Guid activatedById
             , string activationReason
-            , long activatedById
         )
         {
             Email = email;
             UserName = userName;
-            UserId = new UserId(userId);
+            UserId = userId;
             Oib = oib;
-            ActivatedById = activatedByUserId;
+            ActivatedById = activatedById;
             ActivationReason = activationReason;
             ActivationDateStamp = DateTime.UtcNow;
-            ActivatedById = activatedById;
         }
 
-        public long ActivatedById { get; set; }
+        public Guid? ActivatedById { get; set; }
 
         public string ActivationReason { get; set; }
         public DateTime ActivationDateStamp { get; set; }
         public string Email { get; set; }
         public string UserName { get; set; }
         public string Oib { get; set; }
-        public UserId UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }
