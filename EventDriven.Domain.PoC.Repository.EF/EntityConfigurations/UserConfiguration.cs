@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -20,7 +19,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
                 ;
             builder.HasIndex(p => p.Oib)
                 .IsUnique();
-            
+
 
             builder.Property(p => p.Email)
                 .HasMaxLength(50)
@@ -116,7 +115,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 
-            builder.HasQueryFilter(p => !p.Deleted);
+            builder.HasQueryFilter(p => !p.TheUserHasBeenDeleted);
 
             builder.UsePropertyAccessMode(PropertyAccessMode.Field);
 

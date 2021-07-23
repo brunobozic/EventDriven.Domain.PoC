@@ -18,11 +18,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public string UserName;
 
         public UserCreatedDomainEvent(
-            string email
+            Guid userId
+            , string email
             , string userName
             , string firstName
             , string lastName
-            , Guid userId
             , string oib
             , DateTimeOffset? dateOfBirth
             , DateTimeOffset? activationLinkGenerated

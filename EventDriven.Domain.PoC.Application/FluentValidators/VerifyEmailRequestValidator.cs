@@ -1,5 +1,4 @@
-﻿using EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using FluentValidation;
 
 namespace EventDriven.Domain.PoC.Application.FluentValidators

@@ -1,13 +1,15 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseOne
 {
     public class ForgotPasswordCommand : ICommand<bool>
     {
- 
+        internal string Email;
+        public string Origin;
+
         private Guid UserId;
+        internal string UserName;
 
         public ForgotPasswordCommand(Guid userId, string email, string userName)
         {
@@ -15,10 +17,6 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.Phas
             UserId = userId;
             UserName = userName;
         }
-
-        internal string Email;
-        internal string UserName;
-        public string Origin;
 
         public Guid Id => throw new NotImplementedException();
     }

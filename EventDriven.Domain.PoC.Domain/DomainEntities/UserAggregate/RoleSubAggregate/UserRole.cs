@@ -76,7 +76,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         public virtual bool IsDeleted()
         {
-            return Deleted;
+            return TheUserHasBeenDeleted;
         }
 
         public virtual bool IsDeactivated()

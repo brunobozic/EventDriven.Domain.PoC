@@ -8,137 +8,145 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "UserRoles",
-                type: "INTEGER",
+                "IsSeed",
+                "UserRoles",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "UserAddress",
-                type: "INTEGER",
+                "IsSeed",
+                "UserAddress",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "Town",
-                type: "INTEGER",
+                "IsSeed",
+                "Town",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "County",
-                type: "INTEGER",
+                "IsSeed",
+                "County",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "Country",
-                type: "INTEGER",
+                "IsSeed",
+                "Country",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "CityBlock",
-                type: "INTEGER",
+                "IsSeed",
+                "CityBlock",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "ApplicationUsers",
-                type: "INTEGER",
+                "IsSeed",
+                "ApplicationUsers",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "ApplicationRoles",
-                type: "INTEGER",
+                "IsSeed",
+                "ApplicationRoles",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "AddressTypes",
-                type: "INTEGER",
+                "IsSeed",
+                "AddressTypes",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsSeed",
-                table: "Addresses",
-                type: "INTEGER",
+                "IsSeed",
+                "Addresses",
+                "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 12, 24, 88, DateTimeKind.Unspecified).AddTicks(630), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 12, 24, 88, DateTimeKind.Unspecified).AddTicks(630),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "UserRoles");
+                "IsSeed",
+                "UserRoles");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "UserAddress");
+                "IsSeed",
+                "UserAddress");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "Town");
+                "IsSeed",
+                "Town");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "County");
+                "IsSeed",
+                "County");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "Country");
+                "IsSeed",
+                "Country");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "CityBlock");
+                "IsSeed",
+                "CityBlock");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "ApplicationUsers");
+                "IsSeed",
+                "ApplicationUsers");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "ApplicationRoles");
+                "IsSeed",
+                "ApplicationRoles");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "AddressTypes");
+                "IsSeed",
+                "AddressTypes");
 
             migrationBuilder.DropColumn(
-                name: "IsSeed",
-                table: "Addresses");
+                "IsSeed",
+                "Addresses");
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 12, 24, 88, DateTimeKind.Unspecified).AddTicks(630), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 12, 24, 88, DateTimeKind.Unspecified).AddTicks(630),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
     }
 }

@@ -24,7 +24,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "RefreshToken");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "RefreshToken");
 
             migrationBuilder.DropColumn(
@@ -36,7 +36,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "AccountJournalEntry");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "AccountJournalEntry");
 
             migrationBuilder.DropColumn(
@@ -164,7 +164,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     new TimeSpan(0, 0, 0, 0, 0)));
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "RefreshToken",
                 "INTEGER",
                 nullable: false,
@@ -210,7 +210,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     new TimeSpan(0, 0, 0, 0, 0)));
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "AccountJournalEntry",
                 "INTEGER",
                 nullable: false,

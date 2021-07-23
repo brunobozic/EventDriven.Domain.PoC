@@ -69,7 +69,13 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
 
         #region FK
 
-        public Guid? ActingUserId { get; private set; } // nullable because of an annoying issue with not having this information when the user is not yet authenticated (registered)
+        public Guid?
+            ActingUserId
+        {
+            get;
+            private set;
+        } // nullable because of an annoying issue with not having this information when the user is not yet authenticated (registered)
+
         public Guid UserActedUponId { get; private set; }
 
         #endregion FK

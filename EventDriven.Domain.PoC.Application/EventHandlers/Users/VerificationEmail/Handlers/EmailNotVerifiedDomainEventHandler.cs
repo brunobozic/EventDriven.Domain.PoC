@@ -7,18 +7,18 @@ using Serilog;
 
 namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.VerificationEmail.Handlers
 {
-    public class EmailVerifiedDomainEventHandler : INotificationHandler<EmailVerifiedNotification>
+    public class EmailNotVerifiedDomainEventHandler : INotificationHandler<EmailNotVerifiedNotification>
     {
         private readonly ICommandsScheduler _commandsScheduler;
 
-        public EmailVerifiedDomainEventHandler(ICommandsScheduler commandsScheduler)
+        public EmailNotVerifiedDomainEventHandler(ICommandsScheduler commandsScheduler)
         {
             _commandsScheduler = commandsScheduler;
         }
 
-        public async Task Handle(EmailVerifiedNotification notification, CancellationToken cancellationToken)
+        public async Task Handle(EmailNotVerifiedNotification notification, CancellationToken cancellationToken)
         {
-            // set something to something
+            Log.Information("Email verified domain event fired.");
         }
     }
 }

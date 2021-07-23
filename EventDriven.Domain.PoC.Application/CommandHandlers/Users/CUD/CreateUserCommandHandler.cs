@@ -40,23 +40,24 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
         private MyConfigurationValues AppSettings { get; }
         private IEmailService EmailService { get; }
 
-        public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<UserDto> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
             var creator = await UserRepository.Queryable().AsNoTrackingWithIdentityResolution()
-                .SingleOrDefaultAsync(user => user.Id == request.Creator.Id, cancellationToken);
+                .SingleOrDefaultAsync(user => user.Id == command.Creator.Id, cancellationToken);
 
             var user = User.NewActiveWithPassword(
-                request.Email
-                , request.UserName
-                , request.FirstName
-                , request.LastName
-                , request.Oib
-                , request.DateOfBirth
-                , request.ActiveFrom
-                , request.ActiveTo
-                , request.Password
+                command.Id
+                , command.Email
+                , command.UserName
+                , command.FirstName
+                , command.LastName
+                , command.Oib
+                , command.DateOfBirth
+                , command.ActiveFrom
+                , command.ActiveTo
+                , command.Password
                 , creator
-                , request.Origin
+                , command.Origin
             );
 
             UserRepository.Attach(user);

@@ -1,5 +1,4 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Newtonsoft.Json;

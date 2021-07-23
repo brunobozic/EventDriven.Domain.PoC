@@ -24,7 +24,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
         {
             var audit = new AuditTrail
             {
-                UserId = Guid.Parse(Consts.SYSTEM_USER), // System.Web.HttpContext.Current.User.Identity.Name; //Change this line according to your needs
+                UserId = Guid.Parse(Consts
+                    .SYSTEM_USER), // System.Web.HttpContext.Current.User.Identity.Name; //Change this line according to your needs
                 TableName = GetTableName(entry),
                 UpdatedAt = DateTime.Now,
                 TableIdValue = GetKeyValueLong(entry),
@@ -36,31 +37,31 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
             switch (entry.State)
             {
                 case EntityState.Added:
-                    {
-                        var newValues = new StringBuilder();
-                        SetAddedProperties(entry, newValues);
-                        audit.NewData = newValues.ToString();
-                        audit.Actions = AuditActions.I.ToString();
-                        break;
-                    }
+                {
+                    var newValues = new StringBuilder();
+                    SetAddedProperties(entry, newValues);
+                    audit.NewData = newValues.ToString();
+                    audit.Actions = AuditActions.I.ToString();
+                    break;
+                }
                 case EntityState.Deleted:
-                    {
-                        var oldValues = new StringBuilder();
-                        SetDeletedProperties(entry, oldValues);
-                        audit.OldData = oldValues.ToString();
-                        audit.Actions = AuditActions.D.ToString();
-                        break;
-                    }
+                {
+                    var oldValues = new StringBuilder();
+                    SetDeletedProperties(entry, oldValues);
+                    audit.OldData = oldValues.ToString();
+                    audit.Actions = AuditActions.D.ToString();
+                    break;
+                }
                 case EntityState.Modified:
-                    {
-                        var oldValues = new StringBuilder();
-                        var newValues = new StringBuilder();
-                        SetModifiedProperties(entry, oldValues, newValues);
-                        audit.OldData = oldValues.ToString();
-                        audit.NewData = newValues.ToString();
-                        audit.Actions = AuditActions.U.ToString();
-                        break;
-                    }
+                {
+                    var oldValues = new StringBuilder();
+                    var newValues = new StringBuilder();
+                    SetModifiedProperties(entry, oldValues, newValues);
+                    audit.OldData = oldValues.ToString();
+                    audit.NewData = newValues.ToString();
+                    audit.Actions = AuditActions.U.ToString();
+                    break;
+                }
 
                 case EntityState.Detached:
                     break;
@@ -147,16 +148,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
             long myLong = -1;
 
             if (propInfo != null)
-            {
                 try
                 {
-                    myLong = (long)propInfo.GetValue(entry.Entity);
+                    myLong = (long) propInfo.GetValue(entry.Entity);
                 }
                 catch (Exception)
                 {
                     // ignore any errors here
                 }
-            }
 
             return myLong;
         }
@@ -171,19 +170,17 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
             if (propInfo == null) //Fall back to Id Name
                 propInfo = t.GetProperty("Id");
 
-            Guid myGuid = Guid.Empty;
+            var myGuid = Guid.Empty;
 
             if (propInfo != null)
-            {
                 try
                 {
-                    myGuid = (Guid)propInfo.GetValue(entry.Entity);
+                    myGuid = (Guid) propInfo.GetValue(entry.Entity);
                 }
                 catch (Exception)
                 {
                     // ignore any errors here
                 }
-            }
 
             return myGuid;
         }

@@ -8,9 +8,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "UserName",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "UserName",
+                "ApplicationUsers",
+                "TEXT",
                 maxLength: 50,
                 nullable: false,
                 defaultValue: "",
@@ -19,9 +19,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
-                name: "Oib",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "Oib",
+                "ApplicationUsers",
+                "TEXT",
                 maxLength: 12,
                 nullable: false,
                 defaultValue: "",
@@ -30,9 +30,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
-                name: "Email",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "Email",
+                "ApplicationUsers",
+                "TEXT",
                 maxLength: 50,
                 nullable: false,
                 defaultValue: "",
@@ -41,83 +41,91 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 49, 24, 460, DateTimeKind.Unspecified).AddTicks(6445), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 49, 24, 460, DateTimeKind.Unspecified).AddTicks(6445),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226),
+                    new TimeSpan(0, 0, 0, 0, 0)));
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApplicationUsers_Email",
-                table: "ApplicationUsers",
-                column: "Email");
+                "IX_ApplicationUsers_Email",
+                "ApplicationUsers",
+                "Email");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApplicationUsers_Oib",
-                table: "ApplicationUsers",
-                column: "Oib",
+                "IX_ApplicationUsers_Oib",
+                "ApplicationUsers",
+                "Oib",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApplicationUsers_UserName",
-                table: "ApplicationUsers",
-                column: "UserName",
+                "IX_ApplicationUsers_UserName",
+                "ApplicationUsers",
+                "UserName",
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "IX_ApplicationUsers_Email",
-                table: "ApplicationUsers");
+                "IX_ApplicationUsers_Email",
+                "ApplicationUsers");
 
             migrationBuilder.DropIndex(
-                name: "IX_ApplicationUsers_Oib",
-                table: "ApplicationUsers");
+                "IX_ApplicationUsers_Oib",
+                "ApplicationUsers");
 
             migrationBuilder.DropIndex(
-                name: "IX_ApplicationUsers_UserName",
-                table: "ApplicationUsers");
+                "IX_ApplicationUsers_UserName",
+                "ApplicationUsers");
 
             migrationBuilder.AlterColumn<string>(
-                name: "UserName",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "UserName",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldMaxLength: 50);
 
             migrationBuilder.AlterColumn<string>(
-                name: "Oib",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "Oib",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldMaxLength: 12);
 
             migrationBuilder.AlterColumn<string>(
-                name: "Email",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "Email",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldMaxLength: 50);
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 23, 54, 67, DateTimeKind.Unspecified).AddTicks(1226),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 49, 24, 460, DateTimeKind.Unspecified).AddTicks(6445), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 49, 24, 460, DateTimeKind.Unspecified).AddTicks(6445),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
     }
 }

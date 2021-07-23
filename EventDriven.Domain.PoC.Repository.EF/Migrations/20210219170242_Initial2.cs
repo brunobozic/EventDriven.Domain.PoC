@@ -15,7 +15,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "UserRoles",
                 "INTEGER",
                 nullable: false,
@@ -92,7 +92,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 schema: "Audit",
                 table: "DbAuditTrail",
                 type: "INTEGER",
@@ -186,7 +186,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "ApplicationRoles",
                 "INTEGER",
                 nullable: false,
@@ -258,7 +258,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "AccountJournalEntry",
                 "INTEGER",
                 nullable: false,
@@ -297,7 +297,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "UserRoles");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "UserRoles");
 
             migrationBuilder.DropColumn(
@@ -347,7 +347,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 table: "DbAuditTrail");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 schema: "Audit",
                 table: "DbAuditTrail");
 
@@ -408,7 +408,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "ApplicationRoles");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "ApplicationRoles");
 
             migrationBuilder.DropColumn(
@@ -452,7 +452,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "AccountJournalEntry");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "AccountJournalEntry");
 
             migrationBuilder.DropColumn(

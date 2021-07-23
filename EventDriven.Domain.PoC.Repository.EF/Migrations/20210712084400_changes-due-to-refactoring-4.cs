@@ -8,127 +8,135 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "UserRoles");
+                "ActivatedByUserId",
+                "UserRoles");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "UserAddress");
+                "ActivatedByUserId",
+                "UserAddress");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "Town");
+                "ActivatedByUserId",
+                "Town");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "County");
+                "ActivatedByUserId",
+                "County");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "Country");
+                "ActivatedByUserId",
+                "Country");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "CityBlock");
+                "ActivatedByUserId",
+                "CityBlock");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "ApplicationUsers");
+                "ActivatedByUserId",
+                "ApplicationUsers");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "ApplicationRoles");
+                "ActivatedByUserId",
+                "ApplicationRoles");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "AddressTypes");
+                "ActivatedByUserId",
+                "AddressTypes");
 
             migrationBuilder.DropColumn(
-                name: "ActivatedByUserId",
-                table: "Addresses");
+                "ActivatedByUserId",
+                "Addresses");
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 43, 59, 834, DateTimeKind.Unspecified).AddTicks(5185), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 43, 59, 834, DateTimeKind.Unspecified).AddTicks(5185),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "UserRoles",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "UserRoles",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "UserAddress",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "UserAddress",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "Town",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "Town",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "County",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "County",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "Country",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "Country",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "CityBlock",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "CityBlock",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "AddressTypes",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "AddressTypes",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "ActivatedByUserId",
-                table: "Addresses",
-                type: "TEXT",
+                "ActivatedByUserId",
+                "Addresses",
+                "TEXT",
                 nullable: true);
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 43, 59, 834, DateTimeKind.Unspecified).AddTicks(5185), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 43, 59, 834, DateTimeKind.Unspecified).AddTicks(5185),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
     }
 }

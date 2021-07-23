@@ -11,12 +11,15 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             Id = id;
         }
 
-        public EmailVerifiedDomainEvent(string email, string userName, Guid id)
+        public EmailVerifiedDomainEvent(string email, string userName, Guid id, DateTimeOffset verifiedOffset)
         {
             Email = email;
             UserName = userName;
             Id = id;
+            VerifiedDate = verifiedOffset;
         }
+
+        public DateTimeOffset VerifiedDate { get; }
 
         public string Email { get; }
         public Guid Id { get; }

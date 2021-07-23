@@ -21,9 +21,9 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Handlers
         {
             // verification mail needs to be sent whenever a user is created, we normally presume that at this point the user is not (soft)deleted nor deactivated
 
-            // normally, this notification [UserCreatedNotification] would be handled by a separate microservice after having been published / read from a queue (in the form of an integration event)
-            // an email sending microservice would then act on this integration event (consume it) and would finally send the actual email
-            // in our case however, we are reacting to this notification **internally** whereby sending the email remains a "user CRM microservice" (this microservice) domain concern
+            // normally, this notification [UserCreatedNotification] would be handled by a separate micro-service after having been published / read from a queue (in the form of an integration event)
+            // an email sending micro-service would then act on this integration event (consume it) and would finally send the actual email
+            // in our case however, we are reacting to this notification **internally** whereby sending the email remains a "user CRM micro-service" (this micro-service) domain concern
             await _commandsScheduler.EnqueueAsync(new SendAccountVerificationMailCommand(
                 Guid.NewGuid(),
                 notification.ActivationLink,

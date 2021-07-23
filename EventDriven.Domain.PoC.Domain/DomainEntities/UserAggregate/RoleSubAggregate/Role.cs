@@ -90,7 +90,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
                 RoleIdGuid = roleIdGuid
             };
 
-            if (creatorUser != null) // when seeding, the creator user may not yet be inserted - hence this might be null
+            if (creatorUser != null
+            ) // when seeding, the creator user may not yet be inserted - hence this might be null
             {
                 role.Activate(from, to, creatorUser);
                 role.AssignCreatedBy(creatorUser);
@@ -148,7 +149,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         public virtual bool IsDeleted()
         {
-            return Deleted;
+            return TheUserHasBeenDeleted;
         }
 
         public virtual bool IsDeactivated()

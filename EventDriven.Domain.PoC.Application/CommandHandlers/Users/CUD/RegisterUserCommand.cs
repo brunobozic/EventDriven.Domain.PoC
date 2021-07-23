@@ -27,6 +27,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
             Oib = oib;
         }
 
+        public Guid UserId { get; set; }
         public string ConfirmPassword { get; set; }
         public DateTimeOffset? DateOfBirth { get; set; }
         public string Email { get; set; }

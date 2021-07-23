@@ -198,7 +198,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 table: "DbAuditTrail");
 
             migrationBuilder.RenameColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 schema: "Audit",
                 table: "DbAuditTrail",
                 newName: "AuditTrailId");
@@ -231,10 +231,10 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "AuditTrailId",
                 schema: "Audit",
                 table: "DbAuditTrail",
-                newName: "Deleted");
+                newName: "TheUserHasBeenDeleted");
 
             migrationBuilder.AlterColumn<bool>(
-                    "Deleted",
+                    "TheUserHasBeenDeleted",
                     schema: "Audit",
                     table: "DbAuditTrail",
                     type: "INTEGER",

@@ -1,5 +1,4 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email

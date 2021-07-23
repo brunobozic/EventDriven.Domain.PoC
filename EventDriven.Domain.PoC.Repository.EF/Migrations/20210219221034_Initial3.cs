@@ -58,7 +58,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "RefreshToken",
                 "INTEGER",
                 nullable: false,
@@ -135,7 +135,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "RefreshToken");
 
             migrationBuilder.DropColumn(
-                "Deleted",
+                "TheUserHasBeenDeleted",
                 "RefreshToken");
 
             migrationBuilder.DropColumn(

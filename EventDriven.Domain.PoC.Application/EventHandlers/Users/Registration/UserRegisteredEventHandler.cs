@@ -18,8 +18,6 @@ namespace EventDriven.Domain.PoC.Application.EventHandlers.Users.Registration
 
         public async Task Handle(UserRegisteredNotification notification, CancellationToken cancellationToken)
         {
-            // Send welcome e-mail message...
-
             await _commandsScheduler.EnqueueAsync(new MarkUserAsWelcomedCommand(
                 Guid.NewGuid(),
                 notification.UserId));

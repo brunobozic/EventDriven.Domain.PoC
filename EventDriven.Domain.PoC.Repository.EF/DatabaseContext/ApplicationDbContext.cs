@@ -83,7 +83,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
             var currentDateTime = DateTime.Now;
 
             // TODO: fetch user Id from the facade
-            var currentApplicationUserId = await ApplicationUsers.Where(user => user.UserName == Consts.SYSTEM_USER_USERNAME).Select(i => i.Id).SingleOrDefaultAsync(cancellationToken: cancellationToken);
+            var currentApplicationUserId = await ApplicationUsers
+                .Where(user => user.UserName == Consts.SYSTEM_USER_USERNAME).Select(i => i.Id)
+                .SingleOrDefaultAsync(cancellationToken);
 
             try
             {
@@ -204,9 +206,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                     {
                         auditableEntity.Entity.DateCreated = currentDateTime;
                         if (!auditableEntity.Entity.IsSeed)
-                        {
                             auditableEntity.Entity.CreatedById = currentApplicationUserId;
-                        }
                     }
 
                 changes = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -252,7 +252,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
 
             //    throw new ModelValidationException(result.ToString(), entityException, allErrors);
             //}
-            catch (DbUpdateConcurrencyException ex) // This will fire only for entities that have the [RowVersion] property implemented...
+            catch (DbUpdateConcurrencyException ex
+            ) // This will fire only for entities that have the [RowVersion] property implemented...
             {
                 var entry = ex.Entries.Single();
                 var clientValues = entry.Entity;

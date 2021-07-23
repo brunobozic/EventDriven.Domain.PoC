@@ -24,6 +24,7 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request
 
         public DateTimeOffset? DateOfBirth { get; set; }
         public string Origin { get; internal set; }
+        public Guid Id { get; internal set; }
 
         // helpers
 

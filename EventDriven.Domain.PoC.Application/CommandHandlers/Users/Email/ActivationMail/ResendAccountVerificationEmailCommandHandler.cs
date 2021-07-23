@@ -18,7 +18,7 @@ using URF.Core.Abstractions.Trackable;
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.ActivationMail
 {
     public class
-        ResendAccountActivationCommandHandler : ICommandHandler<ResendAccountActivationCommand, bool>
+        ResendAccountVerificationEmailCommandHandler : ICommandHandler<ResendAccountVerificationEmailCommand, bool>
     {
         private readonly IEmailService _emailService;
 
@@ -28,7 +28,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
         private IMapper _mapper;
         private ITrackableRepository<Role> _roleRepository;
 
-        public ResendAccountActivationCommandHandler(
+        public ResendAccountVerificationEmailCommandHandler(
             IMyUnitOfWork unitOfWork,
             ITrackableRepository<User> userRepository,
             ITrackableRepository<Role> roleRepository,
@@ -48,7 +48,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
         /// <summary>
         ///     Will compose and send the account verification email
         /// </summary>
-        public async Task<bool> Handle(ResendAccountActivationCommand command,
+        public async Task<bool> Handle(ResendAccountVerificationEmailCommand command,
             CancellationToken cancellationToken)
         {
             var user = await _userRepository
@@ -58,17 +58,14 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
 
             if (user == null)
                 throw new DomainException("Application user not found by requested Id of: [ " + command.UserId +
-                                          " ], e-mail [ " + command.Email + " ], username: [ " + command.UserName + " ]");
+                                          " ], e-mail [ " + command.Email + " ], username: [ " + command.UserName +
+                                          " ]");
             string message;
             var origin = command.Origin;
 
-            if (user == null)
-                throw new DomainException("Application user not found by requested Id of: [ " + command.UserId +
-                                          " ], e-mail [ " + command.Email + " ], username: [ " + command.UserName + " ]");
-
             if (!string.IsNullOrEmpty(origin))
             {
-                var verifyUrl = $"{origin}/user/verify-email?token={user.AccountActivationToken}";
+                var verifyUrl = $"{origin}/user/verify-email?token={user.EmailVerificationToken}";
                 message = $@"<p>Please click the below link to activate your account:</p>
                              <p><a href=""{verifyUrl}"">{verifyUrl}</a></p>";
             }
@@ -76,7 +73,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
             {
                 message =
                     $@"<p>Please use the below token to activate your account with the <code>/user/verify-email</code> api route:</p>
-                             <p><code>{user.AccountActivationToken}</code></p>";
+                             <p><code>{user.EmailVerificationToken}</code></p>";
             }
 
             var emailSubject = "Sign-up Verification API - Verify Account";
@@ -89,7 +86,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
             {
                 _emailService.Send(user.Email, emailSubject, completeEmailMessageBody, emailFrom);
 
-                user.AccountActivationMailSent();
+                user.SetAccountActivationMailResent();
             }
             catch (Exception e)
             {

@@ -15,11 +15,15 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public RoleEnum Role;
         public Guid UserId;
         public string UserName;
+
+        public string UserEmail;
+
         public string UserRole;
 
         public UserRegisteredDomainEvent(
             string email
             , string userName
+            , string userEmail
             , string firstName
             , string lastName
             , string role
@@ -30,6 +34,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         {
             Email = email;
             UserName = userName;
+            UserEmail = userEmail;
             FirstName = firstName;
             LastName = lastName;
             UserRole = role;

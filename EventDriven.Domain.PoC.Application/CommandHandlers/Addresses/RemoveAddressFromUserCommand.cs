@@ -1,5 +1,4 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
@@ -8,17 +7,17 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Addresses
     {
         public RemoveAddressFromUserCommand(Guid userId, Guid roleId, string addressName)
         {
-            this.UserId = userId;
-            this.RoleId = roleId;
-            this.AddressName = addressName;
+            UserId = userId;
+            RoleId = roleId;
+            AddressName = addressName;
         }
 
-        private Guid RoleId { get; set; }
+        private Guid RoleId { get; }
 
-        private string AddressName { get; set; }
+        private string AddressName { get; }
 
 
-        private Guid UserId { get; set; }
+        private Guid UserId { get; }
         public Guid RemoverUser { get; set; }
 
         public string Origin { get; set; }

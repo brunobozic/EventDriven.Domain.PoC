@@ -29,7 +29,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public string GetAddressTypeName()
         {
-            if (AddressType != null && AddressType.EnsureIsActive() && AddressType.Active && !AddressType.Deleted)
+            if (AddressType != null && AddressType.EnsureIsActive() && AddressType.Active && !AddressType.TheUserHasBeenDeleted)
                 return AddressType.Name;
             return "Not available (inactive, deleted, does not exist)";
         }
@@ -205,7 +205,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 Line1 = line1;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                    {AddressId = Id, UserId = changedBy.Id});
             }
             else
             {
@@ -220,7 +220,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 Line2 = line2;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                    {AddressId = Id, UserId = changedBy.Id});
             }
             else
             {
@@ -235,7 +235,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 FlatNr = flatNumber;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                    {AddressId = Id, UserId = changedBy.Id});
             }
             else
             {
@@ -250,7 +250,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 PostalCode = postalCode;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                    {AddressId = Id, UserId = changedBy.Id});
             }
             else
             {
@@ -265,7 +265,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 HouseNumber = houseNumber;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                    {AddressId = Id, UserId = changedBy.Id});
             }
             else
             {
@@ -280,7 +280,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             {
                 HouseNumberSuffix = houseNumberSuffix;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                    {AddressId = Id, UserId = changedBy.Id});
             }
             else
             {
@@ -297,7 +297,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
                 {
                     AddressType = addressType;
                     AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    { AddressId = Id, UserId = changedBy.Id });
+                        {AddressId = Id, UserId = changedBy.Id});
                 }
                 else
                 {
@@ -319,7 +319,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public virtual bool IsDeleted()
         {
-            return Deleted;
+            return TheUserHasBeenDeleted;
         }
 
         public virtual bool IsDeactivated()

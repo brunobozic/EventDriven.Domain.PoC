@@ -87,6 +87,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         public Guid? CreatedById { get; set; }
         public bool IsDraft { get; set; } = false;
         public bool IsSeed { get; set; } = false;
+
         #endregion ICreationAuditedEntity
 
         #region IModificationAuditedEntity

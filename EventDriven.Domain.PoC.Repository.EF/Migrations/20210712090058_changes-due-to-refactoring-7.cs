@@ -8,24 +8,28 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_ApplicationUsers_ApplicationUsers_CreatedById",
-                table: "ApplicationUsers");
+                "FK_ApplicationUsers_ApplicationUsers_CreatedById",
+                "ApplicationUsers");
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 0, 58, 5, DateTimeKind.Unspecified).AddTicks(7199), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 0, 58, 5, DateTimeKind.Unspecified).AddTicks(7199),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 54, 4, 368, DateTimeKind.Unspecified).AddTicks(1244), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 54, 4, 368, DateTimeKind.Unspecified).AddTicks(1244),
+                    new TimeSpan(0, 0, 0, 0, 0)));
 
             migrationBuilder.AddForeignKey(
-                name: "FK_ApplicationUsers_ApplicationUsers_CreatedById",
-                table: "ApplicationUsers",
-                column: "CreatedById",
-                principalTable: "ApplicationUsers",
+                "FK_ApplicationUsers_ApplicationUsers_CreatedById",
+                "ApplicationUsers",
+                "CreatedById",
+                "ApplicationUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.SetNull);
         }
@@ -33,24 +37,28 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_ApplicationUsers_ApplicationUsers_CreatedById",
-                table: "ApplicationUsers");
+                "FK_ApplicationUsers_ApplicationUsers_CreatedById",
+                "ApplicationUsers");
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 54, 4, 368, DateTimeKind.Unspecified).AddTicks(1244), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 54, 4, 368, DateTimeKind.Unspecified).AddTicks(1244),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 9, 0, 58, 5, DateTimeKind.Unspecified).AddTicks(7199), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 9, 0, 58, 5, DateTimeKind.Unspecified).AddTicks(7199),
+                    new TimeSpan(0, 0, 0, 0, 0)));
 
             migrationBuilder.AddForeignKey(
-                name: "FK_ApplicationUsers_ApplicationUsers_CreatedById",
-                table: "ApplicationUsers",
-                column: "CreatedById",
-                principalTable: "ApplicationUsers",
+                "FK_ApplicationUsers_ApplicationUsers_CreatedById",
+                "ApplicationUsers",
+                "CreatedById",
+                "ApplicationUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }

@@ -81,7 +81,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public virtual bool IsDeleted()
         {
-            return Deleted;
+            return TheUserHasBeenDeleted;
         }
 
         public virtual bool IsDeactivated()

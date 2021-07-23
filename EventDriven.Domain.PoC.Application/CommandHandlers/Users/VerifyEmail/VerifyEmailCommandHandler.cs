@@ -29,29 +29,29 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail
         {
             var retVal = new VerifyEmailResponse();
 
-            var userWithToken = await UserRepository
+            var user = await UserRepository
                 .Queryable()
-                .Where(user => user.AccountActivationToken.Trim() == command.EmailVerificationToken.Trim())
+                .Where(user => user.EmailVerificationToken.Trim() == command.EmailVerificationToken.Trim())
                 .SingleOrDefaultAsync(cancellationToken);
 
-            if (userWithToken == null)
+            if (user == null)
             {
                 var explanation =
-                    $"No user with provided token was found, likely the email verification token [ {command.EmailVerificationToken} ] has already been consumed.";
+                    $"No user (email: [{command.Email}], username: [{command.UserName}]) with provided token was found, likely the email verification token [ {command.EmailVerificationToken} ] had already been consumed.";
                 Log.Error(explanation);
                 retVal.Message = explanation;
 
                 return retVal;
             }
 
-            var verificationStatus = userWithToken.VerifyEmailVerificationToken();
+            var verificationStatus = user.SetEmailIsVerified();
 
             await UnitOfWork.SaveChangesAsync(cancellationToken);
 
             if (verificationStatus == "OK")
             {
                 retVal.Success = true;
-                retVal.Message = "Your email has now been verified, you may now log in.";
+                retVal.Message = $"Your email ([{command.Email}]) has now been verified, you may now log in.";
             }
 
             retVal.Message = verificationStatus;

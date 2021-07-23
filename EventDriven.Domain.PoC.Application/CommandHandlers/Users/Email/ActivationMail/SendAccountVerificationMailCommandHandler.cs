@@ -96,7 +96,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
             {
                 _emailService.Send(user.Email, emailSubject, completeEmailMessageBody, emailFrom);
 
-                user.AccountActivationMailSent();
+                user.SetAccountActivationMailResent();
 
                 // await _unitOfWork.SaveChangesAsync(cancellationToken);
             }

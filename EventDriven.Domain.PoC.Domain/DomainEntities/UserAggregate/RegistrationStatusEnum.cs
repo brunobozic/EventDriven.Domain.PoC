@@ -12,7 +12,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         [Description("VerificationTimeOut")] VerificationTimeOut = 4,
         [Description("VerificationEmailSent")] VerificationEmailSent = 5,
 
-        [Description("SentActivationLinkAgain")]
-        SentActivationLinkAgain = 5
+        [Description("VerificationEmailResent")]
+        VerificationEmailResent = 6
     }
 }

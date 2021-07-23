@@ -54,7 +54,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
 
                     return new UserDto
                     {
-                        Id = null,
+                        Id = command.UserId,
                         UserName = "User with this username already exists.",
                         Email = "User with this email already exists.",
                         ActiveTo = null,
@@ -63,7 +63,8 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD
                 }
 
             var user = User.NewActiveWithPassword(
-                command.Email
+                command.UserId
+                , command.Email
                 , command.UserName
                 , command.FirstName
                 , command.LastName

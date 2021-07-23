@@ -8,166 +8,170 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "UserRoles",
-                type: "TEXT",
+                "UndeletedById",
+                "UserRoles",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "UserRoles",
-                type: "TEXT",
+                "ReactivatedById",
+                "UserRoles",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "UserRoles",
-                type: "TEXT",
+                "DeactivatedById",
+                "UserRoles",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "UserAddress",
-                type: "TEXT",
+                "UndeletedById",
+                "UserAddress",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "UserAddress",
-                type: "TEXT",
+                "ReactivatedById",
+                "UserAddress",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "UserAddress",
-                type: "TEXT",
+                "DeactivatedById",
+                "UserAddress",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "UndeletedById",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "ReactivatedById",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "DeactivatedById",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "UndeletedById",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "ReactivatedById",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "DeactivatedById",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "AddressTypes",
-                type: "TEXT",
+                "UndeletedById",
+                "AddressTypes",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "AddressTypes",
-                type: "TEXT",
+                "ReactivatedById",
+                "AddressTypes",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "AddressTypes",
-                type: "TEXT",
+                "DeactivatedById",
+                "AddressTypes",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "Addresses",
-                type: "TEXT",
+                "UndeletedById",
+                "Addresses",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "Addresses",
-                type: "TEXT",
+                "ReactivatedById",
+                "Addresses",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "Addresses",
-                type: "TEXT",
+                "DeactivatedById",
+                "Addresses",
+                "TEXT",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 24, 25, 594, DateTimeKind.Unspecified).AddTicks(8956), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 24, 25, 594, DateTimeKind.Unspecified).AddTicks(8956),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "UserRoles",
-                type: "TEXT",
+                "UndeletedById",
+                "UserRoles",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -175,9 +179,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "UserRoles",
-                type: "TEXT",
+                "ReactivatedById",
+                "UserRoles",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -185,9 +189,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "UserRoles",
-                type: "TEXT",
+                "DeactivatedById",
+                "UserRoles",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -195,9 +199,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "UserAddress",
-                type: "TEXT",
+                "UndeletedById",
+                "UserAddress",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -205,9 +209,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "UserAddress",
-                type: "TEXT",
+                "ReactivatedById",
+                "UserAddress",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -215,9 +219,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "UserAddress",
-                type: "TEXT",
+                "DeactivatedById",
+                "UserAddress",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -225,9 +229,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "UndeletedById",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -235,9 +239,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "ReactivatedById",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -245,9 +249,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "ApplicationUsers",
-                type: "TEXT",
+                "DeactivatedById",
+                "ApplicationUsers",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -255,9 +259,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "UndeletedById",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -265,9 +269,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "ReactivatedById",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -275,9 +279,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "ApplicationRoles",
-                type: "TEXT",
+                "DeactivatedById",
+                "ApplicationRoles",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -285,9 +289,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "AddressTypes",
-                type: "TEXT",
+                "UndeletedById",
+                "AddressTypes",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -295,9 +299,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "AddressTypes",
-                type: "TEXT",
+                "ReactivatedById",
+                "AddressTypes",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -305,9 +309,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "AddressTypes",
-                type: "TEXT",
+                "DeactivatedById",
+                "AddressTypes",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -315,9 +319,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "UndeletedById",
-                table: "Addresses",
-                type: "TEXT",
+                "UndeletedById",
+                "Addresses",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -325,9 +329,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "ReactivatedById",
-                table: "Addresses",
-                type: "TEXT",
+                "ReactivatedById",
+                "Addresses",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -335,9 +339,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "DeactivatedById",
-                table: "Addresses",
-                type: "TEXT",
+                "DeactivatedById",
+                "Addresses",
+                "TEXT",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
@@ -345,14 +349,18 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "DateCreated",
-                table: "AccountJournalEntry",
-                type: "TEXT",
+                "DateCreated",
+                "AccountJournalEntry",
+                "TEXT",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 24, 25, 594, DateTimeKind.Unspecified).AddTicks(8956), new TimeSpan(0, 0, 0, 0, 0)),
+                defaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 24, 25, 594, DateTimeKind.Unspecified).AddTicks(8956),
+                    new TimeSpan(0, 0, 0, 0, 0)),
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTimeOffset(new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414), new TimeSpan(0, 0, 0, 0, 0)));
+                oldDefaultValue: new DateTimeOffset(
+                    new DateTime(2021, 7, 12, 8, 38, 3, 834, DateTimeKind.Unspecified).AddTicks(414),
+                    new TimeSpan(0, 0, 0, 0, 0)));
         }
     }
 }

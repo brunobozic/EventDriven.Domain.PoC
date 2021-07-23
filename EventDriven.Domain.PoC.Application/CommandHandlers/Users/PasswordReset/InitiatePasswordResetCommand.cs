@@ -1,10 +1,9 @@
 ﻿using System;
-using EventDriven.Domain.PoC.Domain;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.PasswordReset
 {
-    public class InitiatePasswordResetCommand : ICommand<object>
+    public class InitiatePasswordResetCommand : ICommand<object>, ICommand<bool>
     {
         private Guid guid;
         private Guid userId;

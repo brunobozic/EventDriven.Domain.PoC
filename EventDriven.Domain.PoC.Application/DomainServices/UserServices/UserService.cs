@@ -12,6 +12,7 @@ using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToken;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
@@ -283,13 +284,14 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 Message = ""
             };
 
-            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.AccountActivationToken == token);
+            var applicationUser =
+                await Repository.Queryable().SingleOrDefaultAsync(x => x.EmailVerificationToken == token);
 
             if (applicationUser == null) throw new AppException("Verification failed");
 
             try
             {
-                applicationUser.VerifyEmailVerificationToken();
+                applicationUser.SetEmailIsVerified();
                 Repository.Update(applicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();
 
@@ -477,10 +479,11 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             if (await Repository.Queryable().AnyAsync(x => x.Email == model.Email))
                 throw new AppException($"Email '{model.Email}' is already registered");
             var creator = await Repository.Queryable()
-                .Where(u => u.Id == Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109")).SingleOrDefaultAsync();
+                .Where(u => u.Id == Guid.Parse(Consts.SYSTEM_USER)).SingleOrDefaultAsync();
             // map model to new applicationUser object
             var newApplicationUser = User.NewDraft(
-                model.Email
+                model.Id
+                , model.Email
                 , model.Email
                 , model.FirstName
                 , model.LastName
@@ -495,7 +498,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 var defaultRole = await RoleRepository.Queryable().Where(r => r.Name.Trim().ToUpper() == "GUEST")
                     .SingleOrDefaultAsync();
                 var roleAssigner = await Repository.Queryable()
-                    .Where(u => u.Id == Guid.Parse("2da4d020-5ac7-453b-a28a-e621aeb9c109")).SingleOrDefaultAsync();
+                    .Where(u => u.Id == Guid.Parse(Consts.SYSTEM_USER)).SingleOrDefaultAsync();
                 newApplicationUser.AddRole(defaultRole, roleAssigner);
                 Repository.Insert(newApplicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();

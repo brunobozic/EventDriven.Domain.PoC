@@ -18,7 +18,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.SYSTEM_USER_USERNAME))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    Consts.UserEmail
+                    Guid.Parse(Consts.SYSTEM_USER)
+                    , Consts.UserEmail
                     , Consts.SYSTEM_USER_USERNAME
                     , "System"
                     , "System"
@@ -37,12 +38,15 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            var creatorUser = myDbContext.ApplicationUsers.SingleOrDefault(u => u.NormalizedUserName == Consts.SYSTEM_USER_USERNAME.ToUpper());
+            var creatorUser =
+                myDbContext.ApplicationUsers.SingleOrDefault(u =>
+                    u.NormalizedUserName == Consts.SYSTEM_USER_USERNAME.ToUpper());
 
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.UserEmail))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    Consts.UserEmail
+                    Guid.NewGuid()
+                    , Consts.UserEmail
                     , Consts.UserEmail
                     , "Bruno"
                     , "Bozic"
@@ -87,7 +91,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "BrunoBozic"))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    Consts.UserEmail
+                    Guid.NewGuid()
+                    , Consts.UserEmail
                     , "BrunoBozic"
                     , "Bruno"
                     , "Bozic"
@@ -120,7 +125,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin2"))
             {
                 var newUser2 = User.NewActiveWithPasswordAndEmailVerified(
-                    Consts.UserEmail2
+                    Guid.NewGuid()
+                    , Consts.UserEmail2
                     , "testadmin2"
                     , "Bruno"
                     , "Bozic"
@@ -152,7 +158,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin3"))
             {
                 var newUser3 = User.NewActiveWithPasswordAndEmailVerified(
-                    Consts.UserEmail3
+                    Guid.NewGuid()
+                    , Consts.UserEmail3
                     , "testadmin3"
                     , "Test"
                     , "Admin3"
@@ -184,7 +191,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin4"))
             {
                 var newUser4 = User.NewActiveWithPasswordAndEmailVerified(
-                    Consts.UserEmail4
+                    Guid.NewGuid()
+                    , Consts.UserEmail4
                     , "testadmin4"
                     , "Test"
                     , "Admin4"

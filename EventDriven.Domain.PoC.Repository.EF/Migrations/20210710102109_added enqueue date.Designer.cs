@@ -204,7 +204,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -346,7 +346,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -434,7 +434,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -522,7 +522,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -610,7 +610,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -698,7 +698,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -792,7 +792,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -944,7 +944,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -1035,7 +1035,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -1145,7 +1145,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("DeleteReason")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("TheUserHasBeenDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("DeletedById")
@@ -1226,7 +1226,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("LatestVerificationFailureMessage")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("AccountActivationToken")
+                    b.Property<string>("EmailVerificationToken")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("VerificationTokenExpirationDate")
