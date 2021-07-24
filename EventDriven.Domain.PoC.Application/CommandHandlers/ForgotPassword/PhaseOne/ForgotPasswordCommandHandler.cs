@@ -13,7 +13,7 @@ using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseOne
 {
-    public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordCommand, bool>
+    public class ForgotPasswordCommandHandler : ICommandHandler<InitiateForgotPasswordCommand, bool>
     {
         public ForgotPasswordCommandHandler(
             IMyUnitOfWork unitOfWork,
@@ -33,7 +33,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.Phas
         public IEmailService EmailService { get; }
         private ITrackableRepository<User> UserRepository { get; }
 
-        public async Task<bool> Handle(ForgotPasswordCommand command, CancellationToken cancellationToken)
+        public async Task<bool> Handle(InitiateForgotPasswordCommand command, CancellationToken cancellationToken)
         {
             User user = null;
 

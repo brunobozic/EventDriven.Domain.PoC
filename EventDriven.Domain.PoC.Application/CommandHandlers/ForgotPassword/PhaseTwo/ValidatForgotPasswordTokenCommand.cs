@@ -4,11 +4,11 @@ using Microsoft.Extensions.Primitives;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseTwo
 {
-    public class ValidatePasswordResetTokenCommand : ICommand<bool>
+    public class ValidatForgotPasswordTokenCommand : ICommand<bool>
     {
         private Guid UserId;
 
-        public ValidatePasswordResetTokenCommand(Guid userId, string token)
+        public ValidatForgotPasswordTokenCommand(Guid userId, string token)
         {
             Token = token;
             UserId = userId;

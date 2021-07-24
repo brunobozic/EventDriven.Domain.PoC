@@ -14,7 +14,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
         Task<DeleteUserResponse> DeleteAsync(Guid id, User currentlyLoggedUser);
 
-        // Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest model, string origin);
+        // Task<ForgotPasswordResponse> ForgotPasswordAsync(InitiateForgotPasswordRequest model, string origin);
         Task<ApplicationUserResponse> GetAllAsync();
         Task<ApplicationUserResponse> GetByIdAsync(Guid id);
         Task<AuthenticateResponse> RefreshTheTokenAsync(string token, string ipAddress);

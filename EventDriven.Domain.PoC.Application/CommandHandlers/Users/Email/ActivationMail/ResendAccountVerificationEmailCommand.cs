@@ -9,9 +9,9 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.Activat
         public Guid UserId;
         public string UserName;
 
-        public ResendAccountVerificationEmailCommand(Guid userId)
+        public ResendAccountVerificationEmailCommand(string userEmailAddress)
         {
-            UserId = userId;
+            Email = userEmailAddress;
         }
 
         public string Origin { get; set; }

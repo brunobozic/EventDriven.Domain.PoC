@@ -3,7 +3,7 @@ using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseOne
 {
-    public class ForgotPasswordCommand : ICommand<bool>
+    public class InitiateForgotPasswordCommand : ICommand<bool>
     {
         internal string Email;
         public string Origin;
@@ -11,7 +11,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.Phas
         private Guid UserId;
         internal string UserName;
 
-        public ForgotPasswordCommand(Guid userId, string email, string userName)
+        public InitiateForgotPasswordCommand(Guid userId, string email, string userName)
         {
             Email = email;
             UserId = userId;

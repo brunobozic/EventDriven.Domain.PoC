@@ -311,12 +311,12 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return returnValue;
         }
 
-        //public async Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest model, string origin)
+        //public async Task<ForgotPasswordResponse> ForgotPasswordAsync(InitiateForgotPasswordRequest model, string origin)
         //{
         //    if (model == null || string.IsNullOrEmpty(origin))
-        //        throw new ArgumentNullException("ForgotPasswordRequest and/or origin are invalid");
+        //        throw new ArgumentNullException("InitiateForgotPasswordRequest and/or origin are invalid");
         //    if (string.IsNullOrEmpty(model.Email))
-        //        throw new ArgumentNullException("ForgotPasswordRequest Email invalid");
+        //        throw new ArgumentNullException("InitiateForgotPasswordRequest Email invalid");
 
         //    var returnValue = new ForgotPasswordResponse
         //    {

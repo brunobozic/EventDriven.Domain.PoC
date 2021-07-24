@@ -9,7 +9,7 @@ using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseTwo
 {
-    public class ValidatePasswordResetTokenCommandHandler : ICommandHandler<ValidatePasswordResetTokenCommand, bool>
+    public class ValidatePasswordResetTokenCommandHandler : ICommandHandler<ValidatForgotPasswordTokenCommand, bool>
     {
         public ValidatePasswordResetTokenCommandHandler(
             IMyUnitOfWork unitOfWork,
@@ -24,7 +24,7 @@ namespace EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.Phas
         private ITrackableRepository<User> UserRepository { get; }
 
 
-        public async Task<bool> Handle(ValidatePasswordResetTokenCommand command, CancellationToken cancellationToken)
+        public async Task<bool> Handle(ValidatForgotPasswordTokenCommand command, CancellationToken cancellationToken)
         {
             if (command == null) throw new ArgumentNullException("ValidateResetTokenRequest invalid");
             if (string.IsNullOrEmpty(command.Token))

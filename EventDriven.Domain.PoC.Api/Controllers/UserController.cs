@@ -114,16 +114,16 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync()
         {
             var refreshToken = Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest(new {message = "Refresh EmailVerificationToken (Request cookie) is required"});
+                return BadRequest(new { message = "Refresh EmailVerificationToken (Request cookie) is required" });
 
             var serviceLayerResponse = await _applicationUserService.RefreshTheTokenAsync(refreshToken, IpAddress());
 
@@ -144,10 +144,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost("revoke-token")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<RevokeTokenResponse>> RevokeTokenAsync(RevokeTokenRequest model,
             CancellationToken ct)
         {
@@ -178,9 +178,9 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("register")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 201)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterAsync(RegisterUserRequest request, CancellationToken ct)
         {
             // As an example of a non-trivial event based flow we got the following:
@@ -205,12 +205,12 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             #region For development purposes this is unfortunately needed
 
             // ReSharper disable once PossibleNullReferenceException
-            var creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
 
             var command = new RegisterUserCommand(request.Email, request.ConfirmPassword,
                     request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
                     request.Oib)
-                {Origin = Request.Headers["origin"]};
+            { Origin = Request.Headers["origin"] };
 
             Guid? creatorId = Guid.Empty;
 
@@ -245,21 +245,21 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [MyAuthorize("Admin")]
         [HttpPost("create")]
         [Produces(typeof(ApplicationUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
         public async Task<ActionResult<UserDto>> CreateAsync([FromBody] RegisterUserRequest request,
             CancellationToken ct)
         {
             var command = new RegisterUserCommand(request.Email, request.ConfirmPassword,
                     request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
                     request.Oib)
-                {Origin = Request.Headers["origin"]};
+            { Origin = Request.Headers["origin"] };
 
             command.Origin = Request.Headers["origin"];
 
             // ReSharper disable once PossibleNullReferenceException
-            var creator = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
             if (creator != null) command.CreatorId = creator.Id;
 
             using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
@@ -268,6 +268,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return Created(string.Empty, user);
         }
 
+        #region User roles
+
         /// <summary>
         /// </summary>
         /// <param name="request"></param>
@@ -275,9 +277,9 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("assign-role-to-user")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> AssignRoleToUserAsync(AssignRoleToUserRequest request,
             CancellationToken ct)
         {
@@ -285,7 +287,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 Origin = Request.Headers["origin"],
                 // ReSharper disable once PossibleNullReferenceException
-                AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"]
+                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
             };
 
             using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
@@ -302,9 +304,9 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("remove-role-from-user")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RemoveRoleFromUserAsync(RemoveRoleFromUserRequest request,
             CancellationToken ct)
         {
@@ -312,7 +314,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 Origin = Request.Headers["origin"],
                 // ReSharper disable once PossibleNullReferenceException
-                RemoverUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"]
+                RemoverUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
             };
 
             using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
@@ -322,6 +324,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return Ok();
         }
 
+        #endregion User roles
+
+        #region User addresses
+
         /// <summary>
         /// </summary>
         /// <param name="request"></param>
@@ -330,9 +336,9 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [MyAuthorize("Admin")]
         [HttpPost("assign-address")]
         [Produces(typeof(AssignAddressToUserResponse))]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int) HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<ActionResult<UserDto>> AssignAddressToUserAsync(
             [FromBody] AssignAddressToUserRequest request,
             CancellationToken ct)
@@ -346,7 +352,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 Origin = Request.Headers["origin"],
                 // ReSharper disable once PossibleNullReferenceException
-                AssignerUser = (User) _contextAccessor.HttpContext.Items["ApplicationUser"]
+                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
             };
 
             using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
@@ -362,14 +368,14 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <returns></returns>
         [MyAuthorize("Admin")]
         [HttpPost("remove-address-from-user")]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RemoveAddressFromUserAsync(RemoveAddressFromUserRequest request,
             CancellationToken ct)
         {
             // ReSharper disable once PossibleNullReferenceException
-            var remover = (User) _contextAccessor.HttpContext.Items["ApplicationUser"];
+            var remover = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
 
             var command = new RemoveAddressFromUserCommand(request.UserId, request.RoleId, request.AddressName)
             {
@@ -385,6 +391,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
             return Ok();
         }
+
+        #endregion User addresses
 
 
         /// <summary>
@@ -429,22 +437,23 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return null;
         }
 
+        #region Email verification 
         /// <summary>
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="userEmailAddress"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         [Authorize]
         [HttpGet("resend-activation-link/{id:int}")]
-        public async Task<ActionResult<bool>> ResendActivationLinkAsync(Guid userId,
+        public async Task<ActionResult<bool>> ResendActivationLinkAsync(string userEmailAddress,
             CancellationToken ct)
         {
-            var command = new ResendAccountVerificationEmailCommand(userId) {Origin = Request.Headers["origin"]};
+            var command = new ResendAccountVerificationEmailCommand(userEmailAddress) { Origin = Request.Headers["origin"] };
 
             using var scope = _tracer.BuildSpan("ResendActivationLinkAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
 
-            return true;
+            return response;
         }
 
         /// <summary>
@@ -453,11 +462,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("verify-email")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct)
         {
-            var command = new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail, request.UserName) {Origin = Request.Headers["origin"]};
+            var command = new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail, request.UserName) { Origin = Request.Headers["origin"] };
 
             using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
 
@@ -470,20 +479,24 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return BadRequest(response.Message);
         }
 
+        #endregion Email verification
+
+        #region User has forgotten his password
+
         /// <summary>
         /// </summary>
         /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct)
+        [HttpPost("initiate-forgot-password")]
+        public async Task<IActionResult> InitiateForgotPasswordAsync(InitiateForgotPasswordRequest request, CancellationToken ct)
         {
-            var command = new ForgotPasswordCommand(request.UserId, request.Email, request.UserName)
+            var command = new InitiateForgotPasswordCommand(request.UserId, request.Email, request.UserName)
             {
                 Origin = Request.Headers["origin"]
             };
 
-            using var scope = _tracer.BuildSpan("ForgotPasswordAsync").StartActive(true);
+            using var scope = _tracer.BuildSpan("InitiateForgotPasswordAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
 
             return Ok(response);
@@ -494,27 +507,28 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <param name="request"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        [HttpPost("validate-reset-token")]
-        [ProducesResponseType(typeof(bool), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> ValidateResetTokenAsync(ValidatePasswordResetTokenRequest request,
+        [HttpPost("validate-forgot-password-token")]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> ValidateForgotPasswordTokenAsync(ValidatePasswordResetTokenRequest request,
             CancellationToken ct)
         {
-            var command = new ValidatePasswordResetTokenCommand(request.UserId, request.Token)
+            var command = new ValidatForgotPasswordTokenCommand(request.UserId, request.Token)
             {
                 Origin = Request.Headers["origin"]
             };
 
-            using var scope = _tracer.BuildSpan("ValidateResetTokenAsync").StartActive(true);
+            using var scope = _tracer.BuildSpan("ValidateForgotPasswordTokenAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
 
             return Ok(response);
         }
 
-        #endregion Other
+        #endregion User has forgotten his password
 
+        #endregion Other
 
         #region Helpers
 
@@ -554,10 +568,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //}
 
         //[HttpPost("forgot-password")]
-        //public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequest model, CancellationToken ct)
+        //public async Task<IActionResult> InitiateForgotPasswordAsync(InitiateForgotPasswordRequest model, CancellationToken ct)
         //{
         //    var serviceLayerResponse =
-        //        await _applicationUserService.ForgotPasswordAsync(model, Request.Headers["origin"]);
+        //        await _applicationUserService.InitiateForgotPasswordAsync(model, Request.Headers["origin"]);
 
         //    if (serviceLayerResponse.Success)
         //        //return Ok(new { message = "Please check your email for password reset instructions" });
@@ -1098,8 +1112,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
     public class RemoveRoleFromUserRequest
     {
-        public string RoleName { get; internal set; }
-        public Guid UserIdToRemoveFrom { get; internal set; }
+        public string RoleName { get; set; }
+        public Guid UserIdToRemoveFrom { get; set; }
     }
 
     public class AssignRoleToUserRequest
