@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType;
-using EventDriven.Domain.PoC.Api.Rest.Controllers.Contracts;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Application.Ports.Input.Contracts;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

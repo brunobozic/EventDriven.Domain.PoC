@@ -13,11 +13,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public string LastName;
         public string Oib;
         public RoleEnum Role;
+        public string UserEmail;
         public Guid UserId;
         public string UserName;
-
-        public string UserEmail;
-
         public string UserRole;
 
         public UserRegisteredDomainEvent(

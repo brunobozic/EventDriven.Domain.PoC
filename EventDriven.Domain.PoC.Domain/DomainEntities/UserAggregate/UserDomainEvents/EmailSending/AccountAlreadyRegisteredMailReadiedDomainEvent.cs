@@ -23,11 +23,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         }
 
         public string EmailFrom { get; set; }
-
         public string EmailBody { get; set; }
-
         public string EmailSubject { get; set; }
-
         public string Email { get; }
         public string UserName { get; }
         public Guid UserId { get; set; }

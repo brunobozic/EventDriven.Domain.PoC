@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD;
 using FluentValidation;
 
 namespace EventDriven.Domain.PoC.Application.FluentValidators

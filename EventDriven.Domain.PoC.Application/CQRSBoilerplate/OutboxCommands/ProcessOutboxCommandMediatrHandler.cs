@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using EventDriven.Domain.PoC.Application.EventHandlers.Users.CUD.Notifications;
+using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using EventDriven.Domain.PoC.Application.ViewModels.OutboxMessage;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;

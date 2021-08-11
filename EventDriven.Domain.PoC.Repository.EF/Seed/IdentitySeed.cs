@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.SharedKernel.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -15,19 +15,19 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
     {
         public static async Task SeedUsersAsync(ApplicationDbContext myDbContext, IMyUnitOfWork myUnitOfWork)
         {
-            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.SYSTEM_USER_USERNAME))
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == ApplicationWideConstants.SYSTEM_USER_USERNAME))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                    Guid.Parse(Consts.SYSTEM_USER)
-                    , Consts.UserEmail
-                    , Consts.SYSTEM_USER_USERNAME
+                    Guid.Parse(ApplicationWideConstants.SYSTEM_USER)
+                    , ApplicationWideConstants.UserEmail
+                    , ApplicationWideConstants.SYSTEM_USER_USERNAME
                     , "System"
                     , "System"
-                    , Consts.SYSTEM_USER_OIB
+                    , ApplicationWideConstants.SYSTEM_USER_OIB
                     , DateTimeOffset.UtcNow.AddYears(-200)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(Consts.SYSTEM_USER_ACTIVE_TO_ADD_YEARS)
-                    , Consts.SYSTEM_USER_PASSWORD
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.SYSTEM_USER_ACTIVE_TO_ADD_YEARS)
+                    , ApplicationWideConstants.SYSTEM_USER_PASSWORD
                     , null
                     , ""
                     , true
@@ -40,20 +40,20 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
 
             var creatorUser =
                 myDbContext.ApplicationUsers.SingleOrDefault(u =>
-                    u.NormalizedUserName == Consts.SYSTEM_USER_USERNAME.ToUpper());
+                    u.NormalizedUserName == ApplicationWideConstants.SYSTEM_USER_USERNAME.ToUpper());
 
-            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == Consts.UserEmail))
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == ApplicationWideConstants.UserEmail))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
                     Guid.NewGuid()
-                    , Consts.UserEmail
-                    , Consts.UserEmail
+                    , ApplicationWideConstants.UserEmail
+                    , ApplicationWideConstants.UserEmail
                     , "Bruno"
                     , "Bozic"
                     , "1111112"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
@@ -66,9 +66,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             }
 
 
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == Consts.Guest) == null)
+            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == ApplicationWideConstants.Guest) == null)
             {
-                var role = Role.NewActiveDraft(Consts.Guest, "Guest role", DateTimeOffset.UtcNow,
+                var role = Role.NewActiveDraft(ApplicationWideConstants.Guest, "Guest role", DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1), creatorUser);
 
                 var result = await myDbContext.ApplicationRoles.AddAsync(role);
@@ -76,9 +76,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == Consts.AdministratorRoleName) == null)
+            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == ApplicationWideConstants.AdministratorRoleName) == null)
             {
-                var role = Role.NewActiveDraft(Consts.AdministratorRoleName, "Admin role", DateTimeOffset.UtcNow,
+                var role = Role.NewActiveDraft(ApplicationWideConstants.AdministratorRoleName, "Admin role", DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1), creatorUser);
 
                 var result = await myDbContext.ApplicationRoles.AddAsync(role);
@@ -92,14 +92,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
                     Guid.NewGuid()
-                    , Consts.UserEmail
+                    , ApplicationWideConstants.UserEmail
                     , "BrunoBozic"
                     , "Bruno"
                     , "Bozic"
                     , "1111113"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
@@ -126,14 +126,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             {
                 var newUser2 = User.NewActiveWithPasswordAndEmailVerified(
                     Guid.NewGuid()
-                    , Consts.UserEmail2
+                    , ApplicationWideConstants.UserEmail2
                     , "testadmin2"
                     , "Bruno"
                     , "Bozic"
                     , "22222222"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
@@ -159,14 +159,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             {
                 var newUser3 = User.NewActiveWithPasswordAndEmailVerified(
                     Guid.NewGuid()
-                    , Consts.UserEmail3
+                    , ApplicationWideConstants.UserEmail3
                     , "testadmin3"
                     , "Test"
                     , "Admin3"
                     , "3333333"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
@@ -192,14 +192,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             {
                 var newUser4 = User.NewActiveWithPasswordAndEmailVerified(
                     Guid.NewGuid()
-                    , Consts.UserEmail4
+                    , ApplicationWideConstants.UserEmail4
                     , "testadmin4"
                     , "Test"
                     , "Admin4"
                     , "44444444"
                     , DateTimeOffset.UtcNow.AddYears(-41)
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.UtcNow.AddYears(Consts.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
                     , "Pwd01!"
                     , creatorUser
                     , ""
@@ -234,7 +234,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , creatorUser
                     , DateTimeOffset.UtcNow
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.Now.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
+                    , DateTimeOffset.Now.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
                 );
 
                 var result = await myDbContext.AddressTypes.AddAsync(addressType);
@@ -251,7 +251,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , creatorUser
                     , DateTimeOffset.UtcNow
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.Now.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
+                    , DateTimeOffset.Now.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
                 );
 
                 var result = await myDbContext.AddressTypes.AddAsync(addressType);
@@ -268,7 +268,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                     , creatorUser
                     , DateTimeOffset.UtcNow
                     , DateTimeOffset.UtcNow
-                    , DateTimeOffset.Now.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
+                    , DateTimeOffset.Now.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
                 );
 
                 var result = await myDbContext.AddressTypes.AddAsync(addressType);

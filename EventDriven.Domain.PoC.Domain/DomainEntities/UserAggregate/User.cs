@@ -12,6 +12,7 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvent
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.EmailSending;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.PasswordReset;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Verification;
+using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Random;
 using TrackableEntities.Common.Core;
@@ -19,7 +20,7 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 {
-    public class User : BasicDomainEntity<Guid>, IAuditTrail
+    public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
     {
         private const int NumYearsDefaultActivity = 1;
 
@@ -416,7 +417,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add an address to it. Current registration status: {GetCurrentRegistrationStatus()}");
             var userAddressIdsToDelete = _userAddresses
                 .Where(userAddress =>
-                    !userAddress.TheUserHasBeenDeleted && userAddress.Address.AddressIdGuid == addressToRemove.AddressIdGuid &&
+                    !userAddress.TheUserHasBeenDeleted &&
+                    userAddress.Address.AddressIdGuid == addressToRemove.AddressIdGuid &&
                     !userAddress.Address.TheUserHasBeenDeleted)
                 .Select(uid => uid.Id)
                 .ToList();
@@ -670,7 +672,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             // unfortunately I need a synchronous response here
             var friendlyErrorResponse = "OK";
 
-            if (TheUserIsInActiveState() && !TheUserHasBeenDeleted && VerificationTokenExpirationDate >= DateTime.UtcNow)
+            if (TheUserIsInActiveState() && !TheUserHasBeenDeleted &&
+                VerificationTokenExpirationDate >= DateTime.UtcNow)
             {
                 Verified = DateTime.UtcNow;
                 EmailVerificationToken = null;
@@ -755,7 +758,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             if (TheUserIsInActiveState() && !TheUserHasBeenDeleted)
             {
                 EmailVerificationToken = verificationToken;
-                VerificationTokenExpirationDate = DateTime.UtcNow.AddHours(Consts.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
+                VerificationTokenExpirationDate = DateTime.UtcNow.AddHours(ApplicationWideConstants.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
             }
             else
             {
@@ -769,7 +772,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         public bool RemoveStaleRefreshTokens()
         {
             if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !TheUserHasBeenDeleted)
-                _refreshTokens.RemoveAll(x => x.Created.AddDays(Consts.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
+                _refreshTokens.RemoveAll(x => x.Created.AddDays(ApplicationWideConstants.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
             else
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove stale refresh tokens from it. Current registration status: {GetCurrentRegistrationStatus()}");
@@ -852,7 +855,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         {
             _accountActivationMailsSendAttempts += 1;
             var journalEntry =
-                new AccountJournalEntry(DateTime.UtcNow + " => Account activation code re-sent to the users e-mail address.");
+                new AccountJournalEntry(DateTime.UtcNow +
+                                        " => Account activation code re-sent to the users e-mail address.");
             journalEntry.AttachActingUser(null);
             journalEntry.AttachUser(this);
             _journalEntries.Add(journalEntry);

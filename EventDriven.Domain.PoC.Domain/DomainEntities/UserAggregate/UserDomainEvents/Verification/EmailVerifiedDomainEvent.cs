@@ -20,7 +20,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         }
 
         public DateTimeOffset VerifiedDate { get; }
-
         public string Email { get; }
         public Guid Id { get; }
         public string UserName { get; }

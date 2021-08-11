@@ -7,7 +7,7 @@ using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToken;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

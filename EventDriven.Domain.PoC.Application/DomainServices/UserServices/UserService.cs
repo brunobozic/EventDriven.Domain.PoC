@@ -15,7 +15,7 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToken;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -479,7 +479,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             if (await Repository.Queryable().AnyAsync(x => x.Email == model.Email))
                 throw new AppException($"Email '{model.Email}' is already registered");
             var creator = await Repository.Queryable()
-                .Where(u => u.Id == Guid.Parse(Consts.SYSTEM_USER)).SingleOrDefaultAsync();
+                .Where(u => u.Id == Guid.Parse(ApplicationWideConstants.SYSTEM_USER)).SingleOrDefaultAsync();
             // map model to new applicationUser object
             var newApplicationUser = User.NewDraft(
                 model.Id
@@ -498,7 +498,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 var defaultRole = await RoleRepository.Queryable().Where(r => r.Name.Trim().ToUpper() == "GUEST")
                     .SingleOrDefaultAsync();
                 var roleAssigner = await Repository.Queryable()
-                    .Where(u => u.Id == Guid.Parse(Consts.SYSTEM_USER)).SingleOrDefaultAsync();
+                    .Where(u => u.Id == Guid.Parse(ApplicationWideConstants.SYSTEM_USER)).SingleOrDefaultAsync();
                 newApplicationUser.AddRole(defaultRole, roleAssigner);
                 Repository.Insert(newApplicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();

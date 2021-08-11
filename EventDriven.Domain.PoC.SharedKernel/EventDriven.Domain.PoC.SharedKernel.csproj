@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Kafka\ConsumedMessagePersistors\Enums\" />
     <Folder Include="Pagination\" />
   </ItemGroup>
 

@@ -24,7 +24,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
         {
             var audit = new AuditTrail
             {
-                UserId = Guid.Parse(Consts
+                UserId = Guid.Parse(ApplicationWideConstants
                     .SYSTEM_USER), // System.Web.HttpContext.Current.User.Identity.Name; //Change this line according to your needs
                 TableName = GetTableName(entry),
                 UpdatedAt = DateTime.Now,

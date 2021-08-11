@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.Repository.EF.Seed;
 using Microsoft.AspNetCore;

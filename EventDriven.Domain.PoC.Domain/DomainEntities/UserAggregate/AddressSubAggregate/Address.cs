@@ -4,11 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
+using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate
 {
-    public class Address : BasicDomainEntity<long>, IAuditTrail
+    public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
     {
         #region Public properties
 
@@ -29,7 +30,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public string GetAddressTypeName()
         {
-            if (AddressType != null && AddressType.EnsureIsActive() && AddressType.Active && !AddressType.TheUserHasBeenDeleted)
+            if (AddressType != null && AddressType.EnsureIsActive() && AddressType.Active &&
+                !AddressType.TheUserHasBeenDeleted)
                 return AddressType.Name;
             return "Not available (inactive, deleted, does not exist)";
         }
@@ -165,7 +167,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             if (activeFrom == DateTimeOffset.MinValue) activeFrom = DateTimeOffset.UtcNow;
 
             if (activeTo == DateTimeOffset.MinValue)
-                activeTo = DateTimeOffset.UtcNow.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES);
+                activeTo = DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES);
 
             address.Activate(activeFrom, activeTo, creatorUser);
 

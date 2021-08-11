@@ -24,7 +24,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         }
 
         public User DeactivatedBy { get; set; }
-
         public string DeactivationReason { get; set; }
         public DateTime DeactivationDateStamp { get; set; }
         public Guid? DeactivatedById { get; set; }

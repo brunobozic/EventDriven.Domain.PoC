@@ -10,7 +10,6 @@ namespace EventDriven.Domain.PoC.Repository.EF
         {
             // myDbContext.Database.EnsureCreated();
             await myDbContext.Database.MigrateAsync();
-
             await myDbContext.SaveChangesAsync();
         }
     }

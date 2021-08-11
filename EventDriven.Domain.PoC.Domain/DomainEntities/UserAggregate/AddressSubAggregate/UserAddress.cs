@@ -40,7 +40,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
             // activated by the creator
             userAddress.Activate(DateTimeOffset.UtcNow,
-                DateTimeOffset.UtcNow.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
+                DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
 
             return userAddress;
         }
@@ -53,7 +53,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
             // activated by the creator
             userAddress.Activate(DateTimeOffset.UtcNow,
-                DateTimeOffset.UtcNow.AddYears(Consts.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
+                DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
             userAddress.ActivatedById = creator.Id;
 
             return userAddress;

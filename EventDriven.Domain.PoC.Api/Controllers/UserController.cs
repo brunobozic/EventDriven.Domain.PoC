@@ -5,22 +5,23 @@ using System.Threading.Tasks;
 using AutoMapper;
 using EventDriven.Domain.PoC.Api.Rest.Attributes;
 using EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType;
-using EventDriven.Domain.PoC.Api.Rest.Controllers.Contracts;
 using EventDriven.Domain.PoC.Application;
-using EventDriven.Domain.PoC.Application.CommandHandlers.Addresses;
-using EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseOne;
-using EventDriven.Domain.PoC.Application.CommandHandlers.ForgotPassword.PhaseTwo;
-using EventDriven.Domain.PoC.Application.CommandHandlers.Roles;
-using EventDriven.Domain.PoC.Application.CommandHandlers.Users.CUD;
-using EventDriven.Domain.PoC.Application.CommandHandlers.Users.Email.ActivationMail;
-using EventDriven.Domain.PoC.Application.CommandHandlers.Users.VerifyEmail;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Addresses;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.PhaseOne;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Roles;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.ActivationMail;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.VerifyEmail;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
+using EventDriven.Domain.PoC.Application.Ports.Input.Contracts;
+using EventDriven.Domain.PoC.Application.ViewModels.Address;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +29,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Microsoft.Rest;
 using OpenTracing;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Controllers
@@ -205,9 +205,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             #region For development purposes this is unfortunately needed
 
             // ReSharper disable once PossibleNullReferenceException
-            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
+            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
 
-            var command = new RegisterUserCommand(request.Email, request.ConfirmPassword,
+            var newUserId = Guid.NewGuid();
+
+            var command = new RegisterUserCommand(newUserId, request.Email, request.ConfirmPassword,
                     request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
                     request.Oib)
             { Origin = Request.Headers["origin"] };
@@ -218,14 +220,12 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
                     _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
-                    creatorId = Guid.Parse(Consts.SYSTEM_USER); // User 1 is a "system" user
+                    creatorId = Guid.Parse(ApplicationWideConstants.SYSTEM_USER); // User ApplicationWideConstants.SYSTEM_USER is a pre-seeded "system" user
             }
             else
             {
                 creatorId = creator.Id;
             }
-
-            command.Origin = Request.Headers["origin"];
 
             #endregion For development purposes this is unfortunately needed
 
@@ -251,7 +251,9 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         public async Task<ActionResult<UserDto>> CreateAsync([FromBody] RegisterUserRequest request,
             CancellationToken ct)
         {
-            var command = new RegisterUserCommand(request.Email, request.ConfirmPassword,
+            var newUserId = Guid.NewGuid();
+
+            var command = new RegisterUserCommand(newUserId, request.Email, request.ConfirmPassword,
                     request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
                     request.Oib)
             { Origin = Request.Headers["origin"] };
@@ -259,7 +261,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             command.Origin = Request.Headers["origin"];
 
             // ReSharper disable once PossibleNullReferenceException
-            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
+            var creator = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
             if (creator != null) command.CreatorId = creator.Id;
 
             using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
@@ -287,7 +289,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 Origin = Request.Headers["origin"],
                 // ReSharper disable once PossibleNullReferenceException
-                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
+                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"] // this will work only if the user had gone thru authentication
             };
 
             using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
@@ -314,7 +316,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 Origin = Request.Headers["origin"],
                 // ReSharper disable once PossibleNullReferenceException
-                RemoverUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
+                RemoverUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"] // this will work only if the user had gone thru authentication
             };
 
             using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
@@ -352,7 +354,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             {
                 Origin = Request.Headers["origin"],
                 // ReSharper disable once PossibleNullReferenceException
-                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]
+                AssignerUser = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]  // this will work only if the user had gone thru authentication
             };
 
             using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
@@ -375,7 +377,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             CancellationToken ct)
         {
             // ReSharper disable once PossibleNullReferenceException
-            var remover = (User)_contextAccessor.HttpContext.Items["ApplicationUser"];
+            var remover = (User)_contextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
 
             var command = new RemoveAddressFromUserCommand(request.UserId, request.RoleId, request.AddressName)
             {
@@ -437,7 +439,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return null;
         }
 
-        #region Email verification 
+        #region Email verification
+
         /// <summary>
         /// </summary>
         /// <param name="userEmailAddress"></param>
@@ -445,10 +448,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpGet("resend-activation-link/{id:int}")]
-        public async Task<ActionResult<bool>> ResendActivationLinkAsync(string userEmailAddress,
+        public async Task<ActionResult<bool>> ResendActivationLinkAsync(string userEmailAddress, string userName,
             CancellationToken ct)
         {
-            var command = new ResendAccountVerificationEmailCommand(userEmailAddress) { Origin = Request.Headers["origin"] };
+            var command = new ResendAccountVerificationEmailCommand(userEmailAddress, userName)
+            { Origin = Request.Headers["origin"] };
 
             using var scope = _tracer.BuildSpan("ResendActivationLinkAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
@@ -466,7 +470,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct)
         {
-            var command = new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail, request.UserName) { Origin = Request.Headers["origin"] };
+            var command =
+                new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail,
+                    request.UserName)
+                { Origin = Request.Headers["origin"] };
 
             using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
 
@@ -489,7 +496,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("initiate-forgot-password")]
-        public async Task<IActionResult> InitiateForgotPasswordAsync(InitiateForgotPasswordRequest request, CancellationToken ct)
+        public async Task<IActionResult> InitiateForgotPasswordAsync(InitiateForgotPasswordRequest request,
+            CancellationToken ct)
         {
             var command = new InitiateForgotPasswordCommand(request.UserId, request.Email, request.UserName)
             {
@@ -1103,22 +1111,52 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         #endregion CUD non CQRS
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class RemoveAddressFromUserRequest
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Guid UserId { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string AddressName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Guid RoleId { get; set; }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class RemoveRoleFromUserRequest
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string RoleName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Guid UserIdToRemoveFrom { get; set; }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class AssignRoleToUserRequest
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Guid UserIdToAssignTo { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string RoleName { get; set; }
     }
 }

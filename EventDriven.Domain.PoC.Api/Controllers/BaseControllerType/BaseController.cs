@@ -2,7 +2,7 @@
 using AutoMapper;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork;
+using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using EventDriven.Domain.PoC.SharedKernel.ViewModelPagination;
 using Microsoft.AspNetCore.Http;

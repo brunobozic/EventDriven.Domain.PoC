@@ -24,7 +24,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         }
 
         public Guid? ActivatedById { get; set; }
-
         public string ActivationReason { get; set; }
         public DateTime ActivationDateStamp { get; set; }
         public string Email { get; set; }

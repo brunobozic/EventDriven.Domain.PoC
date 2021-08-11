@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Extensions
 {
@@ -78,6 +80,23 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
 
             // Step 7
             return d[n, m];
+        }
+
+        public static int WordCount(this string str)
+        {
+            return str.Split(new[] {' ', '.', '?'},
+                StringSplitOptions.RemoveEmptyEntries).Length;
+        }
+
+        public static bool ContainsDigits(this string str)
+        {
+            return str.Any(c => char.IsDigit(c));
+        }
+
+        public static bool IsCamelCased(this string str)
+        {
+            var rx = new Regex(@"/^[a-z][a-z0-9]+(?:[A-Z][a-z0-9]+)*$/");
+            return rx.IsMatch(str);
         }
     }
 }

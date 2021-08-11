@@ -29,14 +29,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CommandHandlers\Addresses\CUD\" />
-    <Folder Include="CommandHandlers\Roles\CUD\" />
-    <Folder Include="EventHandlers\Users\PasswordReset\" />
-    <Folder Include="EventHandlers\Addresses\" />
-    <Folder Include="EventHandlers\Users\UserUpdates\Handlers\" />
-    <Folder Include="EventHandlers\Roles\Activation\Handlers\" />
-    <Folder Include="EventHandlers\Roles\RoleUpdates\" />
-    <Folder Include="ViewModels\Address\" />
+    <Folder Include="CommandsAndHandlers\Addresses\CUD\" />
+    <Folder Include="CommandsAndHandlers\Roles\CUD\" />
+    <Folder Include="EventsAndEventHandlers\Users\PasswordReset\" />
+    <Folder Include="EventsAndEventHandlers\Addresses\" />
+    <Folder Include="EventsAndEventHandlers\Users\UserUpdates\Handlers\" />
+    <Folder Include="EventsAndEventHandlers\Roles\Activation\Handlers\" />
+    <Folder Include="EventsAndEventHandlers\Roles\RoleUpdates\" />
     <Folder Include="ViewModels\Contact\" />
     <Folder Include="ViewModels\CellPhoneNumber\" />
     <Folder Include="ViewModels\LandLine\" />

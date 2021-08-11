@@ -84,7 +84,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
 
             // TODO: fetch user Id from the facade
             var currentApplicationUserId = await ApplicationUsers
-                .Where(user => user.UserName == Consts.SYSTEM_USER_USERNAME).Select(i => i.Id)
+                .Where(user => user.UserName == ApplicationWideConstants.SYSTEM_USER_USERNAME).Select(i => i.Id)
                 .SingleOrDefaultAsync(cancellationToken);
 
             try
