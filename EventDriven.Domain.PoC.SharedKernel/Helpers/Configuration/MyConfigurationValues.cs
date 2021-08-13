@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.SharedKernel.Helpers.EmailSender;
+﻿using System.Net;
+using EventDriven.Domain.PoC.SharedKernel.Helpers.EmailSender;
 using EventDriven.Domain.PoC.SharedKernel.Kafka.Settings;
 using Framework.Kafka.Core.KafkaSettings;
 
@@ -63,5 +64,31 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration
         public string Microsoft { get; set; }
         public string System { get; set; }
         public string MicrosoftAspNetCore { get; set; }
+    }
+
+    public class ServiceDisvoveryOptions
+    {
+        public string ServiceName { get; set; }
+
+        public ConsulOptions Consul { get; set; }
+    }
+
+    public class ConsulOptions
+    {
+        public string HttpEndpoint { get; set; }
+
+        public DnsEndpoint DnsEndpoint { get; set; }
+    }
+
+    public class DnsEndpoint
+    {
+        public string Address { get; set; }
+
+        public int Port { get; set; }
+
+        public IPEndPoint ToIPEndPoint()
+        {
+            return new(IPAddress.Parse(Address), Port);
+        }
     }
 }

@@ -1,5 +1,24 @@
 version: '3'
 services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+       - "5775:5775/udp"
+       - "6831:6831/udp"
+       - "6832:6832/udp"
+       - "5778:5778"
+       - "16686:16686"
+       - "14268:14268"
+       - "9411:9411"
+    networks:
+      - jaeger-example
+  eureka-server:
+    image:  steeltoeoss/eureka-server
+    hostname: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - jaeger-example
   kafkaui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
@@ -12,11 +31,15 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - jaeger-example
   zookeeper:
     image: wurstmeister/zookeeper
     hostname: zookeeper
     ports:
       - "2181:2181"
+    networks:
+      - jaeger-example
   kafka:
     image: wurstmeister/kafka
     hostname: kafka
@@ -37,3 +60,57 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: OUTSIDE
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jaeger-example
+  consul-agent-1:
+    image: consul:latest
+    networks:
+      - consul-demo
+    command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
+
+  consul-agent-2:
+    # Complete copy of 'consul-agent-1'
+    image: consul:latest
+    networks:
+      - consul-demo
+    command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
+
+  consul-agent-3:
+    # Complete copy of 'consul-agent-1'
+    image: consul:latest
+    networks:
+      - consul-demo
+    command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
+
+  consul-server-1:
+    # Uses only image and networks from 'consul-agent-1'
+    # while 'command' is overwritten
+    image: consul:latest
+    networks:
+      - consul-demo
+    command: "agent -server -retry-join consul-server-bootstrap -client 0.0.0.0"
+
+  consul-server-2:
+    # Complete copy of 'consul-server-1'
+    image: consul:latest
+    networks:
+      - consul-demo
+    command: "agent -server -retry-join consul-server-bootstrap -client 0.0.0.0"
+
+  consul-server-bootstrap:
+    # Uses only image and networks from 'consul-agent-1'
+    # while 'command' is overwritten and 'ports' are defined
+    image: consul:latest
+    networks:
+      - consul-demo
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:8600"
+      - "8600:8600/udp"
+    command: "agent -server -bootstrap-expect 3 -ui -client 0.0.0.0"
+networks:
+  consul-demo:
+  jaeger-example:
+  consul:
+    driver: bridge

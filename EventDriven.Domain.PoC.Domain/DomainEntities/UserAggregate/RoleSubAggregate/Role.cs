@@ -29,6 +29,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
         public Guid? ReactivatedById { get; set; }
         public Guid? DeactivatedById { get; set; }
         public Guid? UndeletedById { get; set; }
+        public bool Deleted { get; set; }
 
         #endregion FK
 
@@ -148,10 +149,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
             return ActiveTo >= DateTimeOffset.UtcNow;
         }
 
-        public virtual bool IsDeleted()
-        {
-            return TheUserHasBeenDeleted;
-        }
 
         public virtual bool IsDeactivated()
         {

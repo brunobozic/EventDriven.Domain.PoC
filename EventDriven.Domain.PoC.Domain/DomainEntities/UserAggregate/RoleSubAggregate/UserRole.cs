@@ -74,11 +74,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
             return ActiveTo >= DateTimeOffset.UtcNow;
         }
 
-        public virtual bool IsDeleted()
-        {
-            return TheUserHasBeenDeleted;
-        }
-
         public virtual bool IsDeactivated()
         {
             return !Active;

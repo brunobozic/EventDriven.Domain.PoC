@@ -8,8 +8,9 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
         public string Email;
         public string FirstName;
         public string LastName;
-        public Guid UserId;
         public string Origin;
+        public Guid UserId;
+        public string UserName;
 
         public ResendAccountVerificationEmailCommand(string email, string userName)
         {
@@ -18,6 +19,5 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
         }
 
         public Guid Id => Guid.NewGuid();
-        public string UserName;
     }
 }

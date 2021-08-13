@@ -14,7 +14,7 @@ namespace EventDriven.Domain.PoC.Domain.ExampleSpecifications
                         && string.IsNullOrWhiteSpace(x.LastName) == false
                         && string.IsNullOrWhiteSpace(x.Email) == false
                         && x.IsDraft == false
-                        && x.TheUserHasBeenDeleted == false
+                        && x.IsDeleted == false
                         && x.Active
                         && x.Email.Contains("@")
                 //&& x.Email.EndsWith(".edu")

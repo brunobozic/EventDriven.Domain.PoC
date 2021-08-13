@@ -35,6 +35,7 @@ using EventDriven.Domain.PoC.SharedKernel.Kafka.Settings;
 using Framework.Kafka.Core.Contracts;
 using MediatR;
 using MediatR.Pipeline;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -68,7 +69,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
         /// <param name="connStr"></param>
         /// <param name="services"></param>
         /// <returns></returns>
-        public static IContainer BuildContainer(string connStr, IServiceCollection services)
+        public static IContainer BuildContainer(string connStr, IServiceCollection services,
+            IWebHostEnvironment environment)
         {
             // create a builder
             var containerBuilder = new ContainerBuilder();
@@ -97,8 +99,9 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
                     false) // beware this will default to Production appsettings if no ENV is defined on the OS                                                                                                                            // .AddJsonFile("appsettings.local.json", true) // load local settings (usually used for local debugging sessions)  ==> this will override all the other previously loaded appsettings, so comment this out in production!
                 //.AddJsonFile("appsettings.local.json", true)
-                .SetBasePath(new FileInfo(processModule.FileName).DirectoryName) // this might fail on linux
+                //.SetBasePath(new FileInfo(processModule.FileName).DirectoryName) // this might fail on linux
                 //.SetBasePath(GetBasePath()) // this might fail on linux
+                .SetBasePath(environment.ContentRootPath)
                 .AddEnvironmentVariables()
                 .Build();
 

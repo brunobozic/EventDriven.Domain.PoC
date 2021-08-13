@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using Consul;
 using EventDriven.Domain.PoC.Api.Rest.Extensions;
 using EventDriven.Domain.PoC.Api.Rest.Filters;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
@@ -20,6 +21,7 @@ using EventDriven.Domain.PoC.SharedKernel.Helpers.EmailSender;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Quartz;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using HealthChecks.UI.Client;
 using Jaeger;
 using Jaeger.Reporters;
 using Jaeger.Samplers;
@@ -28,6 +30,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -35,6 +38,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -50,6 +54,7 @@ using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using Swashbuckle.AspNetCore.Swagger;
 using static EventDriven.Domain.PoC.SharedKernel.Helpers.Startup;
+using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 using ILogger = Serilog.ILogger;
 
 namespace EventDriven.Domain.PoC.Api.Rest
@@ -101,6 +106,17 @@ namespace EventDriven.Domain.PoC.Api.Rest
 #pragma warning restore 1591
         {
             var connStr = Configuration.GetConnectionString("Sqlite");
+            services.AddOptions();
+            services.Configure<ServiceDisvoveryOptions>(Configuration.GetSection("ServiceDiscovery"));
+            services.AddConsulConfig(Configuration);
+            services.AddSingleton<IConsulClient>(p => new ConsulClient(cfg =>
+            {
+                var serviceConfiguration = p.GetRequiredService<IOptions<ServiceDisvoveryOptions>>().Value;
+
+                if (!string.IsNullOrEmpty(serviceConfiguration.Consul.HttpEndpoint))
+                    // if not configured, the client will use the default value "127.0.0.1:8500"
+                    cfg.Address = new Uri(serviceConfiguration.Consul.HttpEndpoint);
+            }));
 
             #region MVC wireup
 
@@ -307,23 +323,38 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #endregion Jaeger wireup
 
+            #region Consul
+
+            services.AddConsulConfig(Configuration);
+
+            #endregion Consul
+
             #region HealthCheck
 
-            //services.AddHealthChecks()
-            // .AddCheck("self", () => HealthCheckResult.Healthy())
-            // //.AddSqlServer(Configuration.GetConnectionString("MSSql"),
-            // //   name: "EventDriven.Domain.PoC-check",
-            // //   tags: new[] { "EventDriven.Domain.PoC" })
-            // //.AddSqlite(connStr,
-            // //    name: "sql-check",
-            // //    tags: new[] { "EventDriven.Domain.PoC.Repository.EF" })
-            // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 10_000), "Check primary disk - warning", HealthStatus.Degraded)
-            // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 2_000), "Check primary disk - error", HealthStatus.Unhealthy)
-            // .AddProcessAllocatedMemoryHealthCheck(512) // 512 MB max allocated memory
-            //                                            //.AddProcessHealthCheck("ProcessName", p => p.Length > 0) // check if process is running;
-            // .AddFileWritePermissionsCheck(Env.WebRootPath)
-            // .AddUrlGroup(new Uri("https://localhost:5001/swagger"), name: "base URL", failureStatus: HealthStatus.Degraded)
-            // ;
+            //var consulOptions = new ConsulOptions
+            //{
+            //    HostName = "https://localhost",
+            //    RequireBasicAuthentication = false,
+            //    RequireHttps = true,
+            //    Port = 8500
+            //};
+
+            services.AddHealthChecks()
+                .AddCheck("self", () => HealthCheckResult.Healthy())
+                // .AddConsul(consulOptions, AppName, HealthStatus.Unhealthy, null, TimeSpan.FromSeconds(30))
+                // //.AddSqlServer(Configuration.GetConnectionString("MSSql"),
+                // //   name: "EventDriven.Domain.PoC-check",
+                // //   tags: new[] { "EventDriven.Domain.PoC" })
+                // //.AddSqlite(connStr,
+                // //    name: "sql-check",
+                // //    tags: new[] { "EventDriven.Domain.PoC.Repository.EF" })
+                // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 10_000), "Check primary disk - warning", HealthStatus.Degraded)
+                // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 2_000), "Check primary disk - error", HealthStatus.Unhealthy)
+                // .AddProcessAllocatedMemoryHealthCheck(512) // 512 MB max allocated memory
+                // .AddProcessHealthCheck("ProcessName", p => p.Length > 0) // check if process is running;
+                // .AddFileWritePermissionsCheck(Env.WebRootPath)
+                // .AddUrlGroup(new Uri("https://localhost:5001/swagger"), name: "base URL", failureStatus: HealthStatus.Degraded)
+                ;
 
             ////adding healthchecks UI
             //services.AddHealthChecksUI(opt =>
@@ -392,7 +423,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
             // ================================================================================================
             // ================================================================================================
 
-            var builtContainer = Bootstrap.BuildContainer(connStr, services);
+            var builtContainer = Bootstrap.BuildContainer(connStr, services, Env);
 
             // ================================================================================================
             // ================================================================================================
@@ -448,6 +479,9 @@ namespace EventDriven.Domain.PoC.Api.Rest
             , IWebHostEnvironment env
             //, ILoggerFactory loggerFactory
             //, ApplicationDbContext myDbContext
+            , IOptions<ServiceDisvoveryOptions> serviceOptions
+            , IConsulClient consul
+            , IApplicationLifetime appLife
         )
         {
             if (env.IsDevelopment())
@@ -460,6 +494,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
 
             //_ = DbInitializer.InitializeAsync(myDbContext);
 
@@ -475,16 +510,20 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #endregion Swagger wireup
 
-            //app.UseHealthChecks("/hc", new HealthCheckOptions
-            //{
-            //    Predicate = _ => true,
-            //    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            //});
+            #region HealthCheck
 
-            //app.UseHealthChecks("/liveness", new HealthCheckOptions
-            //{
-            //    Predicate = r => r.Name.Contains("self")
-            //});
+            app.UseHealthChecks("/hc", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            app.UseHealthChecks("/liveness", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self")
+            });
+
+            #endregion HelathCheck
 
             app.UseStaticFiles();
 
@@ -582,6 +621,12 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     //endpoints.MapHealthChecksUI();
                 }
             );
+
+            #region Consul
+
+            app.UseConsul();
+
+            #endregion Consul
         }
 
         private ILogger ConfigureLogger(IConfiguration configuration)

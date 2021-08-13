@@ -63,7 +63,8 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
 
             var user = await _userRepository
                 .Queryable()
-                .Where(u => u.NormalizedEmail == command.Email.Trim().ToUpper() && u.NormalizedUserName == command.UserName.Trim().ToUpper())
+                .Where(u => u.NormalizedEmail == command.Email.Trim().ToUpper() &&
+                            u.NormalizedUserName == command.UserName.Trim().ToUpper())
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (user == null)

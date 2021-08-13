@@ -10,7 +10,10 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
         public string Email;
         public string FirstName;
         public string LastName;
+
+        public string Origin;
         public Guid UserId;
+        public string UserName;
 
         public SendAccountVerificationMailCommand(
             string activationLink,
@@ -32,8 +35,5 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
             LastName = lastName;
             Origin = origin;
         }
-
-        public string Origin;
-        public string UserName;
     }
 }

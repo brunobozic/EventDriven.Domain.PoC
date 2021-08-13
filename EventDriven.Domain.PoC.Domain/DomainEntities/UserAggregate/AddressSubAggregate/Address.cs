@@ -31,7 +31,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         public string GetAddressTypeName()
         {
             if (AddressType != null && AddressType.EnsureIsActive() && AddressType.Active &&
-                !AddressType.TheUserHasBeenDeleted)
+                !AddressType.IsDeleted)
                 return AddressType.Name;
             return "Not available (inactive, deleted, does not exist)";
         }
@@ -167,7 +167,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             if (activeFrom == DateTimeOffset.MinValue) activeFrom = DateTimeOffset.UtcNow;
 
             if (activeTo == DateTimeOffset.MinValue)
-                activeTo = DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES);
+                activeTo = DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants
+                    .DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES);
 
             address.Activate(activeFrom, activeTo, creatorUser);
 
@@ -203,7 +204,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void SetLine1(string line1, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
                 Line1 = line1;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -218,7 +219,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void SetLine2(string line2, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
                 Line2 = line2;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -233,7 +234,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void SetFlatNr(int flatNumber, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
                 FlatNr = flatNumber;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -248,7 +249,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void SetPostalCode(string postalCode, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
                 PostalCode = postalCode;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -263,7 +264,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void SetHouseNumber(int houseNumber, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
                 HouseNumber = houseNumber;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -278,7 +279,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void SetHouseNumberSuffix(string houseNumberSuffix, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
                 HouseNumberSuffix = houseNumberSuffix;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -293,9 +294,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void AssignAddressType(AddressType addressType, User changedBy)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
             {
-                if (addressType.EnsureIsActive() && !addressType.IsDeleted() && !IsDeactivated())
+                if (addressType.EnsureIsActive() && !addressType.IsDeleted && !IsDeactivated())
                 {
                     AddressType = addressType;
                     AddDomainEvent(new UserUpdatedAddressDomainEvent
@@ -319,11 +320,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             return ActiveTo >= DateTimeOffset.UtcNow;
         }
 
-        public virtual bool IsDeleted()
-        {
-            return TheUserHasBeenDeleted;
-        }
-
         public virtual bool IsDeactivated()
         {
             return !Active;
@@ -335,6 +331,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool TheAddressHasBeenDeleted()
         {
             throw new NotImplementedException();
         }

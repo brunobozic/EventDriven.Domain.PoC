@@ -15,6 +15,8 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.No
         public string Origin;
         public Guid UserId;
 
+        public string UserName;
+
         public UserCreatedNotification(UserCreatedDomainEvent integrationEvent) : base(integrationEvent)
         {
             UserId = integrationEvent.UserId;
@@ -48,7 +50,5 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.No
             UserName = userName;
             Origin = this.Origin;
         }
-
-        public string UserName;
     }
 }

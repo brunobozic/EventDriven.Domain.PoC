@@ -15,7 +15,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
     {
         public static async Task SeedUsersAsync(ApplicationDbContext myDbContext, IMyUnitOfWork myUnitOfWork)
         {
-            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == ApplicationWideConstants.SYSTEM_USER_USERNAME))
+            if (!myDbContext.ApplicationUsers.Any(
+                user => user.UserName == ApplicationWideConstants.SYSTEM_USER_USERNAME))
             {
                 var newUser = User.NewActiveWithPasswordAndEmailVerified(
                     Guid.Parse(ApplicationWideConstants.SYSTEM_USER)
@@ -76,9 +77,11 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == ApplicationWideConstants.AdministratorRoleName) == null)
+            if (myDbContext.ApplicationRoles.SingleOrDefault(r =>
+                r.Name == ApplicationWideConstants.AdministratorRoleName) == null)
             {
-                var role = Role.NewActiveDraft(ApplicationWideConstants.AdministratorRoleName, "Admin role", DateTimeOffset.UtcNow,
+                var role = Role.NewActiveDraft(ApplicationWideConstants.AdministratorRoleName, "Admin role",
+                    DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1), creatorUser);
 
                 var result = await myDbContext.ApplicationRoles.AddAsync(role);

@@ -1,22 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
-using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
-using EventDriven.Domain.PoC.Repository.EF.Seed;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
-namespace EventDriven.Domain.PoC.Api.Rest
+namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
 {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class Program
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
 #pragma warning disable 1591
         public static readonly string Namespace = typeof(Program).Namespace;
@@ -24,10 +17,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public static readonly string AppName = Namespace;
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public static int Main(string[] args)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
             var configuration = GetConfiguration();
 
@@ -37,36 +28,11 @@ namespace EventDriven.Domain.PoC.Api.Rest
             {
                 Log.Warning("Configuring web host ({ApplicationContext})...", AppName);
 
-                var host = BuildWebHost(configuration, args);
-
-                Log.Warning("Applying migrations ({ApplicationContext})...", AppName);
-
-                using (var newScope = host.Services.CreateScope())
-                {
-                    var context = newScope.ServiceProvider.GetService<ApplicationDbContext>();
-                    context.Database.Migrate();
-                    var uow = newScope.ServiceProvider.GetService<IMyUnitOfWork>();
-
-                    try
-                    {
-                        IdentitySeed.SeedUsersAsync(context, uow).Wait();
-                    }
-                    catch (Exception seedEx)
-                    {
-                        Log.Fatal("Error while applying migrations...", seedEx);
-
-                        Debug.WriteLine(seedEx.Message);
-
-                        Console.WriteLine(seedEx.Message);
-
-                        return 1;
-                    }
-                }
+                var host = CreateWebHostBuilder(args).Build();
 
                 Log.Warning("Starting web host ({ApplicationContext})...", AppName);
 
                 host.Run();
-
 
                 return 0;
             }
@@ -77,58 +43,35 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 return 1;
             }
         }
-
 #pragma warning disable 1591
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
 #pragma warning restore 1591
         {
             return WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(false)
-                .UseStartup<Startup>()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                //.UseIIS() // <===== For use in "in process" IIS scenarios: 
-                .UseKestrel(opts =>
-                {
-                    // Bind directly to a socket handle or Unix socket
-                    // opts.ListenHandle(123554);
-                    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                    //opts.Listen(IPAddress.Loopback, port: 5001);
-                    //opts.ListenAnyIP(5000);
-                    //opts.ListenLocalhost(5000);
-                    //opts.ListenLocalhost(5003, opts => opts.UseHttps());
-                    //opts.ListenLocalhost(5004, opts => opts.UseHttps());
-                })
-                //.UseUrls("http://localhost:5000")
-                .UseUrls("http://*:5000")
-                .UseSerilog();
+                    .CaptureStartupErrors(false)
+                    .UseStartup<Startup>()
+                    .UseContentRoot(Directory.GetCurrentDirectory())
+                    //.UseIIS() // <===== For use in "in process" IIS scenarios: 
+                    .UseSerilog()
+                    .UseUrls("http://*:9000")
+                    .ConfigureAppConfiguration((hostingContext, config) =>
+                    {
+                        config
+                            .SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
+                            .AddJsonFile("ocelot.json", false)
+                            .AddEnvironmentVariables()
+                            ;
+                    })
+                //.ConfigureServices(services =>
+                //{
+                //    services
+                //        .AddOcelot()
+                //        .AddConsul();
+                //})
+                //.Configure(app => { app.UseOcelot().Wait(); })
+                ;
         }
 
-#pragma warning disable 1591
-        public static IWebHost BuildWebHost(IConfiguration configuration, string[] args)
-#pragma warning restore 1591
-        {
-            return WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(false)
-                .UseStartup<Startup>()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseConfiguration(configuration)
-                //.UseIIS() // <===== For use in "in process" IIS scenarios: 
-                .UseKestrel(opts =>
-                {
-                    // Bind directly to a socket handle or Unix socket
-                    // opts.ListenHandle(123554);
-                    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                    //opts.Listen(IPAddress.Loopback, port: 5001);
-                    //opts.ListenAnyIP(5000);
-                    //opts.ListenLocalhost(5000);
-                    //opts.ListenLocalhost(5003, opts => opts.UseHttps());
-                    //opts.ListenLocalhost(5004, opts => opts.UseHttps());
-                })
-                //.UseUrls("http://localhost:5000", "https://localhost:5001")
-                .UseUrls("http://*:5000")
-                .UseSerilog()
-                .Build();
-        }
 
         [Obsolete]
         private static ILogger CreateSerilogLogger(IConfiguration configuration)

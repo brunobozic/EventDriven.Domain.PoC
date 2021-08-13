@@ -40,7 +40,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
             // activated by the creator
             userAddress.Activate(DateTimeOffset.UtcNow,
-                DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
+                DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS),
+                creator);
 
             return userAddress;
         }
@@ -53,7 +54,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
             // activated by the creator
             userAddress.Activate(DateTimeOffset.UtcNow,
-                DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
+                DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS),
+                creator);
             userAddress.ActivatedById = creator.Id;
 
             return userAddress;
@@ -79,10 +81,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             return ActiveTo >= DateTimeOffset.UtcNow;
         }
 
-        public virtual bool IsDeleted()
-        {
-            return TheUserHasBeenDeleted;
-        }
 
         public virtual bool IsDeactivated()
         {
@@ -95,6 +93,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool TheAddressHasBeenDeleted()
         {
             throw new NotImplementedException();
         }

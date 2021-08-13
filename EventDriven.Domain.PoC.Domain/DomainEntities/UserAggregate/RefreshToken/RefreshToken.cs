@@ -13,6 +13,16 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToke
 
         #endregion FK
 
+
+        #region Public Methods
+
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Public Methods
+
         #region ctor
 
         private RefreshToken()
@@ -57,20 +67,5 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToke
         public bool IsActive => Revoked == null && !IsExpired;
 
         #endregion Public properties
-
-
-        #region Public Methods
-
-        public virtual bool IsDeleted()
-        {
-            return Deleted;
-        }
-
-        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion Public Methods
     }
 }

@@ -8,6 +8,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 {
     public class AddressType : BasicDomainEntity<long>, IAuditTrail
     {
+        public bool TheAddressTypeHasBeenDeleted()
+        {
+            return IsDeleted;
+        }
+
         #region Public properties
 
         public Guid? ReactivatedById { get; set; }
@@ -67,7 +72,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         public void ChangeDescription(string newDescription)
         {
-            if (EnsureIsActive() && !IsDeleted() && !IsDeactivated())
+            if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
                 Description = newDescription;
             else
                 throw new DomainException(
@@ -77,11 +82,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         public bool EnsureIsActive()
         {
             return ActiveTo >= DateTimeOffset.UtcNow;
-        }
-
-        public virtual bool IsDeleted()
-        {
-            return TheUserHasBeenDeleted;
         }
 
         public virtual bool IsDeactivated()

@@ -73,7 +73,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
         public User DeactivatedBy { get; private set; }
         public string DeactivateReason { get; private set; }
 
-        public bool TheUserHasBeenDeleted { get; private set; }
         public User UndeletedBy { get; private set; }
 
         internal void AssignCreatedBy(User creatorUser)
@@ -141,14 +140,16 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         public void Delete(User deletedBy, string reason)
         {
-            TheUserHasBeenDeleted = true;
+            IsDeleted = true;
             DeletedBy = deletedBy;
             DeleteReason = reason;
         }
 
+        public bool IsDeleted { get; set; }
+
         public void Undelete(User undeletedBy, string reason)
         {
-            TheUserHasBeenDeleted = false;
+            IsDeleted = false;
             UndeletedBy = undeletedBy;
             UndeleteReason = reason;
         }

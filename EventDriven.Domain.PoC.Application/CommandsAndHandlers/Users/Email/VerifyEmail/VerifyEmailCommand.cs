@@ -6,6 +6,12 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.VerifyEma
 {
     public class VerifyEmailCommand : ICommand<VerifyEmailResponse>
     {
+        public string Email;
+        public string EmailVerificationToken;
+        public Guid UserId;
+
+        public string UserName;
+
         public VerifyEmailCommand(string emailVerificationToken, Guid userId, string userEmail, string userName)
         {
             EmailVerificationToken = emailVerificationToken;
@@ -14,11 +20,7 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.VerifyEma
             UserName = userName;
         }
 
-        public string UserName;
-        public string EmailVerificationToken;
         public string Origin { get; set; } = "";
-        public Guid UserId;
-        public string Email;
         public Guid Id { get; set; } = Guid.NewGuid();
     }
 }

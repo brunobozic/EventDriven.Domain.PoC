@@ -99,7 +99,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
                 .OnDelete(DeleteBehavior.SetNull)
                 ;
 
-            builder.HasQueryFilter(p => !p.IsDeleted());
+            builder.HasQueryFilter(p => !p.IsDeleted);
         }
     }
 }

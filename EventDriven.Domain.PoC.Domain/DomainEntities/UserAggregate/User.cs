@@ -384,7 +384,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         // TODO: transform to event driven
         public bool AssignAddress(Address address, AddressType addressType, User addressAssigner)
         {
-            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || TheUserHasBeenDeleted)
+            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add an address to it. Current registration status: {GetCurrentRegistrationStatus()}");
             var newAddress = address;
@@ -412,14 +412,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         // TODO: transform to event driven
         public bool RemoveAddressFromUser(Address addressToRemove, AddressType addressType, User addressRemover)
         {
-            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || TheUserHasBeenDeleted)
+            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add an address to it. Current registration status: {GetCurrentRegistrationStatus()}");
             var userAddressIdsToDelete = _userAddresses
                 .Where(userAddress =>
-                    !userAddress.TheUserHasBeenDeleted &&
+                    !userAddress.TheAddressHasBeenDeleted() &&
                     userAddress.Address.AddressIdGuid == addressToRemove.AddressIdGuid &&
-                    !userAddress.Address.TheUserHasBeenDeleted)
+                    !userAddress.Address.TheAddressHasBeenDeleted())
                 .Select(uid => uid.Id)
                 .ToList();
 
@@ -521,7 +521,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         /// <returns></returns>
         private bool TheUserIsInActiveState()
         {
-            return ActiveTo >= DateTimeOffset.UtcNow;
+            if (ActiveTo != null)
+                return ActiveTo >= DateTimeOffset.UtcNow;
+
+            return true;
         }
 
         private bool TheUserHadBeenVerified()
@@ -535,9 +538,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         /// </summary>
         public new bool Activate(DateTimeOffset from, DateTimeOffset to, User activatedBy)
         {
-            if (!TheUserIsInActiveState() || !TheUserHasBeenDeleted)
+            if (!TheUserIsInActiveState() || IsDeleted)
                 throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to activate it. Current registration status: {GetCurrentRegistrationStatus()}");
+                    $"The user [{UserName} / {Email}] is either deactivated [current activation status: {TheUserIsInActiveState()}], deleted [current: {IsDeleted}] or has not yet verified his account, hence we are unable to activate it. Current registration status: {GetCurrentRegistrationStatus()}");
             try
             {
                 base.Activate(from, to, activatedBy);
@@ -566,7 +569,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         /// </summary>
         public bool Deactivate(DateTimeOffset from, DateTimeOffset to, User deactivatedBy, string reason)
         {
-            if (TheUserIsInActiveState() || !TheUserHasBeenDeleted)
+            if (TheUserIsInActiveState() || IsDeleted)
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to deactivate it. Current registration status: {GetCurrentRegistrationStatus()}");
             try
@@ -599,10 +602,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool AddRole(Role role, User roleGiver)
         {
-            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || TheUserHasBeenDeleted)
+            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a role [ {role.Name} ] to it. Current registration status: {GetCurrentRegistrationStatus()}");
-            if (role.IsExpired(DateTime.Now) || role.IsDeleted())
+            if (role.IsExpired(DateTime.Now) || role.IsDeleted)
                 throw new DomainException(
                     $"The role entity [ {role.Name} ] is either expired or deleted, hence we are unable to add it to the user.");
             var newJoin = UserRole.NewActivatedDraft(this, role, roleGiver);
@@ -630,10 +633,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool RemoveRole(Role role, User removerUser)
         {
-            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || TheUserHasBeenDeleted)
+            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove a role [ {role.Name} ] from it. Current registration status: {GetCurrentRegistrationStatus()}");
-            if (role.IsExpired(DateTime.Now) || role.IsDeleted())
+            if (role.IsExpired(DateTime.Now) || role.IsDeleted)
                 throw new DomainException(
                     $"The role entity [ {role.Name} ] is either expired or deleted, hence we are unable to remove it from the user.");
             var linkTableEntry =
@@ -672,7 +675,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             // unfortunately I need a synchronous response here
             var friendlyErrorResponse = "OK";
 
-            if (TheUserIsInActiveState() && !TheUserHasBeenDeleted &&
+            if (TheUserIsInActiveState() && !IsDeleted &&
                 VerificationTokenExpirationDate >= DateTime.UtcNow)
             {
                 Verified = DateTime.UtcNow;
@@ -695,7 +698,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 LatestVerificationFailureMessage = friendlyErrorResponse + ", ";
             }
 
-            if (TheUserHasBeenDeleted)
+            if (IsDeleted)
             {
                 friendlyErrorResponse +=
                     $"Unable to verify user account [{UserName} / {Email}], the account is deleted. Current registration status: {GetCurrentRegistrationStatus()}" +
@@ -720,7 +723,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool AddPasswordHash(string password)
         {
-            if (!TheUserIsInActiveState() || TheUserHasBeenDeleted)
+            if (!TheUserIsInActiveState() || IsDeleted)
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a password to it. Current registration status: {GetCurrentRegistrationStatus()}");
             PasswordHash = BC.HashPassword(password);
@@ -730,7 +733,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         // TODO: transform to event driven
         public bool CreatePasswordResetToken(string randomToken)
         {
-            if (TheUserIsInActiveState() && !TheUserHasBeenDeleted && TheUserHadBeenVerified())
+            if (TheUserIsInActiveState() && !IsDeleted && TheUserHadBeenVerified())
             {
                 ResetToken = randomToken;
                 ResetTokenExpires = DateTime.UtcNow.AddHours(8);
@@ -755,10 +758,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool AddVerificationToken(string verificationToken)
         {
-            if (TheUserIsInActiveState() && !TheUserHasBeenDeleted)
+            if (TheUserIsInActiveState() && !IsDeleted)
             {
                 EmailVerificationToken = verificationToken;
-                VerificationTokenExpirationDate = DateTime.UtcNow.AddHours(ApplicationWideConstants.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
+                VerificationTokenExpirationDate =
+                    DateTime.UtcNow.AddHours(ApplicationWideConstants.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
             }
             else
             {
@@ -771,8 +775,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool RemoveStaleRefreshTokens()
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !TheUserHasBeenDeleted)
-                _refreshTokens.RemoveAll(x => x.Created.AddDays(ApplicationWideConstants.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
+                _refreshTokens.RemoveAll(x =>
+                    x.Created.AddDays(ApplicationWideConstants.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
             else
                 throw new DomainException(
                     $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove stale refresh tokens from it. Current registration status: {GetCurrentRegistrationStatus()}");
@@ -782,7 +787,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool AddRefreshToken(RefreshToken.RefreshToken refreshToken)
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !TheUserHasBeenDeleted)
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
                 _refreshTokens.Add(refreshToken);
             else
                 throw new DomainException(
@@ -793,7 +798,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public List<RefreshToken.RefreshToken> GetRefreshTokens()
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !TheUserHasBeenDeleted)
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
                 return _refreshTokens.ToList();
             throw new DomainException(
                 $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to fetch refresh tokens for it. Current registration status: {GetCurrentRegistrationStatus()}");
@@ -801,7 +806,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         private bool UpdatePasswordThenRemoveResetToken(string newPassword)
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !TheUserHasBeenDeleted)
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
             {
                 if (VerificationTokenHasNotExpired())
                 {
@@ -835,7 +840,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public bool OwnsToken(string refreshToken)
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !TheUserHasBeenDeleted)
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
                 return _refreshTokens?.Find(x => x.Token == refreshToken) != null;
             throw new DomainException(
                 $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to fetch a token to it. Current registration status: {GetCurrentRegistrationStatus()}");

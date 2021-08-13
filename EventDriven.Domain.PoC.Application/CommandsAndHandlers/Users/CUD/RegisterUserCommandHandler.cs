@@ -36,7 +36,8 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
         {
             // cant log the creator user because when registering a new user, we dont have the creator user in the db
             var creator = await UserRepository.Queryable().AsNoTrackingWithIdentityResolution()
-                .SingleOrDefaultAsync(user => user.Id == Guid.Parse(ApplicationWideConstants.SYSTEM_USER), cancellationToken);
+                .SingleOrDefaultAsync(user => user.Id == Guid.Parse(ApplicationWideConstants.SYSTEM_USER),
+                    cancellationToken);
 
             var doesTheUserAlreadyExist = await UserRepository.Queryable().AsNoTrackingWithIdentityResolution()
                 .AnyAsync(user => user.NormalizedEmail == command.Email.Trim().ToUpper(), cancellationToken);
