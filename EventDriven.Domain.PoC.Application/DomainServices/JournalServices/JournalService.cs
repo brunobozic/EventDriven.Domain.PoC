@@ -65,8 +65,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
                 var entry = new AccountJournalEntry(journalEntryMessage);
                 entry.AttachActingUser(actorEntity);
                 entry.AttachUser(actedUponEntity);
-                entry.Activate(DateTime.UtcNow, DateTime.UtcNow.AddYears(3), actedUponEntity);
-
+             
                 var saved = await UnitOfWork.SaveChangesAsync();
 
                 retVal.Success = true;
@@ -86,7 +85,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
 
             try
             {
-                var listOfEntries = await JournalRepository.Queryable().Where(entry => entry.Active).ToListAsync();
+                var listOfEntries = await JournalRepository.Queryable().ToListAsync();
 
                 var mapped = _mapper.Map<List<AccountJournalEntryViewModel>>(listOfEntries);
 
@@ -109,11 +108,11 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
             try
             {
                 if (Guid.Empty == userId) { throw new ArgumentNullException(nameof(userId)); };
-                var entry = await JournalRepository.Queryable().Where(entry => entry.Active && entry.Id == userId).SingleAsync();
+                var entry = await JournalRepository.Queryable().Where(e => e.UserActedUponId == userId).ToListAsync();
 
-                var mapped = _mapper.Map<AccountJournalEntryViewModel>(entry);
+                //var mapped = _mapper.Map<AccountJournalEntryViewModel>(entry);
 
-                retVal.ViewModel = mapped;
+                retVal.ViewModel.ListOfEntries = entry;
                 retVal.Success = true;
                 retVal.Message = $"Returned [ {1} ] entries."; 
             }

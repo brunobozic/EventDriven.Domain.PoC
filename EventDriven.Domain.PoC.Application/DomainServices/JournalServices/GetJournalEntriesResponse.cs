@@ -4,6 +4,6 @@
     {
         public bool Success { get; set; } = false;
         public string Message { get; set; } = string.Empty;
-        internal AccountJournalEntryViewModel ViewModel { get; set; }
+        public AccountJournalEntryViewModel ViewModel { get; set; }
     }
 }

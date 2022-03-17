@@ -10,6 +10,8 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
         public void Configure(EntityTypeBuilder<AccountJournalEntry> builder)
         {
             builder.HasKey(p => p.JournalId);
+            builder.Property(p => p.JournalId)
+                .ValueGeneratedOnAdd();
 
             builder.Property(p => p.Message)
                 .IsRequired();

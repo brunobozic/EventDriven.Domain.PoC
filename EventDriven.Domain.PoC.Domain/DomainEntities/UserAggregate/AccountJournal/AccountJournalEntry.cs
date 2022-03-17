@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal
 {
-    public class AccountJournalEntry :BasicDomainEntity<Guid>
+    public class AccountJournalEntry : JournalEntityOfT<Guid>
     {
         #region Public Methods
 
@@ -69,16 +69,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
 
         #region FK
 
-        public Guid?
-            ActingUserId
+        public Guid? ActingUserId
         {
             get;
             private set;
         } // nullable because of an annoying issue with not having this information when the user is not yet authenticated (registered)
 
         public Guid UserActedUponId { get; private set; }
-        public object JournalId { get; set; }
-
+       
         #endregion FK
     }
 }
