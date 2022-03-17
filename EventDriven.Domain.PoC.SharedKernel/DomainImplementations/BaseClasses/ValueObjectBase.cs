@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 
 namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
 {

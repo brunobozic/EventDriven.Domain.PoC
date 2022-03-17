@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Principal;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.SharedKernel.ActiveDirectory;
+﻿using EventDriven.Domain.PoC.SharedKernel.ActiveDirectory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ActiveDirectory
 {

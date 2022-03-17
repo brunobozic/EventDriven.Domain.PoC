@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using EventDriven.Domain.PoC.SharedKernel.Helpers;
 using EventDriven.Domain.PoC.SharedKernel.Kafka.Settings;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaProducer;
 using Serilog;
+using System;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
 {
@@ -65,7 +65,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
         public async Task WriteLogMessageAsync(string message)
         {
             await _producer.ProduceAsync(_topicName,
-                    new Message<string, string> {Key = rand.Next(5).ToString(), Value = message})
+                    new Message<string, string> { Key = rand.Next(5).ToString(), Value = message })
                 .ContinueWith(task => task.IsFaulted
                     ? $"error producing message: {task.Exception.Message}"
                     : $"produced to: {task.Result.TopicPartitionOffset}");

@@ -2,10 +2,10 @@
 // Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 // See the LICENSE file in the project root for more information
 
-using System.IO;
-using System.Text;
 using Serilog.Events;
 using Serilog.Formatting;
+using System.IO;
+using System.Text;
 
 namespace Elastic.CommonSchema.Serilog
 {

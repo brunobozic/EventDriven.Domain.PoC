@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.SharedKernel.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Repository.EF.Seed
 {

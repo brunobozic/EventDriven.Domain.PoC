@@ -1,14 +1,14 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
+﻿using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.PhaseOne

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
+using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
-using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
-using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 using TrackableEntities.Common.Core;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities
@@ -29,10 +29,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
         public static bool operator ==(BasicDomainEntity<TK> entity1,
             BasicDomainEntity<TK> entity2)
         {
-            if ((object) entity1 == null && (object) entity2 == null)
+            if ((object)entity1 == null && (object)entity2 == null)
                 return true;
 
-            if ((object) entity1 == null || (object) entity2 == null)
+            if ((object)entity1 == null || (object)entity2 == null)
                 return false;
 
             if (entity1.Id.ToString() == entity2.Id.ToString())

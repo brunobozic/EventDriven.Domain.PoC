@@ -1,7 +1,7 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using FluentValidation;
+using System;
+using System.Text.RegularExpressions;
 
 namespace EventDriven.Domain.PoC.Application.FluentValidators
 {

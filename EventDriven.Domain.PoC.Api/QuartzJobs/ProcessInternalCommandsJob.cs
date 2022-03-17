@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
+﻿using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.InternalCommands;
 using Quartz;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
 {

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
 using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command.Handlers
 {

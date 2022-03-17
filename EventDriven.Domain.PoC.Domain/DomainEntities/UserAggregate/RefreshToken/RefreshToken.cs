@@ -37,6 +37,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToke
             RevokedByIp = revokedByIp;
         }
 
+        public RefreshToken(string token, string createdByIp, DateTime validUntil)
+        {
+            Token = token;
+            Expires = validUntil;
+            Created = DateTime.UtcNow;
+            RevokedByIp = createdByIp;
+        }
+
         public static RefreshToken NewRefreshTokenDraft(string token, string revokedByIp)
         {
             var newtoken = new RefreshToken(token, revokedByIp);
@@ -65,6 +73,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToke
 
         public string ReplacedByToken { get; set; }
         public bool IsActive => Revoked == null && !IsExpired;
+
+        public string V { get; }
+        public string IpAddress { get; }
+        public DateTime DateTime { get; }
 
         #endregion Public properties
     }

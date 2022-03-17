@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.DomainEventDispatchers
 {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Autofac.Core.Activators.Reflection;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
-using Autofac.Core.Activators.Reflection;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers
 {

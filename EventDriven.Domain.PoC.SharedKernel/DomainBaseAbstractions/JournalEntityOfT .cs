@@ -1,12 +1,12 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
+using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 using TrackableEntities.Common.Core;
 
 namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
@@ -28,10 +28,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         public static bool operator ==(JournalEntityOfT<TK> entity1,
             JournalEntityOfT<TK> entity2)
         {
-            if ((object) entity1 == null && (object) entity2 == null)
+            if ((object)entity1 == null && (object)entity2 == null)
                 return true;
 
-            if ((object) entity1 == null || (object) entity2 == null)
+            if ((object)entity1 == null || (object)entity2 == null)
                 return false;
 
             if (entity1.JournalId.ToString() == entity2.JournalId.ToString())

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal
 {
-    public class AccountJournalEntry : JournalEntityOfT<Guid>
+    public class AccountJournalEntry :BasicDomainEntity<Guid>
     {
         #region Public Methods
 
@@ -77,6 +77,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
         } // nullable because of an annoying issue with not having this information when the user is not yet authenticated (registered)
 
         public Guid UserActedUponId { get; private set; }
+        public object JournalId { get; set; }
 
         #endregion FK
     }

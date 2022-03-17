@@ -32,7 +32,6 @@
     <Folder Include="CommandsAndHandlers\Addresses\CUD\" />
     <Folder Include="CommandsAndHandlers\Roles\CUD\" />
     <Folder Include="EventsAndEventHandlers\Users\PasswordReset\" />
-    <Folder Include="EventsAndEventHandlers\Addresses\" />
     <Folder Include="EventsAndEventHandlers\Users\UserUpdates\Handlers\" />
     <Folder Include="EventsAndEventHandlers\Roles\Activation\Handlers\" />
     <Folder Include="EventsAndEventHandlers\Roles\RoleUpdates\" />

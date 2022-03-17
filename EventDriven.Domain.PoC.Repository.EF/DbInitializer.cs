@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
+﻿using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Repository.EF
 {

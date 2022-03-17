@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
+using System;
+using System.Collections.Generic;
 
 namespace Framework.Kafka.Core.Contracts
 {

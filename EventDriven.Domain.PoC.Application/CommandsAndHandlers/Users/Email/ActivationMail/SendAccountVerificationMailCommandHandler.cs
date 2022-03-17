@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
@@ -13,6 +9,10 @@ using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.ActivationMail

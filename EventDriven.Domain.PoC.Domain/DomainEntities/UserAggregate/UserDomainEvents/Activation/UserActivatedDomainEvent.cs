@@ -1,5 +1,5 @@
-﻿using System;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation
 {
@@ -11,6 +11,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , Guid userId
             , string oib
             , Guid activatedById
+            , string activatedByUsername
             , string activationReason
         )
         {
@@ -23,7 +24,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             ActivationDateStamp = DateTime.UtcNow;
         }
 
-        public Guid? ActivatedById { get; set; }
+        public Guid ActivatedById { get; set; }
+        public string ActivatedByUsername { get; set; }
         public string ActivationReason { get; set; }
         public DateTime ActivationDateStamp { get; set; }
         public string Email { get; set; }

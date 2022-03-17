@@ -1,17 +1,49 @@
-dotnet ef migrations add Initial --project EventDriven.Domain.PoC.Repository.EF
-dotnet ef database update --project EventDriven.Domain.PoC.Repository.EF 
 
+# The app
 
+- depending on the way in which you start your debugging session the app will be available on different (possibly) URLs
+    - the expected URL (debug session started *without* using docker) will be: https://localhost:6001/swagger/index.html
+
+# EF migrations
+
+The project that is a home for EF context is the Repository.EF, therefore the migrations are started using these commands
+
+- `dotnet ef migrations add Initial --project EventDriven.Domain.PoC.Repository.EF`
+- `dotnet ef database update --project EventDriven.Domain.PoC.Repository.EF`
+
+# Jaeger and consul (service discovery)
+
+The ideas behind Consul, Eureka and Jaeger are the following:
+- I need all services to be registered in a key value store so I can query that store to always know what service is available (and healthy)
+    - the key values store is Consul
+    - the services register themselves and are then discoverable via Eureka
+    - the spans that happen between the services are being traced and logged via Jaeger
 
 ## Liveness probe 
-- URL: https://localhost:5001/liveness
+- URL: https://localhost:6001/liveness
 
 ## Rudimentary HC endpoint
-- URL: https://localhost:5001/hc
 
-- URL: https://localhost:5001/healthchecks-ui#/healthchecks
+Basically this is used by load balancers or service discovery subsystem so they know that a service is "alive"
+The data presented via the /hc endpoint can also be used for dashboard purposes (Grafana or Kibana) if one so desires
+
+- URL: https://localhost:6001/hc
+
+The following is the hc UI which is not all that important, its just an UI over the /hc json payload
+Depending on the version of .net core and the version of hc package, there tend to be some incompatibilies, so I usually leave the UI out until it matures 
+
+- URL: https://localhost:6001/healthchecks-ui#/healthchecks 
 
 ## Jaeger (open tracing)
+- Jaeger is located in a docker container (see docker-compose)
+- URL: http://localhost:16686/search
+
+## Consul
+The key values store where we keep the service registrations 
+- URL: http://localhost:8500/ui/dc1/services/consul/instances
+
+
+# Event driven architecture
 
 ## Commands
 

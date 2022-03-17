@@ -1,8 +1,8 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationRoles;
+using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationRoles;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 
 namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers
 {

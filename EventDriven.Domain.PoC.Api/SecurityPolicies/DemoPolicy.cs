@@ -1,8 +1,8 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
+using Microsoft.AspNetCore.Authorization;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
-using Microsoft.AspNetCore.Authorization;
 
 namespace EventDriven.Domain.PoC.Api.Rest.SecurityPolicies
 {

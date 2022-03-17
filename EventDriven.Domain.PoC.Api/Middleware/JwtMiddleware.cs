@@ -1,14 +1,14 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
+﻿using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Middleware
 {
@@ -51,7 +51,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Middleware
                     ClockSkew = TimeSpan.Zero
                 }, out var validatedToken);
 
-                var jwtToken = (JwtSecurityToken) validatedToken;
+                var jwtToken = (JwtSecurityToken)validatedToken;
                 var applicationUserId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 // attach applicationUser to context on successful jwt validation

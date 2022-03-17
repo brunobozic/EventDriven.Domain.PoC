@@ -1,7 +1,7 @@
-﻿using System.Net;
-using EventDriven.Domain.PoC.SharedKernel.Helpers.EmailSender;
+﻿using EventDriven.Domain.PoC.SharedKernel.Helpers.EmailSender;
 using EventDriven.Domain.PoC.SharedKernel.Kafka.Settings;
 using Framework.Kafka.Core.KafkaSettings;
+using System.Net;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration
 {

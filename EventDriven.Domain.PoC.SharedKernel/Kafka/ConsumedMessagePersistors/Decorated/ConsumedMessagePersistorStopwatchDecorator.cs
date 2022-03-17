@@ -1,9 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
+﻿using EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Framework.Kafka.Core.DTOs.MessageProcessor;
 using Serilog;
+using System;
+using System.Diagnostics;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors.Decorated
 {

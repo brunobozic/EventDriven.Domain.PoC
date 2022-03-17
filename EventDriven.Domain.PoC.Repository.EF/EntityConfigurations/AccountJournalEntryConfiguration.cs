@@ -1,7 +1,7 @@
-﻿using System;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 
 namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
 {

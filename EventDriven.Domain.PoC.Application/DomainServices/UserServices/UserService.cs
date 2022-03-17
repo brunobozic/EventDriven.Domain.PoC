@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
@@ -18,10 +10,20 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregat
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
+using EventDriven.Domain.PoC.SharedKernel.Helpers.Epoch;
+using EventDriven.Domain.PoC.SharedKernel.Helpers.Random;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 using URF.Core.Services;
 using BC = BCrypt.Net.BCrypt;
@@ -37,6 +39,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             ITrackableRepository<User> repository,
             ITrackableRepository<Role> roleRepository,
             IMapper mapper,
+            IOptions<JwtIssuerOptions> jwtOptions,
             IOptions<MyConfigurationValues> appSettings,
             IEmailService emailService) : base(repository)
         {
@@ -61,7 +64,8 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
         private readonly IMapper _mapper;
         private readonly MyConfigurationValues _appSettings;
         private readonly IEmailService _emailService;
-
+        private readonly IOptions<MyConfigurationValues> _appSettingsSnap;
+        private readonly JwtIssuerOptions _jwtOptions;
         #endregion private props
 
         #region public methods
@@ -89,7 +93,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 throw new AppException("Email or password is incorrect");
 
             // authentication successful so generate jwt and refresh tokens
-            var jwtToken = GenerateJwtToken(applicationUser);
+            var jwtToken = GenerateJwtTokenAsync(applicationUser);
             var refreshToken = GenerateRefreshToken(ipAddress);
 
             try
@@ -104,7 +108,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
                 var response = _mapper.Map<AuthenticateResponse>(applicationUser);
 
-                response.JwtToken = jwtToken;
+                response.JwtToken = await jwtToken;
                 response.RefreshToken = refreshToken.Token;
                 response.Success = true;
                 response.Message = "Authenticated";
@@ -124,90 +128,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             }
         }
 
-        public async Task<AuthenticateResponse> RefreshTheTokenAsync(string token, string ipAddress)
-        {
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(ipAddress))
-                throw new ArgumentNullException("EmailVerificationToken and/or ip address are invalid");
 
-            var (refreshToken, applicationUser) = await GetRefreshTokenAsync(token);
-
-            var returnValue = new AuthenticateResponse
-            {
-                Success = false,
-                Message = ""
-            };
-
-            try
-            {
-                // replace old refresh token with a new one and save
-                var newRefreshToken = GenerateRefreshToken(ipAddress);
-                var theRefreshTokenDraft = RefreshToken.NewRefreshTokenDraft(newRefreshToken.Token, ipAddress);
-                applicationUser.AddRefreshToken(theRefreshTokenDraft);
-                applicationUser.RemoveStaleRefreshTokens();
-
-                Repository.Update(applicationUser);
-                var saveResult = await UnitOfWork.SaveChangesAsync();
-
-                // generate new jwt
-                var jwtToken = GenerateJwtToken(applicationUser);
-
-                var response = _mapper.Map<AuthenticateResponse>(applicationUser);
-
-                response.JwtToken = jwtToken;
-                response.RefreshToken = newRefreshToken.Token;
-                response.Success = true;
-                response.Message = "EmailVerificationToken refreshed";
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Problem refreshing token for user with email: [ " + applicationUser.Email + " ]", ex);
-
-                returnValue.Success = false;
-                returnValue.Message = ex.Message;
-                returnValue.InnerMessage = ex.InnerException?.Message;
-                returnValue.UserFriendlyMessage = "Problem refreshing token";
-
-                return returnValue;
-            }
-        }
-
-        public async Task<RevokeTokenResponse> RevokeTokenAsync(string token, string ipAddress)
-        {
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(ipAddress))
-                throw new ArgumentNullException("EmailVerificationToken and/or ip address are invalid");
-
-            var (refreshToken, applicationUser) = await GetRefreshTokenAsync(token);
-
-            var returnValue = new RevokeTokenResponse
-            {
-                Success = false,
-                Message = ""
-            };
-
-            try
-            {
-                // revoke token and save
-                //applicationUser.RevokeToken(refreshToken.EmailVerificationToken, ipAddress);
-                Repository.Update(applicationUser);
-                var saveResult = await UnitOfWork.SaveChangesAsync();
-
-                returnValue.Success = true;
-                returnValue.Message = "EmailVerificationToken revoked";
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Problem revoking token for user with email: [ " + applicationUser.Email + " ]", ex);
-
-                returnValue.Success = false;
-                returnValue.Message = ex.Message;
-                returnValue.InnerMessage = ex.InnerException?.Message;
-                returnValue.UserFriendlyMessage = "Problem revoking token";
-            }
-
-            return returnValue;
-        }
 
         public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest model, string origin)
         {
@@ -456,7 +377,8 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             var retVal = new ApplicationUserResponse
             {
-                Success = true, ViewModel = _mapper.Map<UserViewModel>(applicationUser)
+                Success = true,
+                ViewModel = _mapper.Map<UserViewModel>(applicationUser)
             };
 
             return retVal;
@@ -504,7 +426,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 var saveResult = await UnitOfWork.SaveChangesAsync();
 
                 var appUserToReturn = await Repository.Queryable()
-                    .Where(user => user.UserName == newApplicationUser.UserName).SingleOrDefaultAsync();
+                    .Where(user => user.UserName == newApplicationUser.UserName).SingleAsync();
                 returnValue.Success = true;
                 returnValue.ViewModel = _mapper.Map<UserViewModel>(appUserToReturn);
                 returnValue.Message = "Item created.";
@@ -557,7 +479,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 Repository.Update(applicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();
                 var appUserToReturn = await Repository.Queryable()
-                    .Where(user => user.UserName == applicationUser.UserName).SingleOrDefaultAsync();
+                    .Where(user => user.UserName == applicationUser.UserName).SingleAsync();
                 returnValue.Success = true;
                 returnValue.ViewModel = _mapper.Map<UserViewModel>(appUserToReturn);
                 returnValue.Message = "Item updated.";
@@ -609,6 +531,91 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
         #endregion CUD
 
+        public async Task<AuthenticateResponse> RefreshTheTokenAsync(string token, string ipAddress)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(ipAddress))
+                throw new ArgumentNullException("EmailVerificationToken and/or ip address are invalid");
+
+            var (refreshToken, applicationUser) = await GetRefreshTokenAsync(token);
+
+            var returnValue = new AuthenticateResponse
+            {
+                Success = false,
+                Message = ""
+            };
+
+            try
+            {
+                // replace old refresh token with a new one and save
+                var newRefreshToken = GenerateRefreshToken(ipAddress);
+                var theRefreshTokenDraft = RefreshToken.NewRefreshTokenDraft(newRefreshToken.Token, ipAddress);
+                applicationUser.AddRefreshToken(theRefreshTokenDraft);
+                applicationUser.RemoveStaleRefreshTokens();
+
+                Repository.Update(applicationUser);
+                var saveResult = await UnitOfWork.SaveChangesAsync();
+
+                // generate new jwt
+                var jwtToken = GenerateJwtTokenAsync(applicationUser);
+
+                var response = _mapper.Map<AuthenticateResponse>(applicationUser);
+
+                response.JwtToken = await jwtToken;
+                response.RefreshToken = newRefreshToken.Token;
+                response.Success = true;
+                response.Message = "EmailVerificationToken refreshed";
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Problem refreshing token for user with email: [ " + applicationUser.Email + " ]", ex);
+
+                returnValue.Success = false;
+                returnValue.Message = ex.Message;
+                returnValue.InnerMessage = ex.InnerException?.Message;
+                returnValue.UserFriendlyMessage = "Problem refreshing token";
+
+                return returnValue;
+            }
+        }
+
+        public async Task<RevokeTokenResponse> RevokeTokenAsync(string token, string ipAddress)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(ipAddress))
+                throw new ArgumentNullException("EmailVerificationToken and/or ip address are invalid");
+
+            var (refreshToken, applicationUser) = await GetRefreshTokenAsync(token);
+
+            var returnValue = new RevokeTokenResponse
+            {
+                Success = false,
+                Message = ""
+            };
+
+            try
+            {
+                // revoke token and save
+                //applicationUser.RevokeToken(refreshToken.EmailVerificationToken, ipAddress);
+                Repository.Update(applicationUser);
+                var saveResult = await UnitOfWork.SaveChangesAsync();
+
+                returnValue.Success = true;
+                returnValue.Message = "EmailVerificationToken revoked";
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Problem revoking token for user with email: [ " + applicationUser.Email + " ]", ex);
+
+                returnValue.Success = false;
+                returnValue.Message = ex.Message;
+                returnValue.InnerMessage = ex.InnerException?.Message;
+                returnValue.UserFriendlyMessage = "Problem revoking token";
+            }
+
+            return returnValue;
+        }
+
         #endregion public methods
 
         #region private methods
@@ -624,17 +631,36 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             return (refreshToken, applicationUser);
         }
-
-        private string GenerateJwtToken(User applicationUser)
+        private async Task<string> GenerateJwtTokenAsync(User applicationUser)
         {
             if (applicationUser == null) throw new ArgumentNullException("UpdateApplicationUserRequest invalid");
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var jti = await _jwtOptions.JtiGenerator();
+            var issuedAt = _jwtOptions.IssuedAt;
+            var issuedAtString = UnixEpoch.ToUnixEpochDate(issuedAt).ToString();
+            var fullName = applicationUser.FirstName + " " + applicationUser.LastName;
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] {new Claim("id", applicationUser.Id.ToString())}),
                 Expires = DateTime.UtcNow.AddMinutes(15),
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("id", applicationUser.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, applicationUser.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, jti),
+                    new Claim(JwtRegisteredClaimNames.Iat, issuedAtString, ClaimValueTypes.Integer64),
+                    new Claim(JwtClaimNameConstants.ID_CLAIM_NAME, applicationUser.Id.ToString()),
+                    //new Claim(JwtClaimNameConstants.ROLE_ID_CLAIM_NAME, applicationUser.Role.ToString()),
+                    new Claim(JwtRegisteredClaimNamesCustom.APPLICATION_TYPE, "DockerPoC"),
+                    new Claim(JwtRegisteredClaimNamesCustom.FULL_NAME, fullName),
+                    new Claim(JwtRegisteredClaimNamesCustom.USERNAME, applicationUser.UserName),
+                    new Claim(JwtRegisteredClaimNamesCustom.EMAIL, applicationUser.Email),
+                    new Claim(JwtRegisteredClaimNamesCustom.USER_ID, applicationUser.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNamesCustom.ORGANIZATION_UNITS, ""),
+                    //new Claim(JwtRegisteredClaimNamesCustom.ROLES, userRoles.ToString()),
+                    new Claim(JwtClaimNameConstants.Organization_UNIT, "")
+                }),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature)
             };

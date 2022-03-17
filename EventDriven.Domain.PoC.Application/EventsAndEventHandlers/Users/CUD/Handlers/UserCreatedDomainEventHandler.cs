@@ -1,9 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.ActivationMail;
+﻿using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.Handlers
 {

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
+using System;
 using System.Collections.Generic;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 
 namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands
 {

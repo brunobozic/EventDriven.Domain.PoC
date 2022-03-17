@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Confluent.Kafka;
+using System;
 using System.Threading.Tasks;
-using Confluent.Kafka;
 
 namespace Framework.Kafka.Core.Contracts
 {

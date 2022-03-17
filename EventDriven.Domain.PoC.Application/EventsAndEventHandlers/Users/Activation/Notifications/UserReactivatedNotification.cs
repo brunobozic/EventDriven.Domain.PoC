@@ -1,7 +1,7 @@
-﻿using System;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Newtonsoft.Json;
+using System;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activation.Notifications
 {

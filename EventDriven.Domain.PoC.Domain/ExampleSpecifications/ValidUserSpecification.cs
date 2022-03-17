@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq.Expressions;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.SharedKernel.Specifications;
+using System;
+using System.Linq.Expressions;
 
 namespace EventDriven.Domain.PoC.Domain.ExampleSpecifications
 {

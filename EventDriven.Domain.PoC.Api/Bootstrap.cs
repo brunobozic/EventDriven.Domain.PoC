@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.CommonServiceLocator;
 using CommonServiceLocator;
@@ -13,7 +8,6 @@ using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command.Handlers;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.DomainEventDispatchers;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.UnitOfWorkImplementations;
-using EventDriven.Domain.PoC.Application.DomainServices.RefreshTokenServices;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
 using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using EventDriven.Domain.PoC.Application.Ports.Input.Contracts;
@@ -43,6 +37,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Serilog;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using URF.Core.Abstractions.Services;
 using URF.Core.Services;
 
@@ -68,6 +67,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
         /// </summary>
         /// <param name="connStr"></param>
         /// <param name="services"></param>
+        /// <param name="environment"></param>
         /// <returns></returns>
         public static IContainer BuildContainer(string connStr, IServiceCollection services,
             IWebHostEnvironment environment)
@@ -98,9 +98,9 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 .AddJsonFile(
                     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
                     false) // beware this will default to Production appsettings if no ENV is defined on the OS                                                                                                                            // .AddJsonFile("appsettings.local.json", true) // load local settings (usually used for local debugging sessions)  ==> this will override all the other previously loaded appsettings, so comment this out in production!
-                //.AddJsonFile("appsettings.local.json", true)
-                //.SetBasePath(new FileInfo(processModule.FileName).DirectoryName) // this might fail on linux
-                //.SetBasePath(GetBasePath()) // this might fail on linux
+                           //.AddJsonFile("appsettings.local.json", true)
+                           //.SetBasePath(new FileInfo(processModule.FileName).DirectoryName) // this might fail on linux
+                           //.SetBasePath(GetBasePath()) // this might fail on linux
                 .SetBasePath(environment.ContentRootPath)
                 .AddEnvironmentVariables()
                 .Build();
@@ -168,13 +168,13 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             containerBuilder.RegisterType<KafkaScheduledConsumer>().As<IKafkaScheduledConsumer>()
                 .UsingConstructor(typeof(ConsumerConfig), typeof(string))
-                .WithParameters(new[] {new NamedParameter("topicName", settings.KafkaConsumerSettings.KafkaTopic)})
+                .WithParameters(new[] { new NamedParameter("topicName", settings.KafkaConsumerSettings.KafkaTopic) })
                 .SingleInstance();
 
-            //builder.RegisterType<KafkaProducerTestImplementation>().As<IKafkaScheduledProducer>()
-            //     .UsingConstructor(typeof(ProducerConfig), typeof(string))
-            //     .WithParameters(new[] { new NamedParameter("topicName", "gadm-adapter-logs") })
-            //     .SingleInstance();
+            containerBuilder.RegisterType<KafkaScheduledProducer>().As<IKafkaScheduledProducer>()
+                 .UsingConstructor(typeof(ProducerConfig), typeof(string))
+                 .WithParameters(new[] { new NamedParameter("topicName", "identity-provider-event-stream") })
+                 .SingleInstance();
 
             containerBuilder.RegisterType<KafkaLoggingProducer>().As<IKafkaLoggingProducer>()
                 .UsingConstructor(typeof(ApplicationSettings), typeof(string))
@@ -200,14 +200,9 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 .SingleInstance();
 
             containerBuilder.RegisterType(typeof(UserService)).As(typeof(IUserService)).InstancePerLifetimeScope();
-            containerBuilder.RegisterType(typeof(RefreshTokenService)).As(typeof(IRefreshTokenService))
-                .InstancePerLifetimeScope();
             containerBuilder.RegisterType(typeof(UserController)).As(typeof(IUserController))
                 .InstancePerLifetimeScope();
-            containerBuilder.RegisterType(typeof(RefreshTokenController)).As(typeof(IRefreshTokenController))
-                .InstancePerLifetimeScope();
             containerBuilder.RegisterType<UserController>().PropertiesAutowired();
-            containerBuilder.RegisterType<RefreshTokenController>().PropertiesAutowired();
 
             #endregion Application services
 
@@ -288,7 +283,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
             containerBuilder.RegisterSource(new ScopedContravariantRegistrationSource(
                 typeof(IRequestHandler<,>)
                 , typeof(INotificationHandler<>)
-                // , typeof(IValidator<>)
+            // , typeof(IValidator<>)
             ));
 
             var mediatrOpenTypes = new[]

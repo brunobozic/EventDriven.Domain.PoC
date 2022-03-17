@@ -1,7 +1,7 @@
-﻿using System;
-using System.Text.Json.Serialization;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+using System;
+using System.Text.Json.Serialization;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Activation.Notifications
 {

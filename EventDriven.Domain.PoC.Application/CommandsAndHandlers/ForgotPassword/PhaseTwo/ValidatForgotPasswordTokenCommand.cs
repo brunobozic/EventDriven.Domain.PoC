@@ -1,6 +1,6 @@
-﻿using System;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using Microsoft.Extensions.Primitives;
+using System;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo
 {

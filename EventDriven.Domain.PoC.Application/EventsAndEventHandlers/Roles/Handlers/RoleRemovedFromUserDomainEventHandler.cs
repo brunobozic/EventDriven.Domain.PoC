@@ -1,8 +1,8 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Notifications;
+﻿using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Notifications;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Handlers
 {

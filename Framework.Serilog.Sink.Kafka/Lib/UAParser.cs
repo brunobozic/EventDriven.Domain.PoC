@@ -353,7 +353,7 @@ namespace UAParser
                                     .GetTypeInfo()
 #endif
                     .Assembly.GetManifestResourceStream("UAParser.regexes.yaml"))
-                // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once AssignNullToNotNullAttribute
             using (var reader = new StreamReader(stream))
             {
                 return new Parser(new MinimalYamlParser(reader.ReadToEnd()), parserOptions);
@@ -500,45 +500,45 @@ namespace UAParser
                 {
                     if (v2Replacement == "$2")
                         return Create(regex, from v1 in Replace(v1Replacement, "$1")
-                            from v2 in Replace(v2Replacement, "$2")
-                            from v3 in Replace(v3Replacement, "$3")
-                            from v4 in Replace(v4Replacement, "$4")
-                            from family in Replace(osReplacement, "$5")
-                            select new OS(family, v1, v2, v3, v4));
+                                             from v2 in Replace(v2Replacement, "$2")
+                                             from v3 in Replace(v3Replacement, "$3")
+                                             from v4 in Replace(v4Replacement, "$4")
+                                             from family in Replace(osReplacement, "$5")
+                                             select new OS(family, v1, v2, v3, v4));
 
                     return Create(regex, from v1 in Replace(v1Replacement, "$1")
-                        from family in Replace(osReplacement, "$2")
-                        from v2 in Replace(v2Replacement, "$3")
-                        from v3 in Replace(v3Replacement, "$4")
-                        from v4 in Replace(v4Replacement, "$5")
-                        select new OS(family, v1, v2, v3, v4));
+                                         from family in Replace(osReplacement, "$2")
+                                         from v2 in Replace(v2Replacement, "$3")
+                                         from v3 in Replace(v3Replacement, "$4")
+                                         from v4 in Replace(v4Replacement, "$5")
+                                         select new OS(family, v1, v2, v3, v4));
                 }
 
                 return Create(regex, from family in Replace(osReplacement, "$1")
-                    from v1 in Replace(v1Replacement, "$2")
-                    from v2 in Replace(v2Replacement, "$3")
-                    from v3 in Replace(v3Replacement, "$4")
-                    from v4 in Replace(v4Replacement, "$5")
-                    select new OS(family, v1, v2, v3, v4));
+                                     from v1 in Replace(v1Replacement, "$2")
+                                     from v2 in Replace(v2Replacement, "$3")
+                                     from v3 in Replace(v3Replacement, "$4")
+                                     from v4 in Replace(v4Replacement, "$5")
+                                     select new OS(family, v1, v2, v3, v4));
             }
 
             internal static Func<string, Device> Device(Regex regex, string familyReplacement, string brandReplacement,
                 string modelReplacement)
             {
                 return Create(regex, from family in ReplaceAll(familyReplacement)
-                    from brand in ReplaceAll(brandReplacement)
-                    from model in ReplaceAll(modelReplacement)
-                    select new Device(family, brand, model));
+                                     from brand in ReplaceAll(brandReplacement)
+                                     from model in ReplaceAll(modelReplacement)
+                                     select new Device(family, brand, model));
             }
 
             internal static Func<string, UserAgent> UserAgent(Regex regex, string familyReplacement,
                 string majorReplacement, string minorReplacement, string patchReplacement)
             {
                 return Create(regex, from family in Replace(familyReplacement, "$1")
-                    from v1 in Replace(majorReplacement, "$2")
-                    from v2 in Replace(minorReplacement, "$3")
-                    from v3 in Replace(patchReplacement, "$4")
-                    select new UserAgent(family, v1, v2, v3));
+                                     from v1 in Replace(majorReplacement, "$2")
+                                     from v2 in Replace(minorReplacement, "$3")
+                                     from v3 in Replace(patchReplacement, "$4")
+                                     select new UserAgent(family, v1, v2, v3));
             }
 
             private static Func<Match, IEnumerator<int>, string> Replace(string replacement)
@@ -639,7 +639,7 @@ namespace UAParser
 
             private static IEnumerator<T> Generate<T>(T initial, Func<T, T> next)
             {
-                for (var state = initial;; state = next(state))
+                for (var state = initial; ; state = next(state))
                     yield return state;
                 // ReSharper disable once FunctionNeverReturns
             }
@@ -703,7 +703,7 @@ namespace UAParser
         private void ReadIntoMappingModel(string yamlInputString)
         {
             // line splitting using various splitting characters
-            var lines = yamlInputString.Split(new[] {Environment.NewLine, "\r", "\n", "\r\n"},
+            var lines = yamlInputString.Split(new[] { Environment.NewLine, "\r", "\n", "\r\n" },
                 StringSplitOptions.RemoveEmptyEntries);
             var lineCount = 0;
             Mapping activeMapping = null;

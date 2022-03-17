@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Autofac.Core;
 using EventDriven.Domain.PoC.Domain.DomainEntities;
 using EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern;
@@ -10,6 +7,9 @@ using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
 {

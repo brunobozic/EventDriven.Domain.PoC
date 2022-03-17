@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers
 {
@@ -42,7 +42,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
                             modelClrType,
                             typeof(Guid),
                             valueConverterInfo =>
-                                (ValueConverter) Activator.CreateInstance(converterType,
+                                (ValueConverter)Activator.CreateInstance(converterType,
                                     valueConverterInfo.MappingHints));
                     });
                 }

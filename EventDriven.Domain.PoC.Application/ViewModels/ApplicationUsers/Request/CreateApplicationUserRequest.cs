@@ -1,6 +1,6 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.Helpers;
+using System;
 using System.ComponentModel.DataAnnotations;
-using EventDriven.Domain.PoC.SharedKernel.Helpers;
 
 namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request
 {

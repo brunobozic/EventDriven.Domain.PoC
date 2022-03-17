@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Domain.DomainEntities.Audit;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.Audit;
 using EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal;
@@ -18,6 +11,13 @@ using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
 {

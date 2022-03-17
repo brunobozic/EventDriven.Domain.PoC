@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 {
@@ -12,7 +12,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                 "ApplicationUsers",
                 "INTEGER",
                 nullable: false,
-                defaultValue: (byte) 0);
+                defaultValue: (byte)0);
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
                 "DateCreated",

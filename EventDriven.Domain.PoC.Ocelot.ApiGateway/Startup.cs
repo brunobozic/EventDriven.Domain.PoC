@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +9,7 @@ using Ocelot.Middleware;
 using Ocelot.Provider.Consul;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using System.Diagnostics;
 using ILogger = Serilog.ILogger;
 
 namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
@@ -93,8 +93,8 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
                 .Enrich.WithAssemblyName()
                 .Enrich.WithAssemblyVersion()
                 .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-                //.Enrich.WithExceptionData()
-                //.Enrich.WithExceptionStackTraceHash()
+                                                  //.Enrich.WithExceptionData()
+                                                  //.Enrich.WithExceptionStackTraceHash()
                 .Enrich.WithMemoryUsage()
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()

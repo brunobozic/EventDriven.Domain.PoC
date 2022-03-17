@@ -2,13 +2,13 @@
 // Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 // See the LICENSE file in the project root for more information
 
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Serilog.Events;
 
 namespace Elastic.CommonSchema.Serilog
 {
@@ -20,7 +20,7 @@ namespace Elastic.CommonSchema.Serilog
         public static Base ConvertToEcs(LogEvent logEvent, IEcsTextFormatterConfiguration configuration)
         {
             var exceptions = logEvent.Exception != null
-                ? new List<Exception> {logEvent.Exception}
+                ? new List<Exception> { logEvent.Exception }
                 : new List<Exception>();
 
             if (configuration.MapHttpAdapter != null)
@@ -30,7 +30,7 @@ namespace Elastic.CommonSchema.Serilog
             {
                 Timestamp = logEvent.Timestamp,
                 Message = logEvent.RenderMessage(),
-                Ecs = new Ecs {Version = Base.Version},
+                Ecs = new Ecs { Version = Base.Version },
                 Log = GetLog(logEvent, exceptions, configuration),
                 Agent = GetAgent(logEvent),
                 Event = GetEvent(logEvent),
@@ -64,14 +64,14 @@ namespace Elastic.CommonSchema.Serilog
         {
             return !logEvent.TryGetScalarPropertyValue("ElasticApmTraceId", out var traceId)
                 ? null
-                : new Trace {Id = traceId.Value.ToString()};
+                : new Trace { Id = traceId.Value.ToString() };
         }
 
         private static Transaction GetTransaction(LogEvent logEvent)
         {
             return !logEvent.TryGetScalarPropertyValue("ElasticApmTransactionId", out var transactionId)
                 ? null
-                : new Transaction {Id = transactionId.Value.ToString()};
+                : new Transaction { Id = transactionId.Value.ToString() };
         }
 
         private static IDictionary<string, object> GetMetadata(LogEvent logEvent,
@@ -93,7 +93,7 @@ namespace Elastic.CommonSchema.Serilog
                             .Replace("[", string.Empty)
                             .Replace("]", string.Empty)
                             .Split(','))
-                        .Select(value => new {Key = value[0].Trim(), Value = value[1].Trim()}))
+                        .Select(value => new { Key = value[0].Trim(), Value = value[1].Trim() }))
                         dict.Add(ToSnakeCase(item.Key), item.Value);
             }
 
@@ -148,11 +148,11 @@ namespace Elastic.CommonSchema.Serilog
                         kvp => PropertyValueToObject(kvp.Value));
 
                 case StructureValue ov:
-                {
-                    var dict = ov.Properties.ToDictionary(p => p.Name, p => PropertyValueToObject(p.Value));
-                    if (ov.TypeTag != null) dict.Add("$type", ov.TypeTag);
-                    return dict;
-                }
+                    {
+                        var dict = ov.Properties.ToDictionary(p => p.Name, p => PropertyValueToObject(p.Value));
+                        if (ov.TypeTag != null) dict.Add("$type", ov.TypeTag);
+                        return dict;
+                    }
                 default:
                     return propertyValue;
             }
@@ -181,7 +181,7 @@ namespace Elastic.CommonSchema.Serilog
         {
             var server = configuration.MapHttpAdapter?.Server ?? new Server();
             server.User = e.TryGetScalarPropertyValue(SpecialKeys.EnvironmentUserName, out var environmentUserName)
-                ? new User {Name = environmentUserName.Value.ToString()}
+                ? new User { Name = environmentUserName.Value.ToString() }
                 : null;
 
             var hasHost = e.TryGetScalarPropertyValue(SpecialKeys.Host, out var host);
@@ -205,7 +205,7 @@ namespace Elastic.CommonSchema.Serilog
             var threadId = threadIdProp?.Value.ToString();
             var pid = int.TryParse(processId ?? "", out var p)
                 ? p
-                : (int?) null;
+                : (int?)null;
 
             if (!mapFromCurrentThread)
                 return new Process
@@ -214,7 +214,7 @@ namespace Elastic.CommonSchema.Serilog
                     Name = processName,
                     Pid = pid,
                     Thread = int.TryParse(threadId ?? processId, out var id)
-                        ? new ProcessThread {Id = id}
+                        ? new ProcessThread { Id = id }
                         : null
                 };
 
@@ -228,7 +228,7 @@ namespace Elastic.CommonSchema.Serilog
                 Name = process?.ProcessName ?? processName,
                 Pid = process?.Id ?? pid,
                 Executable = process?.ProcessName ?? processName,
-                Thread = new ProcessThread {Id = currentThread.ManagedThreadId}
+                Thread = new ProcessThread { Id = currentThread.ManagedThreadId }
             };
         }
 
@@ -254,7 +254,7 @@ namespace Elastic.CommonSchema.Serilog
                 ? context.Value.ToString()
                 : SpecialKeys.DefaultLogger;
 
-            var log = new Log {Level = e.Level.ToString("F"), Logger = source};
+            var log = new Log { Level = e.Level.ToString("F"), Logger = source };
 
             if (configuration.MapExceptions)
             {
@@ -269,7 +269,8 @@ namespace Elastic.CommonSchema.Serilog
             return exceptions != null && exceptions.Count > 0
                 ? new Error
                 {
-                    Message = exceptions[0].Message, StackTrace = CatchErrors(exceptions),
+                    Message = exceptions[0].Message,
+                    StackTrace = CatchErrors(exceptions),
                     Type = exceptions[0].GetType().ToString()
                 }
                 : null;
@@ -281,7 +282,7 @@ namespace Elastic.CommonSchema.Serilog
             {
                 Created = e.Timestamp,
                 Category = e.TryGetScalarPropertyValue(SpecialKeys.ActionCategory, out var actionCategoryProperty)
-                    ? new[] {actionCategoryProperty.Value.ToString()}
+                    ? new[] { actionCategoryProperty.Value.ToString() }
                     : null,
                 Action = e.TryGetScalarPropertyValue(SpecialKeys.ActionName, out var action)
                     ? action.Value.ToString()
@@ -294,7 +295,7 @@ namespace Elastic.CommonSchema.Serilog
                     : null,
                 Severity = e.TryGetScalarPropertyValue(SpecialKeys.ActionSeverity, out var actionSev)
                     ? long.Parse(actionSev.Value.ToString())
-                    : (int) e.Level,
+                    : (int)e.Level,
                 Timezone = TimeZoneInfo.Local.StandardName
             };
 

@@ -61,7 +61,7 @@ namespace Elastic.CommonSchema
             if (obj.GetType() != GetType())
                 return false;
 
-            return Equals((Location) obj);
+            return Equals((Location)obj);
         }
 
         public override int GetHashCode()

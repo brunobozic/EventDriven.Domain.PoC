@@ -1,9 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
+﻿using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
 using Serilog;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.VerificationEmail.Handlers
 {

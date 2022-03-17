@@ -31,7 +31,7 @@ namespace EventDriven.Domain.PoC.Application.AutomapperMaps
                     {
                         // ignore null & empty string properties
                         if (prop == null) return false;
-                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string) prop)) return false;
+                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
 
                         // ignore null role
                         //if (x.DestinationMember.Name == "Role" && src.Role == null) return false;
@@ -46,7 +46,7 @@ namespace EventDriven.Domain.PoC.Application.AutomapperMaps
                     {
                         // ignore null & empty string properties
                         if (prop == null) return false;
-                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string) prop)) return false;
+                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
 
                         //// ignore null role
                         //if (x.DestinationMember.Name == "Role" && src.Role == null) return false;
@@ -83,7 +83,7 @@ namespace EventDriven.Domain.PoC.Application.AutomapperMaps
                     {
                         // ignore null & empty string properties
                         if (prop == null) return false;
-                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string) prop)) return false;
+                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
 
                         // ignore null role
                         if (x.DestinationMember.Name == "Role" && src.RoleEnum == null) return false;

@@ -20,6 +20,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.RequestResponsePattern
         public int ItemsCount { get; set; }
 
         public double PageCount
-            => ItemsCount < PageSize ? 1 : (int) ((double) ItemsCount / PageSize + 1);
+            => ItemsCount < PageSize ? 1 : (int)((double)ItemsCount / PageSize + 1);
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Threading;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+using System.Threading;
 using System.Threading.Tasks;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
 {

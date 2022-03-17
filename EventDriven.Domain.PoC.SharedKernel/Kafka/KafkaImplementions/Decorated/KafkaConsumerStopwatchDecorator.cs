@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions.Decorated
 {

@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Serilog.Context;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Middleware
 {

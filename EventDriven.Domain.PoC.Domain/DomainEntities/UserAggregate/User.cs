@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
@@ -15,6 +11,10 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvent
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Random;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using TrackableEntities.Common.Core;
 using BC = BCrypt.Net.BCrypt;
 
@@ -68,7 +68,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         #endregion Email Verification
 
-        #region Token operation
+        #region Token operations
 
         public string ResetToken { get; private set; }
         public string PasswordResetMsg { get; private set; }
@@ -356,7 +356,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         public Guid? UndeletedById { get; private set; }
         public Guid? ReactivatedById { get; private set; }
-
         public Guid? DeactivatedById { get; private set; }
 
         #endregion FK
@@ -381,7 +380,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         #region Addresses
 
-        // TODO: transform to event driven
         public bool AssignAddress(Address address, AddressType addressType, User addressAssigner)
         {
             if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
@@ -396,20 +394,37 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
             DateModified = DateTime.UtcNow;
 
-            var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => [" + addressType.Name +
-                                                       "] address assigned to user. Address assigned: [" +
-                                                       address.Line1 + "].");
-            journalEntry.AttachActingUser(addressAssigner);
-            journalEntry.AttachUser(this);
-            _journalEntries.Add(journalEntry);
-
-            AddDomainEvent(new AddressAssignedToUserDomainEvent(Id, newAddress, addressAssigner.Id,
+            AddDomainEvent(new AddressAssignedToUserDomainEvent(
+                this.Id
+                , this.UserName
+                , this.Email
+                , address.Id
+                , address.Line1
+                , address.Active
+                , address.AddressIdGuid
+                , address.HouseNumber
+                , address.HouseNumberSuffix
+                , address.FlatNr
+                , address.Town.Id
+                , address.Town.Name
+                , address.Town.DateCreated
+                , address.Town.DateModified
+                , address.Town.ZipCode
+                , address.PostalCode
+                , address.DateCreated
+                , address.DateModified
+                , addressType.Id
+                , addressType.Name
+                , addressType.Active
+                , addressType.Description
+                , addressAssigner.Id
+                , addressAssigner.UserName
+                , addressAssigner.Email,
                 DateTimeOffset.UtcNow));
 
             return true;
         }
 
-        // TODO: transform to event driven
         public bool RemoveAddressFromUser(Address addressToRemove, AddressType addressType, User addressRemover)
         {
             if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
@@ -423,19 +438,36 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 .Select(uid => uid.Id)
                 .ToList();
 
-
             _userAddresses.RemoveAll(userAddress => userAddressIdsToDelete.Contains(userAddress.Id));
 
             DateModified = DateTime.UtcNow;
 
-            var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => [" + addressType.Name +
-                                                       "] address removed from user. Address removed: [" +
-                                                       addressToRemove.Line1 + "].");
-            journalEntry.AttachActingUser(addressRemover);
-            journalEntry.AttachUser(this);
-            _journalEntries.Add(journalEntry);
-
-            AddDomainEvent(new AddressRemovedFromUserDomainEvent(Id, addressToRemove, addressRemover.Id,
+            AddDomainEvent(new AddressRemovedFromUserDomainEvent(
+                this.Id
+                , this.UserName
+                , this.Email
+                , addressToRemove.Id
+                , addressToRemove.Line1
+                , addressToRemove.Active
+                , addressToRemove.AddressIdGuid
+                , addressToRemove.HouseNumber
+                , addressToRemove.HouseNumberSuffix
+                , addressToRemove.FlatNr
+                , addressToRemove.Town.Id
+                , addressToRemove.Town.Name
+                , addressToRemove.Town.DateCreated
+                , addressToRemove.Town.DateModified
+                , addressToRemove.Town.ZipCode
+                , addressToRemove.PostalCode
+                , addressToRemove.DateCreated
+                , addressToRemove.DateModified
+                , addressType.Id
+                , addressType.Name
+                , addressType.Active
+                , addressType.Description
+                , addressRemover.Id
+                , addressRemover.UserName
+                , addressRemover.Email,
                 DateTimeOffset.UtcNow));
 
             return true;
@@ -496,7 +528,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             return ActiveTo < theDate;
         }
 
-        // TODO: transform to event driven
         public bool RevokeToken(string token, string ipAddress, User revokerUser)
         {
             var refreshTokenDomain =
@@ -545,14 +576,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             {
                 base.Activate(from, to, activatedBy);
 
-                var journalEntry = activatedBy != null
-                    ? new AccountJournalEntry(DateTime.UtcNow + " => Activated by [ " + activatedBy.UserName +
-                                              " ] .")
-                    : new AccountJournalEntry(DateTime.UtcNow + " => Activated by [ System user (unknown) ] .");
-                journalEntry.AttachActingUser(activatedBy);
-                journalEntry.AttachUser(this);
-                _journalEntries.Add(journalEntry);
-
                 return true;
             }
             catch (Exception ex)
@@ -575,13 +598,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             try
             {
                 base.Deactivate(deactivatedBy, reason);
-
-                var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => Deactivated by [ " +
-                                                           DeactivatedById + " ] : " + reason);
-                journalEntry.AttachActingUser(deactivatedBy);
-                journalEntry.AttachUser(this);
-
-                _journalEntries.Add(journalEntry);
 
                 return true;
             }

@@ -1,6 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.IO;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.Repository.EF.Seed;
@@ -11,6 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
 
 namespace EventDriven.Domain.PoC.Api.Rest
 {
@@ -26,6 +27,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        [Obsolete]
         public static int Main(string[] args)
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
@@ -92,14 +94,14 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     // Bind directly to a socket handle or Unix socket
                     // opts.ListenHandle(123554);
                     // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                    //opts.Listen(IPAddress.Loopback, port: 5001);
-                    //opts.ListenAnyIP(5000);
-                    //opts.ListenLocalhost(5000);
-                    //opts.ListenLocalhost(5003, opts => opts.UseHttps());
-                    //opts.ListenLocalhost(5004, opts => opts.UseHttps());
+                    //opts.Listen(IPAddress.Loopback, port: 6001);
+                    //opts.ListenAnyIP(6000);
+                    //opts.ListenLocalhost(6000);
+                    //opts.ListenLocalhost(6003, opts => opts.UseHttps());
+                    //opts.ListenLocalhost(6004, opts => opts.UseHttps());
                 })
-                //.UseUrls("http://localhost:5000")
-                .UseUrls("http://*:5000")
+                //.UseUrls("http://localhost:6000")
+                .UseUrls("http://*:6000")
                 .UseSerilog();
         }
 
@@ -118,14 +120,14 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     // Bind directly to a socket handle or Unix socket
                     // opts.ListenHandle(123554);
                     // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                    //opts.Listen(IPAddress.Loopback, port: 5001);
-                    //opts.ListenAnyIP(5000);
-                    //opts.ListenLocalhost(5000);
-                    //opts.ListenLocalhost(5003, opts => opts.UseHttps());
-                    //opts.ListenLocalhost(5004, opts => opts.UseHttps());
+                    //opts.Listen(IPAddress.Loopback, port: 6000);
+                    //opts.ListenAnyIP(6000);
+                    //opts.ListenLocalhost(6000);
+                    //opts.ListenLocalhost(6001, opts => opts.UseHttps());
+                    //opts.ListenLocalhost(6004, opts => opts.UseHttps());
                 })
-                //.UseUrls("http://localhost:5000", "https://localhost:5001")
-                .UseUrls("http://*:5000")
+                .UseUrls("http://localhost:6000", "https://localhost:6001")
+                //.UseUrls("http://*:6000")
                 .UseSerilog()
                 .Build();
         }
@@ -149,8 +151,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 .Enrich.WithAssemblyName()
                 .Enrich.WithAssemblyVersion()
                 .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-                //.Enrich.WithExceptionData()
-                //.Enrich.WithExceptionStackTraceHash()
+                                                  //.Enrich.WithExceptionData()
+                                                  //.Enrich.WithExceptionStackTraceHash()
                 .Enrich.WithMemoryUsage()
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()

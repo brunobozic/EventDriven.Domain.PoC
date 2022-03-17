@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType
 {
@@ -56,7 +56,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType
         public IMyUnitOfWork UnitOfWork { get; }
 
         // returns the current authenticated ApplicationUser (null if not logged in)
-        public User ApplicationUser => (User) HttpContext.Items["ApplicationUser"];
+        public User ApplicationUser => (User)HttpContext.Items["ApplicationUser"];
 
         protected PagedResult<TDto> ConvertToPagedResult<TEntity, TDto>(PagedResult<TEntity> pagedResult)
         {

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Data;
-using Microsoft.Data.Sqlite;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Database
 {

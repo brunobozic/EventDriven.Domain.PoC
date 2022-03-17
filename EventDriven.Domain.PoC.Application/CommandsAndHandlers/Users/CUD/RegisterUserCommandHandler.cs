@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
@@ -10,6 +7,9 @@ using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD

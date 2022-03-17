@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+using System;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Services;
 
 namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices

@@ -1,5 +1,5 @@
-﻿using System;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers;
+using System;
 
 namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationRoles
 {

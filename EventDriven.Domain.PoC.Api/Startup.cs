@@ -1,11 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Mime;
-using System.Reflection;
-using System.Text;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Consul;
@@ -52,7 +44,16 @@ using Quartz;
 using Quartz.Impl;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using Steeltoe.Discovery.Client;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Net.Mime;
+using System.Reflection;
+using System.Text;
 using static EventDriven.Domain.PoC.SharedKernel.Helpers.Startup;
 using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 using ILogger = Serilog.ILogger;
@@ -198,7 +199,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     Description = "EventDriven.Domain.PoC API",
                     //TermsOfService = new Uri(null),
                     Contact = new OpenApiContact
-                        {Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/")}
+                    { Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/") }
                 });
                 //options.AddAutoQueryable(); // this does not always work, depending on the assembly version(s)
                 //Set the comments path for the swagger json and ui.
@@ -328,6 +329,12 @@ namespace EventDriven.Domain.PoC.Api.Rest
             services.AddConsulConfig(Configuration);
 
             #endregion Consul
+
+            #region Eureka
+
+            services.AddDiscoveryClient(Configuration);
+
+            #endregion Eureka
 
             #region HealthCheck
 
@@ -553,7 +560,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     builder.Run(
                         async context =>
                         {
-                            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                             context.Response.ContentType = "application/json";
                             context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
                             context.Response.Headers.Add("X-Correlation-Id", context.TraceIdentifier);
@@ -564,13 +571,13 @@ namespace EventDriven.Domain.PoC.Api.Rest
                             {
                                 var json = new JsonErrorResponse
                                 {
-                                    Messages = new[] {error.Error.Message},
+                                    Messages = new[] { error.Error.Message },
                                     User = context.User.Identity.Name
                                 };
 
 
                                 if (error.Error.Message.Contains("AD User"))
-                                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
                                 if (env.EnvironmentName == "Development" || env.EnvironmentName == "LocalDevelopment")
                                     json.DeveloperMessage = error.Error?.StackTrace;
@@ -627,6 +634,12 @@ namespace EventDriven.Domain.PoC.Api.Rest
             app.UseConsul();
 
             #endregion Consul
+
+            #region Eureka
+
+            app.UseDiscoveryClient();
+
+            #endregion Eureka
         }
 
         private ILogger ConfigureLogger(IConfiguration configuration)
@@ -645,8 +658,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 .Enrich.WithAssemblyName()
                 .Enrich.WithAssemblyVersion()
                 .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-                //.Enrich.WithExceptionData()
-                //.Enrich.WithExceptionStackTraceHash()
+                                                  //.Enrich.WithExceptionData()
+                                                  //.Enrich.WithExceptionStackTraceHash()
                 .Enrich.WithMemoryUsage()
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()

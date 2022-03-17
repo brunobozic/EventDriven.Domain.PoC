@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
@@ -10,6 +8,8 @@ using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
@@ -66,7 +66,7 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
 
             await UnitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new UserDto {Id = user.Id, UserName = user.UserName, UserRoles = user.GetUserRoles()};
+            return new UserDto { Id = user.Id, UserName = user.UserName, UserRoles = user.GetUserRoles() };
         }
     }
 }

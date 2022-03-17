@@ -1,7 +1,7 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate
 {
@@ -35,7 +35,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         public static UserAddress NewDraft(User applicationUser, Address address, User creator)
         {
             var userAddress = new UserAddress
-                {User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid()};
+            { User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid() };
             userAddress.AssignCreatedBy(creator);
 
             // activated by the creator
@@ -49,7 +49,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         public static UserAddress NewActivatedDraft(User applicationUser, Address address, User creator)
         {
             var userAddress = new UserAddress
-                {User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid()};
+            { User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid() };
             userAddress.AssignCreatedBy(creator);
 
             // activated by the creator
@@ -64,7 +64,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         public static UserAddress NewInactiveDraft(User applicationUser, Address address, User creator)
         {
             var userAddress = new UserAddress
-                {User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid()};
+            { User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid() };
 
             // not activated, but still has a creator
             userAddress.AssignCreatedBy(creator);

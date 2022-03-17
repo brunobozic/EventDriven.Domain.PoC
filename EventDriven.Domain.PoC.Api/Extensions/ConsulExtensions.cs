@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using Consul;
+﻿using Consul;
 using EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Extensions
@@ -46,9 +46,9 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             // var uri = new Uri(address);
             var registration = new AgentServiceRegistration
             {
-                ID = "FuckingService-5000",
+                ID = "EventDrivenPoC-5000",
                 // service name  
-                Name = "FuckingService",
+                Name = "EventDrivenPoC",
                 Address = "localhost",
                 Port = 5000
             };

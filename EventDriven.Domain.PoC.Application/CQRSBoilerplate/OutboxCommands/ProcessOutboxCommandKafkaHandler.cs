@@ -1,25 +1,26 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using EventDriven.Domain.PoC.Application.ViewModels.OutboxMessage;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
+using Framework.Kafka.Core.Contracts;
 using MediatR;
 using Newtonsoft.Json;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
 {
     internal class ProcessOutboxCommandKafkaHandler : ICommandHandler<ProcessOutboxCommand, Unit>
     {
-        private readonly IKafkaProducer _kafkaProducer;
+        private readonly IKafkaScheduledProducer _kafkaProducer;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-        public ProcessOutboxCommandKafkaHandler(IKafkaProducer kafkaProducer,
+        public ProcessOutboxCommandKafkaHandler(IKafkaScheduledProducer kafkaProducer,
             ISqlConnectionFactory sqlConnectionFactory)
         {
             _kafkaProducer = kafkaProducer;
@@ -54,7 +55,7 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
                     {
                         #region Publish the integration event to Kafka
 
-                        await _kafkaProducer.Produce(integrationEvent, cancellationToken);
+                        await _kafkaProducer.WriteMessageAsync(message.Data);
 
                         #endregion Publish the integration event to Kafka
 

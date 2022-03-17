@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
+using System;
+using System.Linq;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Filters
 {

@@ -42,7 +42,7 @@ namespace Elastic.CommonSchema.Serialization
             {
                 if (!_cachedMemoryStream.TryGetBuffer(out var byteArray))
                     byteArray = new ArraySegment<byte>(_cachedMemoryStream.GetBuffer(), 0,
-                        (int) _cachedMemoryStream.Length);
+                        (int)_cachedMemoryStream.Length);
 
                 CopyToStringBuilder(byteArray, _cachedEncodingBuffer, output);
             }

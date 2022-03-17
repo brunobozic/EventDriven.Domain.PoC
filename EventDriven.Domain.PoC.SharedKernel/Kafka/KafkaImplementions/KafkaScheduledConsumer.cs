@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
 {
@@ -372,7 +372,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
                                 _needsToHitTopicPartition + " ]");
 
                 _c.Subscribe(_topicName);
-                _c.Assign(new List<TopicPartitionOffset> {new(_needsToHitTopicPartition, _needsToHitOffset)});
+                _c.Assign(new List<TopicPartitionOffset> { new(_needsToHitTopicPartition, _needsToHitOffset) });
 
                 Log.Warning("Subscribed to offset: [ " + _needsToHitOffset + " ], partition: [ " +
                             _needsToHitTopicPartition + " ]");

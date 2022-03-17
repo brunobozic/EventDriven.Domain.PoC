@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base;
+﻿using EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
 {

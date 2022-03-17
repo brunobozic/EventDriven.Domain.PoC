@@ -1,6 +1,6 @@
-﻿using System;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
 {

@@ -1,6 +1,6 @@
-﻿using System;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers
 {

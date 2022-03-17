@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Middleware
 {
@@ -28,7 +28,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Middleware
             {
                 var oldHeaders = context.Request.Headers;
                 if (!context.Response.Headers.ContainsKey(CorrelationIdHeaderName))
-                    context.Response.Headers.Add(CorrelationIdHeaderName, new[] {context.TraceIdentifier});
+                    context.Response.Headers.Add(CorrelationIdHeaderName, new[] { context.TraceIdentifier });
                 return Task.CompletedTask;
             });
 

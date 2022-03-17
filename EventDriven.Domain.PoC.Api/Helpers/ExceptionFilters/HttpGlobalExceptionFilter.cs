@@ -1,10 +1,10 @@
-﻿using System;
-using System.Net;
-using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
+using System;
+using System.Net;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters
 {
@@ -29,11 +29,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters
             {
                 var json = new JsonErrorResponse
                 {
-                    Messages = new[] {context.Exception.Message}
+                    Messages = new[] { context.Exception.Message }
                 };
 
                 context.Result = new BadRequestObjectResult(json);
-                context.HttpContext.Response.StatusCode = (int) HttpStatusCode.BadRequest;
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
             else
             {
@@ -48,7 +48,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters
                     json.DeveloperMessage = context.Exception;
 
                 context.Result = new InternalServerErrorObjectResult(json);
-                context.HttpContext.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             }
 
             context.ExceptionHandled = true;

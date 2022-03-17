@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Newtonsoft.Json;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers
 {
@@ -73,7 +73,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             }
             else
             {
-                var arr = (byte[]) value;
+                var arr = (byte[])value;
                 var y = arr.Select(Convert.ToInt32).ToArray();
                 var z = string.Join(", ", y);
                 var val = @"[" + z.Replace("\"", "") + "]";

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration
 {

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 using TrackableEntities.Common.Core;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.Audit

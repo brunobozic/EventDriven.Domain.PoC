@@ -1,13 +1,13 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using EventDriven.Domain.PoC.Domain.DomainEntities.Audit;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.Audit;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
 
 namespace EventDriven.Domain.PoC.Repository.EF.Audit
 {
@@ -37,31 +37,31 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
             switch (entry.State)
             {
                 case EntityState.Added:
-                {
-                    var newValues = new StringBuilder();
-                    SetAddedProperties(entry, newValues);
-                    audit.NewData = newValues.ToString();
-                    audit.Actions = AuditActions.I.ToString();
-                    break;
-                }
+                    {
+                        var newValues = new StringBuilder();
+                        SetAddedProperties(entry, newValues);
+                        audit.NewData = newValues.ToString();
+                        audit.Actions = AuditActions.I.ToString();
+                        break;
+                    }
                 case EntityState.Deleted:
-                {
-                    var oldValues = new StringBuilder();
-                    SetDeletedProperties(entry, oldValues);
-                    audit.OldData = oldValues.ToString();
-                    audit.Actions = AuditActions.D.ToString();
-                    break;
-                }
+                    {
+                        var oldValues = new StringBuilder();
+                        SetDeletedProperties(entry, oldValues);
+                        audit.OldData = oldValues.ToString();
+                        audit.Actions = AuditActions.D.ToString();
+                        break;
+                    }
                 case EntityState.Modified:
-                {
-                    var oldValues = new StringBuilder();
-                    var newValues = new StringBuilder();
-                    SetModifiedProperties(entry, oldValues, newValues);
-                    audit.OldData = oldValues.ToString();
-                    audit.NewData = newValues.ToString();
-                    audit.Actions = AuditActions.U.ToString();
-                    break;
-                }
+                    {
+                        var oldValues = new StringBuilder();
+                        var newValues = new StringBuilder();
+                        SetModifiedProperties(entry, oldValues, newValues);
+                        audit.OldData = oldValues.ToString();
+                        audit.NewData = newValues.ToString();
+                        audit.Actions = AuditActions.U.ToString();
+                        break;
+                    }
 
                 case EntityState.Detached:
                     break;
@@ -150,7 +150,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
             if (propInfo != null)
                 try
                 {
-                    myLong = (long) propInfo.GetValue(entry.Entity);
+                    myLong = (long)propInfo.GetValue(entry.Entity);
                 }
                 catch (Exception)
                 {
@@ -175,7 +175,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
             if (propInfo != null)
                 try
                 {
-                    myGuid = (Guid) propInfo.GetValue(entry.Entity);
+                    myGuid = (Guid)propInfo.GetValue(entry.Entity);
                 }
                 catch (Exception)
                 {

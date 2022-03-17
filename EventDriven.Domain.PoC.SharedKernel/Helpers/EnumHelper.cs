@@ -8,7 +8,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
         public static string GetOracleParamName<TEnum>(this TEnum @enum)
         {
             var info = @enum.GetType().GetField(@enum.ToString());
-            var attributes = (DescriptionAttribute[]) info.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            var attributes = (DescriptionAttribute[])info.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
             return attributes?[0].Description ?? @enum.ToString();
         }
@@ -18,7 +18,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             try
             {
                 var info = @enum.GetType().GetField(@enum.ToString());
-                var attributes = (DescriptionAttribute[]) info.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                var attributes = (DescriptionAttribute[])info.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
                 return attributes?[0].Description ?? @enum.ToString();
             }
@@ -39,12 +39,12 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
                 if (attribute != null)
                 {
                     if (attribute.Description == description)
-                        return (T) field.GetValue(null);
+                        return (T)field.GetValue(null);
                 }
                 else
                 {
                     if (field.Name == description)
-                        return (T) field.GetValue(null);
+                        return (T)field.GetValue(null);
                 }
             }
 
@@ -68,7 +68,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             var enumType = typeof(T);
             if (!enumType.IsEnum) throw new Exception("T must be an Enumeration type.");
 
-            return (T) Enum.ToObject(enumType, intValue);
+            return (T)Enum.ToObject(enumType, intValue);
         }
     }
 }

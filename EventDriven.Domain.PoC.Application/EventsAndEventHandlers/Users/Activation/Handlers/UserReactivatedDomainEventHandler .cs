@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email;
+﻿using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email;
 using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activation.Notifications;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activation.Handlers
 {

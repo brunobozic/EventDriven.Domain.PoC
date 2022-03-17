@@ -1,6 +1,6 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+using System;
 using System.Text.Json.Serialization;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 
 namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
 {

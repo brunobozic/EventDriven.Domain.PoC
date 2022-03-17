@@ -1,8 +1,8 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Reflection;
-using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventDriven.Domain.PoC.Repository.EF.Extensions
 {
@@ -18,7 +18,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Extensions
 
             foreach (var configurationInstance in configurations.Select(configuration =>
                 Activator.CreateInstance(configuration)))
-                builder.ApplyConfiguration((dynamic) configurationInstance);
+                builder.ApplyConfiguration((dynamic)configurationInstance);
         }
 
         public static void SetUpSoftDeletableColumnDefaultValue(this ModelBuilder modelBuilder)

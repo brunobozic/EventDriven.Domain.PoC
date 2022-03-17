@@ -19,7 +19,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations
 
         public int CompareTo(object other)
         {
-            return Id.CompareTo(((DomainEnumeration) other).Id);
+            return Id.CompareTo(((DomainEnumeration)other).Id);
         }
 
         public override string ToString()

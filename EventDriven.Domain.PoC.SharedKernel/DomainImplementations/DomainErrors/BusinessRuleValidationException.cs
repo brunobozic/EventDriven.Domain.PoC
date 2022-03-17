@@ -1,6 +1,6 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
+using System;
 using System.Runtime.Serialization;
-using EventDriven.Domain.PoC.SharedKernel.BusinessRules;
 
 namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors
 {

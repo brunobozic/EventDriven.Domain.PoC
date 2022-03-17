@@ -33,7 +33,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.EmailServices
             email.From.Add(MailboxAddress.Parse(from ?? _appSettings.SmtpOptions.EmailIsFrom));
             email.To.Add(MailboxAddress.Parse(to));
             email.Subject = subject;
-            email.Body = new TextPart(TextFormat.Html) {Text = html};
+            email.Body = new TextPart(TextFormat.Html) { Text = html };
 
             // send email
             using var smtp = new SmtpClient();

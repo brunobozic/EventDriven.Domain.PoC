@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Dapper;
+using Framework.Repository.Dapper.Contracts;
+using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
-using Framework.Repository.Dapper.Contracts;
-using Microsoft.Data.Sqlite;
 
 namespace Framework.Repository.Dapper.Concrete
 {
@@ -225,7 +225,7 @@ namespace Framework.Repository.Dapper.Concrete
 
         private static string CreateConnectionString(string dbPath)
         {
-            return new SqliteConnectionStringBuilder {DataSource = dbPath}.ConnectionString;
+            return new SqliteConnectionStringBuilder { DataSource = dbPath }.ConnectionString;
         }
 
         private void CreateSelectQry()

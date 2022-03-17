@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Autofac;
+﻿using Autofac;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command.Handlers;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.DomainEventDispatchers;
@@ -8,6 +7,7 @@ using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvent
 using EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using System.Reflection;
 using Module = Autofac.Module;
 
 namespace EventDriven.Domain.PoC.Application.AutofacModules

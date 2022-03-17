@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Autofac.Core;
+using Autofac.Features.Variance;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Autofac.Core;
-using Autofac.Features.Variance;
 
 namespace EventDriven.Domain.PoC.SharedKernel.Autofac
 {

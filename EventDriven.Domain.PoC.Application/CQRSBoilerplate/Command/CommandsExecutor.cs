@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command
 {

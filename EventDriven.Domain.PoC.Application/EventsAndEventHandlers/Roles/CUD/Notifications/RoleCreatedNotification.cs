@@ -1,7 +1,7 @@
-﻿using System;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Newtonsoft.Json;
+using System;
 
 namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.CUD.Notifications
 {

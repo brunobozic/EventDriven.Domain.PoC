@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Attributes
 {
@@ -20,7 +20,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var applicationUser = (User) context.HttpContext.Items["ApplicationUser"];
+            var applicationUser = (User)context.HttpContext.Items["ApplicationUser"];
             var rolesOnUser = applicationUser.GetUserRoles().Select(r => r.Name).ToArray();
 
             if (applicationUser != null && _roles.Any())
@@ -32,13 +32,13 @@ namespace EventDriven.Domain.PoC.Api.Rest.Attributes
 
                 if (!isAuth)
                     // not logged in or role not authorized
-                    context.Result = new JsonResult(new {message = "Unauthorized"})
-                        {StatusCode = StatusCodes.Status401Unauthorized};
+                    context.Result = new JsonResult(new { message = "Unauthorized" })
+                    { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             // not logged in or role not authorized
-            context.Result = new JsonResult(new {message = "Unauthorized"})
-                {StatusCode = StatusCodes.Status401Unauthorized};
+            context.Result = new JsonResult(new { message = "Unauthorized" })
+            { StatusCode = StatusCodes.Status401Unauthorized };
         }
     }
 }

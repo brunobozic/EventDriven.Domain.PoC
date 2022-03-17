@@ -1,12 +1,12 @@
-﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Commands;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command
 {

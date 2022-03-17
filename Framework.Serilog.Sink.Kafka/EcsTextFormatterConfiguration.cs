@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Http;
 #else
 #endif
 
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Serilog.Events;
 
 namespace Elastic.CommonSchema.Serilog
 {

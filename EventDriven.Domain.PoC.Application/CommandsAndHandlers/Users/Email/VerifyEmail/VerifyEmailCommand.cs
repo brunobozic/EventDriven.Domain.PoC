@@ -1,6 +1,6 @@
-﻿using System;
-using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
+﻿using EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Response;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
+using System;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.VerifyEmail
 {

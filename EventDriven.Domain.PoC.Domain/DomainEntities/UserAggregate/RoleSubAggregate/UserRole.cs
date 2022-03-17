@@ -1,7 +1,7 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate
 {
@@ -34,7 +34,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         public static UserRole NewDraft(User applicationUser, Role applicationRole, User activator)
         {
-            var userRole = new UserRole {User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid()};
+            var userRole = new UserRole { User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid() };
             userRole.AssignCreatedBy(activator);
 
             // activated by the creator
@@ -45,7 +45,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         public static UserRole NewActivatedDraft(User applicationUser, Role applicationRole, User activator)
         {
-            var userRole = new UserRole {User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid()};
+            var userRole = new UserRole { User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid() };
             userRole.AssignCreatedBy(activator);
 
             // activated by the creator
@@ -57,7 +57,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
 
         public static UserRole NewInactiveDraft(User applicationUser, Role applicationRole, User activator)
         {
-            var userRole = new UserRole {User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid()};
+            var userRole = new UserRole { User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid() };
 
             // not activated, but still has a creator
             userRole.AssignCreatedBy(activator);

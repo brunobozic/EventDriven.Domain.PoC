@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Roles
@@ -54,7 +54,7 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Roles
 
             var res = await UnitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new ApplicationRoleAssignmentDto {RoleName = role.Name, AssigneeUserName = user.UserName};
+            return new ApplicationRoleAssignmentDto { RoleName = role.Name, AssigneeUserName = user.UserName };
         }
     }
 }

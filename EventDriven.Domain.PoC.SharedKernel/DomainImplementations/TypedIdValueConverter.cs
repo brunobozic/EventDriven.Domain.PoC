@@ -1,6 +1,6 @@
-﻿using System;
-using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 
 namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations
 {
