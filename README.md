@@ -2,45 +2,80 @@
 # The app
 
 - depending on the way in which you start your debugging session the app will be available on different (possibly) URLs
-    - the expected URL (debug session started *without* using docker) will be: https://localhost:6001/swagger/index.html
+    - the expected URL (debug session started *without* using docker) will be: `https://localhost:6001/swagger/index.html`
+
+- since the app uses other components (Kafka being the most important one) you must have these components listening on appropriate ports
+    - the easiest way to achieve this is to run `docker-compose up` on the provided `docker-compose.yml` file 
+    - this will bring up the entire stack 
+    - after the stack is "up" you may use the provided `Dockerfile` file (provided within the project directory of `EventDriven.Domain.PoC.Api.Rest`) to begin debugging
+        - please note that, if you begin your debugging session in this way, your API is located within a docker container that is *NOT* on the internal network as it is specified
+          within the `docker-compose` file, so there will be slight differences in which kafka port must be used by the API
+          - if the app container is located within a docker network that is proscribed within the `docker-compose` file, you will be using `kafka:9092`
+            if, on the other hand, it is located outside the docker network proscribed within the `docker-compose` file, you will be using `localhost:29092`
+            - investigate the docker-compose file, specifically the kafka section for more information on this detail
+
+## How to quicky start debugging the app
+1) run docker-compose up, wait for the stack to "settle", I use docker for windows on my Windows 10 development machine
+   => I use the following for engine config, take note of the buildkit property 
+   <code> 
+   {
+      "builder": {
+        "gc": {
+          "defaultKeepStorage": "20GB",
+          "enabled": true
+        }
+      },
+      "debug": false,
+      "experimental": false,
+      "features": {
+        "buildkit": true
+      },
+      "insecure-registries": [],
+      "registry-mirrors": []
+  }
+  </code>
+2) from Visual Studio 2022, select `EventDriven.Domain.PoC.Api.Rest` as your "entrypoint" (starting) project and hit debug
+   this will bring up the application, that will obviously be located outside the docker network, ergo the proper url to use for communicating with kafka is `localhost:29092`
+
+This is the easiest way to begin debugging.
 
 # EF migrations
 
-The project that is a home for EF context is the Repository.EF, therefore the migrations are started using these commands
+The project that is a home for EF context is the `Repository.EF`, therefore the migrations are started using these commands
 
 - `dotnet ef migrations add Initial --project EventDriven.Domain.PoC.Repository.EF`
 - `dotnet ef database update --project EventDriven.Domain.PoC.Repository.EF`
 
 # Jaeger and consul (service discovery)
 
-The ideas behind Consul, Eureka and Jaeger are the following:
+The ideas behind `Consul`, `Eureka` and `Jaeger` are the following:
 - I need all services to be registered in a key value store so I can query that store to always know what service is available (and healthy)
     - the key values store is Consul
     - the services register themselves and are then discoverable via Eureka
     - the spans that happen between the services are being traced and logged via Jaeger
 
 ## Liveness probe 
-- URL: https://localhost:6001/liveness
+- URL: `https://localhost:6001/liveness`
 
 ## Rudimentary HC endpoint
 
 Basically this is used by load balancers or service discovery subsystem so they know that a service is "alive"
 The data presented via the /hc endpoint can also be used for dashboard purposes (Grafana or Kibana) if one so desires
 
-- URL: https://localhost:6001/hc
+- URL: `https://localhost:6001/hc`
 
 The following is the hc UI which is not all that important, its just an UI over the /hc json payload
 Depending on the version of .net core and the version of hc package, there tend to be some incompatibilies, so I usually leave the UI out until it matures 
 
-- URL: https://localhost:6001/healthchecks-ui#/healthchecks 
+- URL: `https://localhost:6001/healthchecks-ui#/healthchecks` 
 
 ## Jaeger (open tracing)
 - Jaeger is located in a docker container (see docker-compose)
-- URL: http://localhost:16686/search
+- URL: `http://localhost:16686/search`
 
 ## Consul
 The key values store where we keep the service registrations 
-- URL: http://localhost:8500/ui/dc1/services/consul/instances
+- URL: `http://localhost:8500/ui/dc1/services/consul/instances`
 
 
 # Event driven architecture

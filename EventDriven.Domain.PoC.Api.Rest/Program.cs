@@ -81,53 +81,28 @@ namespace EventDriven.Domain.PoC.Api.Rest
         }
 
 #pragma warning disable 1591
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
-#pragma warning restore 1591
-        {
-            return WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(false)
-                .UseStartup<Startup>()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                //.UseIIS() // <===== For use in "in process" IIS scenarios: 
-                .UseKestrel(opts =>
-                {
-                    // Bind directly to a socket handle or Unix socket
-                    // opts.ListenHandle(123554);
-                    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                    //opts.Listen(IPAddress.Loopback, port: 6001);
-                    //opts.ListenAnyIP(6000);
-                    //opts.ListenLocalhost(6000);
-                    //opts.ListenLocalhost(6003, opts => opts.UseHttps());
-                    //opts.ListenLocalhost(6004, opts => opts.UseHttps());
-                })
-                //.UseUrls("http://localhost:6000")
-                .UseUrls("http://*:6000")
-                .UseSerilog();
-        }
-
-#pragma warning disable 1591
         public static IWebHost BuildWebHost(IConfiguration configuration, string[] args)
 #pragma warning restore 1591
         {
             return WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(false)
+                .CaptureStartupErrors(true)
                 .UseStartup<Startup>()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseConfiguration(configuration)
                 //.UseIIS() // <===== For use in "in process" IIS scenarios: 
-                .UseKestrel(opts =>
-                {
-                    // Bind directly to a socket handle or Unix socket
-                    // opts.ListenHandle(123554);
-                    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                    //opts.Listen(IPAddress.Loopback, port: 6000);
-                    //opts.ListenAnyIP(6000);
-                    //opts.ListenLocalhost(6000);
-                    //opts.ListenLocalhost(6001, opts => opts.UseHttps());
-                    //opts.ListenLocalhost(6004, opts => opts.UseHttps());
-                })
-                .UseUrls("http://localhost:6000", "https://localhost:6001")
-                //.UseUrls("http://*:6000")
+                //.UseKestrel(opts =>
+                //{
+                //    // Bind directly to a socket handle or Unix socket
+                //    // opts.ListenHandle(123554);
+                //    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
+                //    opts.Listen(IPAddress.Loopback, port: 6000);
+                //    // opts.ListenAnyIP(80);
+                //    opts.ListenLocalhost(6000);
+                //    //opts.ListenLocalhost(6001, opts => opts.UseHttps());
+                //    //opts.ListenLocalhost(6000);
+                //})
+                ////.UseUrls("http://+:6000"/*, "https://+:6001"*/)
+                //.UseUrls("http://localhost:6000"/*, "https://+:6001"*/)
                 .UseSerilog()
                 .Build();
         }
@@ -175,12 +150,9 @@ namespace EventDriven.Domain.PoC.Api.Rest
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true)
                 .AddJsonFile(
                     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", // beware this will default to Production appsettings if no ENV is defined on the OS
                     true)
-                .AddJsonFile("appsettings.local.json", true,
-                    true) //load local settings (usually used for local debugging sessions)
                 .AddEnvironmentVariables();
 
             var config = builder.Build();

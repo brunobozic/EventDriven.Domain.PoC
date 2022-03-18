@@ -1,5 +1,21 @@
-version: '3'
+version: '3.9'
 services:
+  #api: 
+  #   build:
+  #    context: ./
+  #    dockerfile: ./EventDriven.Domain.PoC.Api.Rest/Dockerfile
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://+:80;https://+:443
+  #     - ASPNETCORE_HTTP_PORT=6000
+  #     - ASPNETCORE_HTTPS_PORT=6001 
+  #     #- ASPNETCORE_Kestrel__Certificates__Default__Password=crypticpassword
+  #     #- ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+  #   ports:
+  #     - "6000:80"
+  #     - "6001:443"
+  #   networks:
+  #    - jaeger-example
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
@@ -50,13 +66,14 @@ services:
       - zookeeper
     environment:
       KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_ADVERTISED_PORT: "9092"
+      KAFKA_ADVERTISED_PORT: "9094"
       KAFKA_CREATE_TOPICS: "mytopic:1:1"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       HOSTNAME_COMMAND: "echo 127.0.0.1"
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9094
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9094
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+    
       KAFKA_INTER_BROKER_LISTENER_NAME: OUTSIDE
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock

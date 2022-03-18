@@ -593,6 +593,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #endregion Global exception handling
 
+            app.UseHttpsRedirection();
             app.UseRouting();
 
             #region AD

@@ -6,6 +6,7 @@ using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
 using Framework.Kafka.Core.Contracts;
 using MediatR;
 using Newtonsoft.Json;
+using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
@@ -40,30 +41,47 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
             var messages = await connection.QueryAsync<OutboxMessageDto>(sql);
             var messagesList = messages.AsList();
 
-            const string sqlUpdateProcessedDate = "UPDATE [app].[OutboxMessages] " +
+
+            // "UPDATE [dbo].[OutboxMessages] " + "SET [ProcessedDate] = @Date " + "WHERE [Id] = @Id"; // <=== notice the schema prefix, this might be needed for certain db engines
+            const string sqlUpdateProcessedDate = "UPDATE [OutboxMessages] " +
                                                   "SET [ProcessedDate] = @Date " +
                                                   "WHERE [Id] = @Id";
             if (messagesList.Count > 0)
                 foreach (var message in messagesList)
                 {
-                    var type = typeof(User).Assembly.GetType(message.Type);
-
-                    var integrationEvent =
-                        JsonConvert.DeserializeObject(message.Data, type) as IIntegrationEventNotification;
-
-                    using (LogContext.Push(new OutboxMessageContextEnricher(integrationEvent)))
+                    try
                     {
-                        #region Publish the integration event to Kafka
+                        var type = typeof(User).Assembly.GetType(message.Type);
 
-                        await _kafkaProducer.WriteMessageAsync(message.Data);
+                        var integrationEvent =
+                            JsonConvert.DeserializeObject(message.Data, type) as IIntegrationEventNotification;
 
-                        #endregion Publish the integration event to Kafka
-
-                        await connection.ExecuteAsync(sqlUpdateProcessedDate, new
+                        using (LogContext.Push(new OutboxMessageContextEnricher(integrationEvent)))
                         {
-                            Date = DateTime.UtcNow,
-                            message.Id
-                        });
+                            #region Publish the integration event to Kafka
+
+                            var success = await _kafkaProducer.WriteMessageAsync(message.Data);
+
+                            #endregion Publish the integration event to Kafka
+                            if (success)
+                            {
+                                // be mindfull that in certain cases the raw sql for this might have to include the schema name (eg. [dbo].[OutboxMessages])
+                                // if you encounter problems similar to "no table found", try adding the schema name to the table name
+                                var storeResult = await connection.ExecuteAsync(sqlUpdateProcessedDate, new
+                                {
+                                    Date = DateTime.UtcNow,
+                                    message.Id
+                                });
+                            }
+                        }
+                    }
+                    catch (Exception possibleAsyncProblems)
+                    {
+                        Log.Error(possibleAsyncProblems.Message, possibleAsyncProblems);
+                        // this will break the consistency of the app, better stop and investigate
+                        // possible outcomes might include perpetual sending of the same set of messages to kafka
+                        // obviously kafka would survice but the messages would then need to be cleaned up, which might end up in a maintenance nightmare
+                        throw;
                     }
                 }
 

@@ -10,12 +10,13 @@
 
         public const string SYSTEM_USER = "2da4d020-5ac7-453b-a28a-e621aeb9c109";
 
-        public const string UserEmail = "test.admin@gmail.com";
+        public const string USER_EMAIL = "test.admin@gmail.com";
         public const string UserEmail2 = "bruno.bozic@gmail.com";
         public const string UserEmail3 = "test.admin3@gmail.com";
         public const string UserEmail4 = "test.admin4@gmail.com";
-        public const string AdministratorRoleName = "Administrator";
-        public const string Guest = "Guest";
+        public const string ADMINISTRATOR_ROLE_NAME = "Administrator";
+        public const string GUEST = "Guest";
+        public const string SEED_PASSWORD = "asdJkl098321!";
 
         public static string SYSTEM_USER_OIB = "1111111";
         public static string SYSTEM_USER_PASSWORD = "SystemUser";
@@ -27,5 +28,8 @@
         public static double VERIFICATION_TOKEN_EXPIRES_IN_HOURS = 8;
 
         public static double REFREST_TOKEN_TTL_HOURS = 8;
+
+        public static string SYSTEM_USER_NAME = "SYSTEM";
+        public static string SYSTEM_USER_SURNAME = "SYSTEM";
     }
 }

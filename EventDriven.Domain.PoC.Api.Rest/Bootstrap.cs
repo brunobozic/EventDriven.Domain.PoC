@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.CommonServiceLocator;
 using CommonServiceLocator;
@@ -82,8 +83,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
             // build a .net core native service provider so we can later cross-wire it with AutoFac
             var builtServiceProvider = services.BuildServiceProvider();
 
-            IExecutionContextAccessor executionContextAccessor =
-                new ExecutionContextAccessor(builtServiceProvider.GetService<IHttpContextAccessor>());
+            SharedKernel.DomainContracts.IExecutionContextAccessor executionContextAccessor =
+                new SharedKernel.Helpers.ExecutionContextAccessor(builtServiceProvider.GetService<IHttpContextAccessor>());
 
             // cross-wire services that are detected within the native .net core provider with AutoFac
             containerBuilder.Populate(services);
@@ -94,7 +95,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             // read values from appsettings
             var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", false)
                 .AddJsonFile(
                     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
                     false) // beware this will default to Production appsettings if no ENV is defined on the OS                                                                                                                            // .AddJsonFile("appsettings.local.json", true) // load local settings (usually used for local debugging sessions)  ==> this will override all the other previously loaded appsettings, so comment this out in production!

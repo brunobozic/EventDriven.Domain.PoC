@@ -75,9 +75,9 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             if (model == null || string.IsNullOrEmpty(ipAddress))
                 throw new ArgumentNullException("[AuthenticateRequest] is null, and/or ip address are invalid");
             if (string.IsNullOrEmpty(model.Password))
-                throw new ArgumentNullException("[AuthenticateRequest]=>[Password] invalid");
+                throw new ArgumentNullException("[AuthenticateRequest] => [Password] invalid");
             if (string.IsNullOrEmpty(model.Email))
-                throw new ArgumentNullException("[AuthenticateRequest]=>[Email] invalid");
+                throw new ArgumentNullException("[AuthenticateRequest] => [Email] invalid");
 
             var returnValue = new AuthenticateResponse
             {
@@ -85,44 +85,48 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 Message = ""
             };
 
-            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.Email == model.Email);
+            var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.Email.ToUpper().Trim() == model.Email.ToUpper().Trim());
 
             if (applicationUser == null ||
                 applicationUser.GetCurrentRegistrationStatus() != RegistrationStatusEnum.Verified ||
                 !BC.Verify(model.Password, applicationUser.PasswordHash))
-                throw new AppException("Email or password is incorrect");
+                throw new AppException("Email or password is incorrect, or the user has not verified his account [ " + model.Email.ToUpper().Trim() + " ]");
 
             // authentication successful so generate jwt and refresh tokens
-            var jwtToken = GenerateJwtTokenAsync(applicationUser);
+            var jwtToken = await GenerateJwtTokenAsync(applicationUser);
             var refreshToken = GenerateRefreshToken(ipAddress);
 
             try
             {
-                // add a new refresh token
+                // add a newly created refresh token to the data store
                 applicationUser.AddRefreshToken(refreshToken);
-                // remove old refresh tokens from applicationUser
+                // remove old refresh tokens from the data store
                 applicationUser.RemoveStaleRefreshTokens();
 
+                // persist changes throught the aggregate root
                 Repository.Update(applicationUser);
+
+                // fire the unit of work transaction
                 var saveResult = await UnitOfWork.SaveChangesAsync();
 
+                // map the service layer response into a view model
                 var response = _mapper.Map<AuthenticateResponse>(applicationUser);
 
-                response.JwtToken = await jwtToken;
+                response.JwtToken = jwtToken;
                 response.RefreshToken = refreshToken.Token;
                 response.Success = true;
                 response.Message = "Authenticated";
 
+                // return the created jwt token and the refresh token so they can be used by the front end
                 return response;
             }
             catch (Exception ex)
             {
                 Log.Error("Problem authenticating user with email: [ " + applicationUser.Email + " ]", ex);
 
-                returnValue.Success = false;
                 returnValue.Message = ex.Message;
                 returnValue.InnerMessage = ex.InnerException?.Message;
-                returnValue.UserFriendlyMessage = "Problem refreshing token";
+                returnValue.UserFriendlyMessage = "Problem logging in, generating a jwt token or generating a refresh token.";
 
                 return returnValue;
             }

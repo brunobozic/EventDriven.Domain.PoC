@@ -37,9 +37,9 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             }
         }
 
-        public async Task WriteMessageAsync(string message)
+        public async Task<bool> WriteMessageAsync(string message)
         {
-            await _producer.ProduceAsync(_topicName,
+            var successfullDelivery = await _producer.ProduceAsync(_topicName,
                     new Message<string, string> { Key = rand.Next(5).ToString(), Value = message })
                 .ContinueWith(task => task.IsFaulted
                     ? $"error producing message: {task.Exception.Message}"
@@ -48,6 +48,8 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             // block until all in-flight produce requests have completed (successfully
             // or otherwise) or 10s has elapsed.
             _producer.Flush(TimeSpan.FromSeconds(10));
+
+            return true;
         }
 
         public void Dispose()
