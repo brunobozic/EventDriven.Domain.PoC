@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using OpenTracing;
+using OpenTelemetry.Trace;
 using System;
 using System.Net;
 using System.Threading;
@@ -60,7 +60,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             , IMediator mediator
             , IMemoryCache memCache
             , IHttpContextAccessor contextAccessor
-            , ITracer tracer
+            , Tracer tracer
         ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, applicationUserService)
         {
             _applicationUserService = applicationUserService;
@@ -78,32 +78,43 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         private readonly MyConfigurationValues _configurationValues;
         private readonly IUserService _applicationUserService;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly ITracer _tracer;
+
 #pragma warning disable IDE0052 // Remove unread private members
+
         // ReSharper disable once NotAccessedField.Local
         private readonly IMapper _mapper;
+
 #pragma warning restore IDE0052 // Remove unread private members
         private readonly IMediator _mediator;
+        private readonly Tracer _tracer;
 
         #endregion Private props
 
         #region Public props
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string FirstName { get; private set; }
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string LastName { get; private set; }
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string Email { get; private set; }
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable 1591
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public string UserName { get; private set; }
+
 #pragma warning restore 1591
 
         #endregion Public props
@@ -183,6 +194,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterAsync(RegisterUserRequest request, CancellationToken ct)
         {
+            using var span = _tracer.StartActiveSpan("hello-span");
             // As an example of a non-trivial event based flow we got the following:
 
             // [RegisterUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
@@ -234,13 +246,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
             command.CreatorId = creatorId;
 
-            using var scope = _tracer.BuildSpan("RegisterAsync").StartActive(true);
             var user = await _mediator.Send(command, ct);
 
             return Created(string.Empty, user);
         }
-
-
 
         [HttpPost("login")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -248,7 +257,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> LoginAsync(AuthenticateRequest request, CancellationToken ct)
         {
-            using var scope = _tracer.BuildSpan("LoginAsync").StartActive(true);
+            //using var scope = _tracer.BuildSpan("LoginAsync").StartActive(true);
 
             var serviceLayerResponse = await _applicationUserService.AuthenticateAsync(request, IpAddress());
 
@@ -260,7 +269,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             }
             else { return BadRequest(serviceLayerResponse.Message); }
         }
-
 
         /// <summary>
         /// </summary>
@@ -291,7 +299,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                     .Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
             if (creator != null) command.CreatorId = creator.Id;
 
-            using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
+            //using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
             var user = await _mediator.Send(command, ct);
 
             return Created(string.Empty, user);
@@ -321,7 +329,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                         .Items["ApplicationUser"] // this will work only if the user had gone thru authentication
             };
 
-            using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
+            //using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
 
             await _mediator.Send(command, ct);
 
@@ -350,7 +358,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                         .Items["ApplicationUser"] // this will work only if the user had gone thru authentication
             };
 
-            using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
+            //using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
 
             await _mediator.Send(command, ct);
 
@@ -390,7 +398,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                         .Items["ApplicationUser"] // this will work only if the user had gone thru authentication
             };
 
-            using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
+            // using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
             await _mediator.Send(command, ct);
 
             return Ok("Address assigned to user.");
@@ -419,7 +427,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                 Origin = Request.Headers["origin"]
             };
 
-            using var scope = _tracer.BuildSpan("RemoveAddressFromUserAsync").StartActive(true);
+            // using var scope = _tracer.BuildSpan("RemoveAddressFromUserAsync").StartActive(true);
 
             if (remover != null)
                 command.RemoverUser = remover.Id;
@@ -430,7 +438,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         }
 
         #endregion User addresses
-
 
         /// <summary>
         /// </summary>
@@ -489,7 +496,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             var command = new ResendAccountVerificationEmailCommand(userEmailAddress, userName)
             { Origin = Request.Headers["origin"] };
 
-            using var scope = _tracer.BuildSpan("ResendActivationLinkAsync").StartActive(true);
+            // using var scope = _tracer.BuildSpan("ResendActivationLinkAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
 
             return response;
@@ -510,7 +517,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                         request.UserName)
                 { Origin = Request.Headers["origin"] };
 
-            using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
+            // using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
 
             // this might not be true CQRS but I simply need synchronous feedback at this point because I cant rely on the email provided to be valid
             // so I cant send an email and be certain that the user will receive it
@@ -539,7 +546,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                 Origin = Request.Headers["origin"]
             };
 
-            using var scope = _tracer.BuildSpan("InitiateForgotPasswordAsync").StartActive(true);
+            // using var scope = _tracer.BuildSpan("InitiateForgotPasswordAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
 
             return Ok(response);
@@ -563,7 +570,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                 Origin = Request.Headers["origin"]
             };
 
-            using var scope = _tracer.BuildSpan("ValidateForgotPasswordTokenAsync").StartActive(true);
+            // using var scope = _tracer.BuildSpan("ValidateForgotPasswordTokenAsync").StartActive(true);
             var response = await _mediator.Send(command, ct);
 
             return Ok(response);
@@ -595,7 +602,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         }
 
         #endregion Helpers
-
 
         //[HttpPost("verify-email")]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
@@ -669,7 +675,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //        .Include(u => u.RefreshTokens)
         //        .Where(user => user.Id == 1)
         //        .FirstOrDefaultAsync();
-
 
         //    var users = await _applicationUserService
         //        .Queryable()

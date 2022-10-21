@@ -21,9 +21,8 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activa
 
         public async Task Handle(UserActivatedNotification notification, CancellationToken cancellationToken)
         {
-
             // the journal message
-            var journalEntry = DateTime.UtcNow + " => Activated by [ " + notification.IntegrationEvent.ActivatedByUsername +" ] .";
+            var journalEntry = DateTime.UtcNow + " => Activated by [ " + notification.IntegrationEvent.ActivatedByUsername + " ] .";
 
             // delegate the rest of the operation to the journaling service
             try
@@ -32,7 +31,6 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activa
             }
             catch (Exception ex)
             {
-
             }
         }
     }

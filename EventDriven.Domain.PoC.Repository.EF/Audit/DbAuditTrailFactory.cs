@@ -65,6 +65,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Audit
 
                 case EntityState.Detached:
                     break;
+
                 case EntityState.Unchanged:
                     break;
             }

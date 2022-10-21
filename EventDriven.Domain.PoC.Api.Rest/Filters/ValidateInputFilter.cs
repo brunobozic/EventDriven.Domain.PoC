@@ -11,7 +11,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Filters
     {
         #region Constructor
 
-        #endregion
+        #endregion Constructor
 
         #region
 

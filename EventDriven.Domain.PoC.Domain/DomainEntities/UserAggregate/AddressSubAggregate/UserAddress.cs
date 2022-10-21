@@ -81,7 +81,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
             return ActiveTo >= DateTimeOffset.UtcNow;
         }
 
-
         public virtual bool IsDeactivated()
         {
             return !Active;

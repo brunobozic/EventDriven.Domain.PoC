@@ -31,7 +31,6 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
         private ITrackableRepository<Role> RoleRepository { get; }
         private ITrackableRepository<User> UserRepository { get; }
 
-
         public async Task<UserDto> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
         {
             // cant log the creator user because when registering a new user, we dont have the creator user in the db

@@ -13,7 +13,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RefreshToke
 
         #endregion FK
 
-
         #region Public Methods
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

@@ -1,6 +1,4 @@
 ﻿using EventDriven.Domain.PoC.Application.DomainServices.JournalServices;
-using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Notifications;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
 using System;
@@ -33,7 +31,6 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Handle
             }
             catch (Exception ex)
             {
-
             }
         }
     }

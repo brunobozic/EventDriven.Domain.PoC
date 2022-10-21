@@ -9,7 +9,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.ContactsSub
     {
         public bool IsActive { get; set; }
 
-
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             throw new NotImplementedException();

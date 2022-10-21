@@ -50,6 +50,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
         // ReSharper disable once IdentifierTypo
         public Guid? UndeletedById { get; private set; }
+
         public long AddressTypeId { get; private set; }
 
         #endregion Navigation properties
@@ -122,7 +123,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
 
             return address;
         }
-
 
         public static Address NewActiveDraft(
             string name

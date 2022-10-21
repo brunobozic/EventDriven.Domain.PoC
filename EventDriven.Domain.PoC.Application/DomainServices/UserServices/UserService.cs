@@ -11,7 +11,6 @@ using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Epoch;
-using EventDriven.Domain.PoC.SharedKernel.Helpers.Random;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -66,6 +65,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
         private readonly IEmailService _emailService;
         private readonly IOptions<MyConfigurationValues> _appSettingsSnap;
         private readonly JwtIssuerOptions _jwtOptions;
+
         #endregion private props
 
         #region public methods
@@ -131,8 +131,6 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
                 return returnValue;
             }
         }
-
-
 
         public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest model, string origin)
         {
@@ -313,7 +311,6 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             {
                 returnValue.Success = true;
             }
-
 
             return returnValue;
         }
@@ -600,7 +597,9 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             try
             {
                 // revoke token and save
-                //applicationUser.RevokeToken(refreshToken.EmailVerificationToken, ipAddress);
+                var revoker = await Repository.Queryable()
+                   .Where(u => u.Id == Guid.Parse(ApplicationWideConstants.SYSTEM_USER)).SingleOrDefaultAsync();
+                applicationUser.RevokeToken(token, ipAddress, revoker);
                 Repository.Update(applicationUser);
                 var saveResult = await UnitOfWork.SaveChangesAsync();
 
@@ -635,6 +634,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
 
             return (refreshToken, applicationUser);
         }
+
         private async Task<string> GenerateJwtTokenAsync(User applicationUser)
         {
             if (applicationUser == null) throw new ArgumentNullException("UpdateApplicationUserRequest invalid");

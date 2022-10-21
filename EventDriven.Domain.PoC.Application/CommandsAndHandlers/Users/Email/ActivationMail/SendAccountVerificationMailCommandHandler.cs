@@ -116,7 +116,6 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
                 return retVal;
             }
 
-
             retVal.SuccessfullySent = true;
             retVal.FirstName = command.FirstName;
             retVal.LastName = command.LastName;

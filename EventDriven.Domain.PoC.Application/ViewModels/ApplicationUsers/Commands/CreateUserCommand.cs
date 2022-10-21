@@ -57,7 +57,6 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
         public DateTimeOffset ActiveTo { get; set; }
         public User Creator { get; set; }
 
-
         // helpers
 
         private string replaceEmptyWithNull(string value)

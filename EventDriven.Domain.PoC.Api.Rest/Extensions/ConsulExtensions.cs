@@ -39,6 +39,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             if (!(app.Properties["server.Features"] is FeatureCollection features)) return app;
 
             var addresses = features.Get<IServerAddressesFeature>();
+            // this will fail if run within the IIS server
             var address = addresses.Addresses.First();
 
             Log.Information($"address={address}");
@@ -47,7 +48,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             var registration = new AgentServiceRegistration
             {
                 ID = "EventDrivenPoC-5000",
-                // service name  
+                // service name
                 Name = "EventDrivenPoC",
                 Address = "localhost",
                 Port = 5000

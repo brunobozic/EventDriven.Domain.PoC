@@ -22,7 +22,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Autofac
 
         public IEnumerable<IComponentRegistration> RegistrationsFor(
             Service service,
-            Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
+            Func<Service, IEnumerable<ServiceRegistration>> registrationAccessor)
         {
             var components = _source.RegistrationsFor(service, registrationAccessor);
             foreach (var c in components)

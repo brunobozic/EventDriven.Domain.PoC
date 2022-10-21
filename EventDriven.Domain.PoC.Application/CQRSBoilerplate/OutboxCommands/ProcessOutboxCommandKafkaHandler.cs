@@ -41,7 +41,6 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
             var messages = await connection.QueryAsync<OutboxMessageDto>(sql);
             var messagesList = messages.AsList();
 
-
             // "UPDATE [dbo].[OutboxMessages] " + "SET [ProcessedDate] = @Date " + "WHERE [Id] = @Id"; // <=== notice the schema prefix, this might be needed for certain db engines
             const string sqlUpdateProcessedDate = "UPDATE [OutboxMessages] " +
                                                   "SET [ProcessedDate] = @Date " +
@@ -63,6 +62,7 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
                             var success = await _kafkaProducer.WriteMessageAsync(message.Data);
 
                             #endregion Publish the integration event to Kafka
+
                             if (success)
                             {
                                 // be mindfull that in certain cases the raw sql for this might have to include the schema name (eg. [dbo].[OutboxMessages])

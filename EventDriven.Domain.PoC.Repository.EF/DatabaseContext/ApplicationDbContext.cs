@@ -289,7 +289,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                 //	departmentToUpdate.RowVersion = databaseValues.RowVersion;
                 //}
 
-                // Update the values of the entity that failed to save from the store 
+                // Update the values of the entity that failed to save from the store
                 await ex.Entries.Single().ReloadAsync(cancellationToken);
 
                 var result = new StringBuilder();

@@ -18,6 +18,7 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
         public static readonly string AppName = Namespace;
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         public static int Main(string[] args)
         {
             var configuration = GetConfiguration();
@@ -43,7 +44,9 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
                 return 1;
             }
         }
+
 #pragma warning disable 1591
+
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
 #pragma warning restore 1591
         {
@@ -51,7 +54,7 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
                     .CaptureStartupErrors(false)
                     .UseStartup<Startup>()
                     .UseContentRoot(Directory.GetCurrentDirectory())
-                    //.UseIIS() // <===== For use in "in process" IIS scenarios: 
+                    //.UseIIS() // <===== For use in "in process" IIS scenarios:
                     .UseSerilog()
                     .UseUrls("http://*:9000")
                     .ConfigureAppConfiguration((hostingContext, config) =>
@@ -71,7 +74,6 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
                 //.Configure(app => { app.UseOcelot().Wait(); })
                 ;
         }
-
 
         [Obsolete]
         private static ILogger CreateSerilogLogger(IConfiguration configuration)

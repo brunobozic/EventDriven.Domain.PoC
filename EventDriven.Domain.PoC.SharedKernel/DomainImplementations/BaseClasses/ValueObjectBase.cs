@@ -9,6 +9,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
     public abstract class ValueObjectBase
     {
         private readonly List<BusinessRule> _brokenRules = new();
+
         protected abstract void Validate();
 
         public void ThrowExceptionIfInvalid()

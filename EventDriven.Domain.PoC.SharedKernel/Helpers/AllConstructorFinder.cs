@@ -11,7 +11,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
         private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache =
             new();
 
-
         public ConstructorInfo[] FindConstructors(Type targetType)
         {
             var result = Cache.GetOrAdd(targetType,

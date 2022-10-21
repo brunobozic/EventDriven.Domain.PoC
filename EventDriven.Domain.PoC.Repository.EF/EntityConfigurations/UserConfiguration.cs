@@ -20,7 +20,6 @@ namespace EventDriven.Domain.PoC.Repository.EF.EntityConfigurations
             builder.HasIndex(p => p.Oib)
                 .IsUnique();
 
-
             builder.Property(p => p.Email)
                 .HasMaxLength(50)
                 .IsRequired()

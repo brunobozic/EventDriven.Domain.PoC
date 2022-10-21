@@ -14,10 +14,6 @@ using EventDriven.Domain.PoC.SharedKernel.Helpers.Quartz;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
-using Jaeger;
-using Jaeger.Reporters;
-using Jaeger.Samplers;
-using Jaeger.Senders.Thrift;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -34,12 +30,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using OpenTracing;
-using OpenTracing.Contrib.NetCore.Configuration;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
@@ -61,6 +56,7 @@ using ILogger = Serilog.ILogger;
 namespace EventDriven.Domain.PoC.Api.Rest
 {
 #pragma warning disable 1591
+
     public class Startup
 #pragma warning restore 1591
     {
@@ -72,6 +68,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
 #pragma warning disable 1591
+
         public Startup(
 #pragma warning restore 1591
             IConfiguration configuration
@@ -103,6 +100,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
         // This method gets called by the runtime. Use this method to add services to the container.
 #pragma warning disable 1591
+
+        [Obsolete]
         public IServiceProvider ConfigureServices(IServiceCollection services)
 #pragma warning restore 1591
         {
@@ -130,8 +129,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     fv.RegisterValidatorsFromAssembly(
                         Assembly.Load(
                             "EventDriven.Domain.PoC.Application")); // the assembly that houses the implemented validators
-                    fv.RunDefaultMvcValidationAfterFluentValidationExecutes =
-                        false; // dont run MVC validators after having run the fluent ones
+                                                                    // fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false; // dont run MVC validators after having run the fluent ones
                     fv.ImplicitlyValidateChildProperties =
                         true; // fall through and validate all child elements and their child elements
                 })
@@ -185,8 +183,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 options.Filters.Add(typeof(ValidateInputFilter));
                 options.Filters.Add(typeof(HttpGlobalExceptionFilter));
             });
-
-            var basePath = PlatformServices.Default.Application.ApplicationBasePath;
 
             #region Swagger
 
@@ -301,26 +297,22 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #region Jaeger wireup
 
-            services.AddOpenTracing();
             // Adds the Jaeger Tracer.
-            services.AddSingleton<ITracer>(sp =>
+            var serviceName = "MyCompany.MyProduct.MyService";
+            var serviceVersion = "1.0.0";
+
+            services.AddOpenTelemetryTracing(tcb =>
             {
-                var serviceName = sp.GetRequiredService<IWebHostEnvironment>().ApplicationName;
-                var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-                var reporter = new RemoteReporter.Builder().WithLoggerFactory(loggerFactory).WithSender(new UdpSender())
-                    .Build();
-                var tracer = new Tracer.Builder(serviceName)
-                    // The constant sampler reports every span.
-                    .WithSampler(new ConstSampler(true))
-                    // LoggingReporter prints every reported span to the logging framework.
-                    .WithReporter(reporter)
-                    .Build();
-                return tracer;
+                tcb
+                .AddSource(serviceName)
+                .SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(serviceName: serviceName, serviceVersion: serviceVersion))
+                .AddAspNetCoreInstrumentation()
+                .AddConsoleExporter();
             });
 
-            services.Configure<HttpHandlerDiagnosticOptions>(options =>
-                options.OperationNameResolver =
-                    request => $"{request.Method.Method}: {request?.RequestUri?.AbsoluteUri}");
+            services.AddSingleton(TracerProvider.Default.GetTracer(serviceName));
 
             #endregion Jaeger wireup
 
@@ -363,15 +355,14 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 // .AddUrlGroup(new Uri("https://localhost:5001/swagger"), name: "base URL", failureStatus: HealthStatus.Degraded)
                 ;
 
-            ////adding healthchecks UI
-            //services.AddHealthChecksUI(opt =>
-            //{
-            //    opt.SetEvaluationTimeInSeconds(15); //time in seconds between check
-            //    opt.MaximumHistoryEntriesPerEndpoint(60); //maximum history of checks
-            //    opt.SetApiMaxActiveRequests(1); //api requests concurrency
-
-            //    opt.AddHealthCheckEndpoint("api", "/health"); //map health check api
-            //}).AddSqliteStorage(connStr);
+            //adding healthchecks UI
+            services.AddHealthChecksUI(opt =>
+            {
+                opt.SetEvaluationTimeInSeconds(15); //time in seconds between check
+                opt.MaximumHistoryEntriesPerEndpoint(60); //maximum history of checks
+                opt.SetApiMaxActiveRequests(1); //api requests concurrency
+                opt.AddHealthCheckEndpoint("api", "/health"); //map health check api
+            }).AddSqliteStorage(connStr);
 
             #endregion HealthCheck
 
@@ -411,9 +402,9 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             services.AddSingleton(sp => MapperConfiguration.CreateMapper());
 
-            var config = new MapperConfiguration(cfg => { cfg.AddMaps("EventDriven.Domain.PoC.Application"); });
+            var AMconfig = new MapperConfiguration(cfg => { cfg.AddMaps("EventDriven.Domain.PoC.Application"); });
 
-            var mapper = config.CreateMapper();
+            var mapper = AMconfig.CreateMapper();
             //config.AssertConfigurationIsValid();
             services.AddSingleton(mapper);
 
@@ -422,7 +413,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
             // ======================================== / Mapper ==============================================
             // ================================================================================================
             // ================================================================================================
-
 
             // ================================================================================================
             // ================================================================================================
@@ -480,7 +470,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         [Obsolete]
-#pragma warning disable 1591
         public void Configure(IApplicationBuilder app
 #pragma warning restore 1591
             , IWebHostEnvironment env
@@ -501,7 +490,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
 
             //_ = DbInitializer.InitializeAsync(myDbContext);
 
@@ -530,7 +518,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 Predicate = r => r.Name.Contains("self")
             });
 
-            #endregion HelathCheck
+            #endregion HealthCheck
 
             app.UseStaticFiles();
 
@@ -552,7 +540,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #region Global exception handling
 
-            // The idea here is to hijack all exceptions, and decide whether to show the full trace (for developers) or to show a cleaned up 
+            // The idea here is to hijack all exceptions, and decide whether to show the full trace (for developers) or to show a cleaned up
             // safe, user friendly messages to end users (commonly this is done in Production)
             app.UseExceptionHandler(
                 builder =>
@@ -574,7 +562,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
                                     Messages = new[] { error.Error.Message },
                                     User = context.User.Identity.Name
                                 };
-
 
                                 if (error.Error.Message.Contains("AD User"))
                                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -618,15 +605,15 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 {
                     endpoints.MapControllers();
 
-                    ////adding endpoint of health check for the health check ui in UI format
-                    //endpoints.MapHealthChecks("/health", new HealthCheckOptions
-                    //{
-                    //    Predicate = _ => true,
-                    //    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-                    //});
+                    //adding endpoint of health check for the health check ui in UI format
+                    endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                    {
+                        Predicate = _ => true,
+                        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                    });
 
-                    ////map healthcheck ui endpoing - default is /healthchecks-ui/
-                    //endpoints.MapHealthChecksUI();
+                    //map healthcheck ui endpoing - default is /healthchecks-ui/
+                    endpoints.MapHealthChecksUI();
                 }
             );
 

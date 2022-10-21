@@ -429,7 +429,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             return thusFar;
         }
 
-
         /// <summary>
         ///     Logs a part of the message that was read from Kafka for logging reasons.
         /// </summary>

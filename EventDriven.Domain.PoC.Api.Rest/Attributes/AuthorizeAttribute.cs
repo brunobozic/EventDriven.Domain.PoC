@@ -1,5 +1,4 @@
-﻿
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
+﻿using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

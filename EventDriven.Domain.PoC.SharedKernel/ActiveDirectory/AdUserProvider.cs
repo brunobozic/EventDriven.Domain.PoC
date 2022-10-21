@@ -28,13 +28,11 @@
     //        {
     //            try
     //            {
-
     //                string OU = "OU=Development OU,OU=Users OU,DC=DEV,DC=Teched,DC=HR";
 
     //                string dom = "DEV.Teched.HR";
 
     //                string userAD = "LDAP://DEV-011-DC.DEV.Teched.HR/OU=iCIS";
-
 
     //                using (PrincipalContext context = new PrincipalContext(ContextType.Domain, dom, OU))
     //                {

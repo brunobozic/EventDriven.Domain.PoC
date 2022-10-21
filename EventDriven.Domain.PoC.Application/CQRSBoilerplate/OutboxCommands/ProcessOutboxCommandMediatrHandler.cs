@@ -1,19 +1,4 @@
-﻿using Dapper;
-using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.Notifications;
-using EventDriven.Domain.PoC.Application.ViewModels.OutboxMessage;
-using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
-using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
-using MediatR;
-using Newtonsoft.Json;
-using Serilog;
-using Serilog.Context;
-using Serilog.Core;
-using Serilog.Events;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
+﻿namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
 {
     //internal class ProcessOutboxCommandMediatrHandler : ICommandHandler<ProcessOutboxCommand, Unit>
     //{
@@ -74,7 +59,6 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
     //            Log.Fatal(e.Message, e);
     //            throw;
     //        }
-
 
     //        return Unit.Value;
     //    }

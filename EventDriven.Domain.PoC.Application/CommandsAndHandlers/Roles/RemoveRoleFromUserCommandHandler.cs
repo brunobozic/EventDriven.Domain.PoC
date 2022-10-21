@@ -33,7 +33,6 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Roles
         private ITrackableRepository<Role> RoleRepository { get; }
         private ITrackableRepository<User> UserRepository { get; }
 
-
         public async Task<ApplicationRoleAssignmentDto> Handle(RemoveRoleFromUserCommand command,
             CancellationToken cancellationToken)
         {

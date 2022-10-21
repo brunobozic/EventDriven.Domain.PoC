@@ -32,6 +32,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Handle
         public long AddressId { get; set; }
         public Guid AddressIdGuid { get; set; }
         public string AddressLine1 { get; set; }
+
         public AddressRemovedFromUserNotification(AddressRemovedFromUserDomainEvent integrationEvent) : base(integrationEvent)
         {
             AddressActive = integrationEvent.AddressActive;

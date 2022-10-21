@@ -80,11 +80,9 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             CreatedBy = creatorUser;
         }
 
-
         public string Name { get; set; }
         public string Description { get; set; }
         public TK Id { get; set; }
-
 
         public User CreatedBy { get; private set; }
         public DateTimeOffset DateCreated { get; set; }
@@ -101,7 +99,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
         public string DeleteReason { get; private set; }
 
         #endregion Public Props
-
 
         #region Public Methods
 

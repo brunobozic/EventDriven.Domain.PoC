@@ -38,7 +38,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             _latestVerificationFailureTime = DateTime.UtcNow;
         }
 
-
         #region Public Properties
 
         //[EnumDataType(typeof(RoleEnum))] public string BasicRole { get; private set; }
@@ -500,7 +499,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                          <p>Your email <strong>{Email}</strong> is already registered.</p>
                          {message}";
             var emailFrom = "admin.poc@gmail.com";
-
 
             // when this domain event gets handled [AccountAlreadyRegisteredMailReadiedDomainEventHandler], a new command [AccountAlreadyRegisteredMailCommand]
             // will be created that will actually do the email sending

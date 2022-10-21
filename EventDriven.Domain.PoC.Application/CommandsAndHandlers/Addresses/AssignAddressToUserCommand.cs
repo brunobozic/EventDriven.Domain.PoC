@@ -45,7 +45,6 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Addresses
             ActiveTo = activeTo;
         }
 
-
         public Guid UserId { get; set; }
         public User AssignerUser { get; set; }
         public string AddressTypeName { get; set; }

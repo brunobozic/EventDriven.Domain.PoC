@@ -9,10 +9,10 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationRoles
 
         // public Guid RoleId { get; set; }
         public DateTimeOffset? ActiveFrom { get; set; }
+
         public DateTimeOffset? ActiveTo { get; set; }
         public bool Deleted { get; set; } = false;
         public DateTimeOffset? DateDeleted { get; set; }
-
 
         public bool Active { get; set; }
         public DateTimeOffset DateCreated { get; set; }

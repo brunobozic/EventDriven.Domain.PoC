@@ -25,9 +25,11 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
                 case JsonToken.StartArray:
                     numArray = ReadByteArray(reader);
                     break;
+
                 case JsonToken.String:
                     numArray = Convert.FromBase64String(reader.Value.ToString());
                     break;
+
                 default:
                     throw new Exception(
                         $"Unexpected token parsing binary. Expected String or StartArray, got {reader.TokenType}.");
@@ -58,6 +60,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
                     case JsonToken.EndArray:
 
                         return list.ToArray();
+
                     default:
                         throw new Exception($"Unexpected token when reading bytes: {reader.TokenType}");
                 }

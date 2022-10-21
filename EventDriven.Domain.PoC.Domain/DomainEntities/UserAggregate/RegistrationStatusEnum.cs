@@ -9,6 +9,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         [Description("WaitingForVerification")]
         WaitingForVerification = 3,
+
         [Description("VerificationTimeOut")] VerificationTimeOut = 4,
         [Description("VerificationEmailSent")] VerificationEmailSent = 5,
 

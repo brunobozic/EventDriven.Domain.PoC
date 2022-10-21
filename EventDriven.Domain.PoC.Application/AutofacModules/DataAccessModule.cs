@@ -22,7 +22,6 @@ namespace EventDriven.Domain.PoC.Application.AutofacModules
             //    .As<IUnitOfWork>()
             //    .InstancePerLifetimeScope();
 
-
             ////builder.RegisterType<CustomerRepository>()
             ////    .As<ICustomerRepository>()
             ////    .InstancePerLifetimeScope();

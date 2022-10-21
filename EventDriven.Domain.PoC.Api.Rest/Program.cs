@@ -11,11 +11,11 @@ using Serilog.Sinks.SystemConsole.Themes;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 
 namespace EventDriven.Domain.PoC.Api.Rest
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public class Program
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
@@ -27,6 +27,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         [Obsolete]
         public static int Main(string[] args)
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
@@ -69,7 +70,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
                 host.Run();
 
-
                 return 0;
             }
             catch (Exception ex)
@@ -81,6 +81,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
         }
 
 #pragma warning disable 1591
+
         public static IWebHost BuildWebHost(IConfiguration configuration, string[] args)
 #pragma warning restore 1591
         {
@@ -89,7 +90,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 .UseStartup<Startup>()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseConfiguration(configuration)
-                //.UseIIS() // <===== For use in "in process" IIS scenarios: 
+                //.UseIIS() // <===== For use in "in process" IIS scenarios:
                 //.UseKestrel(opts =>
                 //{
                 //    // Bind directly to a socket handle or Unix socket

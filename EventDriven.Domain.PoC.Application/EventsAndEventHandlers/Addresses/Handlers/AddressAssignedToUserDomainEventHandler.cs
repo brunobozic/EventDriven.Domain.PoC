@@ -32,9 +32,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Handle
             }
             catch (Exception ex)
             {
-
             }
-
         }
     }
 }

@@ -6,7 +6,7 @@
       "DownstreamScheme": "http",
       "ServiceName": "FuckingService",
       "UpstreamPathTemplate": "/{url}",
-      "UpstreamHttpMethod": ["Get", "Post", "Put", "Update"],
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Update" ],
       "ReRoutesCaseSensitive": false
     }
   ],

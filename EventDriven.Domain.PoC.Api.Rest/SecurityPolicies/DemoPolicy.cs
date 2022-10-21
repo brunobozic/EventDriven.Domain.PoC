@@ -10,7 +10,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.SecurityPolicies
     {
         private readonly IServiceProvider _serviceProvider;
 
-
         public DemoPolicy(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;

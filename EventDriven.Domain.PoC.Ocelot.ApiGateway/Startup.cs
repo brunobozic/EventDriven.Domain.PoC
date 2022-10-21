@@ -20,7 +20,6 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
 
         public static readonly string AppName = Namespace;
 
-
         public Startup(
             IConfiguration configuration
             , ILoggerFactory loggerFactory
@@ -34,7 +33,6 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
             LoggerFactory.AddSerilog(Logger);
         }
 
-
         public IWebHostEnvironment Env { get; set; }
 
         public ILogger Logger { get; }
@@ -42,7 +40,6 @@ namespace EventDriven.Domain.PoC.Ocelot.ApiGateway
         public IConfiguration Configuration { get; }
 
         public ILoggerFactory LoggerFactory { get; set; }
-
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)

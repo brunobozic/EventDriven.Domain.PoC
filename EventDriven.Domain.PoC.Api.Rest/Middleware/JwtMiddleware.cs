@@ -30,6 +30,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Middleware
             if (token != null)
                 await AttachapplicationUserToContext(context, dataContext, token);
 
+            // if (context.Request.Path.Value.Contains("healthchecks-api")) { return; }
+
             await _next(context);
         }
 

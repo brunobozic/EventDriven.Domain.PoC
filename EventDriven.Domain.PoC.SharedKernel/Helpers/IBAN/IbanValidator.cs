@@ -78,7 +78,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.IBAN
             {
                 if (cleanText)
                     iban = Regex.Replace(iban, @"\s", "")
-                        .ToUpper(); // remove empty space & convert all uppercase       
+                        .ToUpper(); // remove empty space & convert all uppercase
 
                 if (Regex.IsMatch(iban, @"\W")) // contains chars other than (a-zA-Z0-9)
                     return new IbanStatus(ValidationMessages.IllegalCharactersFound);
@@ -111,10 +111,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.IBAN
                 // ******* from wikipedia.org
                 // The checksum is a basic ISO 7064 mod 97-10 calculation where the remainder must equal 1.
                 // To validate the checksum:
-                // 1- Check that the total IBAN length is correct as per the country. If not, the IBAN is invalid. 
-                // 2- Move the four initial characters to the end of the string. 
-                // 3- Replace each letter in the string with two digits, thereby expanding the string, where A=10, B=11, ..., Z=35. 
-                // 4- Interpret the string as a decimal integer and compute the remainder of that number on division by 97. 
+                // 1- Check that the total IBAN length is correct as per the country. If not, the IBAN is invalid.
+                // 2- Move the four initial characters to the end of the string.
+                // 3- Replace each letter in the string with two digits, thereby expanding the string, where A=10, B=11, ..., Z=35.
+                // 4- Interpret the string as a decimal integer and compute the remainder of that number on division by 97.
                 // The IBAN number can only be valid if the remainder is 1.
                 var modifiedIban = iban.ToUpper().Substring(4) + iban.Substring(0, 4);
 

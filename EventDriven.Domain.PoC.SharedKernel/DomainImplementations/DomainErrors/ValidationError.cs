@@ -10,7 +10,7 @@
             public static string Domain = "domain";
         }
 
-        #endregion
+        #endregion Constants
 
         #region Properties
 
@@ -19,7 +19,7 @@
         public object Source { get; set; }
         public string ErrorMessage { get; set; }
 
-        #endregion
+        #endregion Properties
 
         #region Constructor
 
@@ -35,6 +35,6 @@
             ErrorMessage = message;
         }
 
-        #endregion
+        #endregion Constructor
     }
 }

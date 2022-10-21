@@ -38,8 +38,6 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Roles.Handle
             TownId = integrationEvent.TownId;
             TownName = integrationEvent.TownName;
             TownZipCode = integrationEvent.TownZipCode;
-
-
         }
 
         public bool AddressActive { get; set; }

@@ -129,6 +129,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
         #region Public methods
 
 #pragma warning disable CS0108 // Member hides inherited member; missing new keyword
+
         public void AssignCreatedBy(User creatorUser)
 #pragma warning restore CS0108 // Member hides inherited member; missing new keyword
         {
@@ -148,7 +149,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggr
         {
             return ActiveTo >= DateTimeOffset.UtcNow;
         }
-
 
         public virtual bool IsDeactivated()
         {

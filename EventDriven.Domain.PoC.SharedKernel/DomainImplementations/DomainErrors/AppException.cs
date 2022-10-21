@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.DomainErrors
 {
-    // custom exception class for throwing application specific exceptions 
+    // custom exception class for throwing application specific exceptions
     // that can be caught and handled within the application
     public class AppException : Exception
     {

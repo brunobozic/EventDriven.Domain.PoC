@@ -25,7 +25,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Attributes
             CompundName = compoundName;
         }
 
-
         public virtual string CompundName { get; }
     }
 }

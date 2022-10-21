@@ -10,13 +10,8 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using URF.Core.Abstractions;
 using URF.Core.Abstractions.Trackable;
-using URF.Core.EF;
 using URF.Core.Services;
 
 namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
@@ -49,6 +44,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
             _appSettings = appSettings.Value;
             _emailService = emailService;
         }
+
         public async Task<CreateJournalEntryResponse> CreateAsync(string journalEntryMessage, Guid actor, Guid actedUpon)
         {
             var retVal = new CreateJournalEntryResponse();
@@ -65,7 +61,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
                 var entry = new AccountJournalEntry(journalEntryMessage);
                 entry.AttachActingUser(actorEntity);
                 entry.AttachUser(actedUponEntity);
-             
+
                 var saved = await UnitOfWork.SaveChangesAsync();
 
                 retVal.Success = true;
@@ -114,7 +110,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
 
                 retVal.ViewModel.ListOfEntries = entry;
                 retVal.Success = true;
-                retVal.Message = $"Returned [ {1} ] entries."; 
+                retVal.Message = $"Returned [ {1} ] entries.";
             }
             catch (Exception ex)
             {

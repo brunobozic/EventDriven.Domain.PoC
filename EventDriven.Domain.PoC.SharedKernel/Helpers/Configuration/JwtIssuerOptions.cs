@@ -51,7 +51,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration
         /// </summary>
         public string Secret { get; set; }
 
-
         /// <summary>
         /// </summary>
         public string Key { get; set; }

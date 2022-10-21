@@ -16,7 +16,6 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Addresses
 
         private string AddressName { get; }
 
-
         private Guid UserId { get; }
         public Guid RemoverUser { get; set; }
 

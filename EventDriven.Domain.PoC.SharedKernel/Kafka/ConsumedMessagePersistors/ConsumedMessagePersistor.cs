@@ -54,7 +54,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors
             return r;
         }
 
-
         public bool MarkMessageAsFaulty(ConsumeMessageResult consumedMessage, string readStatusMessage)
         {
             return true;
@@ -65,9 +64,5 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors
         {
             return true;
         }
-
-        #region ctor
-
-        #endregion ctor
     }
 }

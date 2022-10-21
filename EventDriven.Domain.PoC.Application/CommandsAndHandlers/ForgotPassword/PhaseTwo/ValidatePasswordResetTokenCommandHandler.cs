@@ -23,7 +23,6 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.
         private IMyUnitOfWork UnitOfWork { get; }
         private ITrackableRepository<User> UserRepository { get; }
 
-
         public async Task<bool> Handle(ValidatForgotPasswordTokenCommand command, CancellationToken cancellationToken)
         {
             if (command == null) throw new ArgumentNullException("ValidateResetTokenRequest invalid");

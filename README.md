@@ -1,8 +1,12 @@
 
-# The app
+# The app (boilerplate for Event Driven Design)
+
+## URLs
 
 - depending on the way in which you start your debugging session the app will be available on different (possibly) URLs
-    - the expected URL (debug session started *without* using docker) will be: `https://localhost:6001/swagger/index.html`
+    - the expected URL (debug session started *without* using docker) will be: `https://localhost:5001/swagger/index.html`
+
+## Dependencies on other application stacks
 
 - since the app uses other components (Kafka being the most important one) you must have these components listening on appropriate ports
     - the easiest way to achieve this is to run `docker-compose up` on the provided `docker-compose.yml` file 
@@ -15,6 +19,7 @@
             - investigate the docker-compose file, specifically the kafka section for more information on this detail
 
 ## How to quicky start debugging the app
+
 1) run docker-compose up, wait for the stack to "settle", I use docker for windows on my Windows 10 development machine
    => I use the following for engine config, take note of the buildkit property 
    <code> 
@@ -50,32 +55,36 @@ The project that is a home for EF context is the `Repository.EF`, therefore the 
 
 The ideas behind `Consul`, `Eureka` and `Jaeger` are the following:
 - I need all services to be registered in a key value store so I can query that store to always know what service is available (and healthy)
-    - the key values store is Consul
+    - the key value store is Consul
     - the services register themselves and are then discoverable via Eureka
     - the spans that happen between the services are being traced and logged via Jaeger
 
 ## Liveness probe 
-- URL: `https://localhost:6001/liveness`
+- URL: `https://localhost:5001/liveness`
+    - will emit a simple 200: Healthy 
 
 ## Rudimentary HC endpoint
 
 Basically this is used by load balancers or service discovery subsystem so they know that a service is "alive"
 The data presented via the /hc endpoint can also be used for dashboard purposes (Grafana or Kibana) if one so desires
 
-- URL: `https://localhost:6001/hc`
+- URL: `https://localhost:5001/hc`
 
 The following is the hc UI which is not all that important, its just an UI over the /hc json payload
 Depending on the version of .net core and the version of hc package, there tend to be some incompatibilies, so I usually leave the UI out until it matures 
 
-- URL: `https://localhost:6001/healthchecks-ui#/healthchecks` 
+- URL: `https://localhost:5001/healthchecks-ui#/healthchecks` 
 
 ## Jaeger (open tracing)
 - Jaeger is located in a docker container (see docker-compose)
 - URL: `http://localhost:16686/search`
 
 ## Consul
-The key values store where we keep the service registrations 
+The key values store where we keep the service/app registrations 
 - URL: `http://localhost:8500/ui/dc1/services/consul/instances`
+
+
+
 
 
 # Event driven architecture
@@ -83,36 +92,45 @@ The key values store where we keep the service registrations
 ## Commands
 
 ## Domain Events
-If the Domain Event should be processed outside of the ongoing transaction, you should define a Notification Object for it. 
-This is the object which should be written to the Outbox.
+
+If the Domain Event should be processed outside of the ongoing transaction scope, you should define a Notification Object for it. 
+This is the object that should be written to the Outbox.
 
 First thing to note is Json.NET library usage to serialize/deserialize event messages. Second thing to note are 2 constructors of CustomerRegisteredNotification class. 
 First of them is for creating notification based on Domain Event. 
 Second of them is to deserialize message from JSON string which is presented in following section regarding processing.
 
 The most important parts are:
-Line 1 – [DisallowConcurrentExecution] attribute means that scheduler will not start new instance of job if other instance of that job is running. 
+
+Line 1 – [DisallowConcurrentExecution] attribute means that scheduler will not start a new instance of a job if another instance of that job is already running. 
 This is important because we don’t want process Outbox concurrently.
 Line 25 – Get all messages to process
 Line 30 – Deserialize the message (which is usually a state carried integration event) to a Notification Object
 Line 32 – Processing the Notification Object (for example sending event to an event bus, or in our example to a Kafka topic)
 Line 38 – Mark message as processed in the outbox
 
-1. Command Handler defines transaction boundary. 
-Transaction is started when Command Handler is invoked and committed **at the end**.
-2. Each Domain Event handler is invoked in context of the same transaction boundary.
-3. If we want to process something **outside** the transaction, or in other words, outside the boundaries of this application, we need to create a public event based on the Domain Event. 
-I call this event an Integration event. These events will be inserted into the Outbox before being picked up by a background worker.
+1. Command Handler defines a transaction boundary
+A transaction is started when Command Handler is invoked, the transaction is committed **at the end**.
+2. Each Domain Event handler is invoked in context of the one and the same transaction boundary (within the boundaries of the same application so to speak)
+3. If we want to process something **outside** the boundary of one application, we need to create a *public* event, based on the original Domain Event
 
-We need two decorators. The first one will be for command handlers
-we also need a second decorator for the Domain Event handler, which will only publish Domain Events at the very end without committing database transaction
+We call this event an Integration event. 
+These (integration) events will be inserted into the Outbox db table to later be picked up by a background worker (scheduled with the help of Quartz). 
+This is done deliberately in this way in order to make sure we wont break the consistency/atomicity rule for a domain event=>integration event transaction.
+The integration event is therefore being written into the local db (outbox table) within the same transaction that also completes the mutation on an Aggregate.
+Either both succeed or they both fail. Nothing is left hanging / is left in an corrupt state, and no manual compensatory actions are needed.
+
+We need two decorators. The first one will be used for command handlers,
+a second decorator will be used for the Domain Event handler, which will be used to publish Domain Events at the very end of the transaction, without committing 
 
 ## Integration Events
 
-The second most important thing is when to publish and process Domain Events? Events may be created after each action on the Aggregate, so we must publish them:
-– after each Command handling (but BEFORE committing transaction)
-– after each Domain Event handling (but WITHOUT committing transaction)
+The second most important thing is to know when it is time to publish our integration events.
+Events (many) may be created after any kind of mutation has been applied on an Aggregate, we must publish the change(s) made so other parts of the app stack can react to them:
+– this can be done after each Command gets handled (but BEFORE the transaction is commited)
+– this can also be done after each Domain Event is handled (but WITHOUT committing transaction)
 
+These are non trivial choices. You must have a solid understanding on the sequence of the "flow".
 
 
             // [RegisterApplicationUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
@@ -128,9 +146,7 @@ The second most important thing is when to publish and process Domain Events? Ev
             // a domain event is fired in response to this => [MarkApplicationUserAsWelcomedDomainEvent] is sent
             // and is handled by [MarkApplicationUserAsWelcomedDomainEventHandler] marking the user as "welcomed"
 
-
             // Forgot password Flow
-
 
             // Resend activation link Flow
 

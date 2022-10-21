@@ -1,6 +1,5 @@
 ﻿using EventDriven.Domain.PoC.Application.DomainServices.JournalServices;
 using EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activation.Notifications;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJournal;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
 using System;
@@ -19,7 +18,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activa
             JournalService = journalService;
         }
 
-        private  IJournalService JournalService { get; }
+        private IJournalService JournalService { get; }
 
         public async Task Handle(UserDeactivatedNotification notification, CancellationToken cancellationToken)
         {
@@ -32,7 +31,6 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.Activa
             }
             catch (Exception ex)
             {
-
             }
         }
     }

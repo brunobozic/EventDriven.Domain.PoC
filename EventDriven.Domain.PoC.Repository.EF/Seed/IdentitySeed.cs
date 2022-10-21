@@ -40,7 +40,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
             }
 
             var creatorUser =
-                myDbContext.ApplicationUsers.SingleOrDefault(u =>
+                myDbContext.ApplicationUsers.FirstOrDefault(u =>
                     u.NormalizedUserName == ApplicationWideConstants.SYSTEM_USER_USERNAME.ToUpper());
 
             if (!myDbContext.ApplicationUsers.Any(user => user.UserName == ApplicationWideConstants.USER_EMAIL))
@@ -66,8 +66,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r => r.Name == ApplicationWideConstants.GUEST) == null)
+            if (myDbContext.ApplicationRoles.FirstOrDefault(r => r.Name == ApplicationWideConstants.GUEST) == null)
             {
                 var role = Role.NewActiveDraft(ApplicationWideConstants.GUEST, "Guest role", DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1), creatorUser);
@@ -77,7 +76,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.ApplicationRoles.SingleOrDefault(r =>
+            if (myDbContext.ApplicationRoles.FirstOrDefault(r =>
                 r.Name == ApplicationWideConstants.ADMINISTRATOR_ROLE_NAME) == null)
             {
                 var role = Role.NewActiveDraft(ApplicationWideConstants.ADMINISTRATOR_ROLE_NAME, "Admin role",
@@ -111,14 +110,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
 
                 var applicationRole = myDbContext.ApplicationRoles
                     .Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                    .Select(u => u).SingleOrDefault();
+                    .Select(u => u).FirstOrDefault();
 
                 await myDbContext.ApplicationUsers.AddAsync(newUser);
 
                 await myUnitOfWork.SaveChangesAsync();
 
                 var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "BrunoBozic")
-                    .SingleOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
                 usr.AddRole(applicationRole, creatorUser);
 
@@ -144,14 +143,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 );
 
                 var applicationRole2 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                    .Select(u => u).SingleOrDefault();
+                    .Select(u => u).FirstOrDefault();
 
                 await myDbContext.ApplicationUsers.AddAsync(newUser2);
 
                 await myUnitOfWork.SaveChangesAsync();
 
                 var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin2")
-                    .SingleOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
                 usr.AddRole(applicationRole2, creatorUser);
 
@@ -177,14 +176,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 );
 
                 var applicationRole3 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                    .Select(u => u).SingleOrDefault();
+                    .Select(u => u).FirstOrDefault();
 
                 await myDbContext.ApplicationUsers.AddAsync(newUser3);
 
                 await myUnitOfWork.SaveChangesAsync();
 
                 var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin3")
-                    .SingleOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
                 usr.AddRole(applicationRole3, creatorUser);
 
@@ -210,14 +209,14 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 );
 
                 var applicationRole4 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                    .Select(u => u).SingleOrDefault();
+                    .Select(u => u).FirstOrDefault();
 
                 await myDbContext.ApplicationUsers.AddAsync(newUser4);
 
                 await myUnitOfWork.SaveChangesAsync();
 
                 var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin4")
-                    .SingleOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
                 usr.AddRole(applicationRole4, creatorUser);
 
@@ -228,7 +227,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
 
             #region Address Types
 
-            if (myDbContext.AddressTypes.SingleOrDefault(r =>
+            if (myDbContext.AddressTypes.FirstOrDefault(r =>
                 r.Name == AddressTypeEnum.Primary.ToDescriptionString()) == null)
             {
                 var addressType = AddressType.NewActiveDraft(
@@ -245,7 +244,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.AddressTypes.SingleOrDefault(r =>
+            if (myDbContext.AddressTypes.FirstOrDefault(r =>
                 r.Name == AddressTypeEnum.Secondary.ToDescriptionString()) == null)
             {
                 var addressType = AddressType.NewActiveDraft(
@@ -262,7 +261,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Seed
                 await myUnitOfWork.SaveChangesAsync();
             }
 
-            if (myDbContext.AddressTypes.SingleOrDefault(r => r.Name == AddressTypeEnum.Living.ToDescriptionString()) ==
+            if (myDbContext.AddressTypes.FirstOrDefault(r => r.Name == AddressTypeEnum.Living.ToDescriptionString()) ==
                 null)
             {
                 var addressType = AddressType.NewActiveDraft(

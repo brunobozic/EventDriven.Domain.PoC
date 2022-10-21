@@ -16,14 +16,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
         /// </summary>
         public static readonly ShortGuid Empty = new(Guid.Empty);
 
-        #endregion
+        #endregion Static
 
         #region Fields
 
         private Guid _guid;
         private string _value;
 
-        #endregion
+        #endregion Fields
 
         #region Contructors
 
@@ -50,7 +50,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             _guid = guid;
         }
 
-        #endregion
+        #endregion Contructors
 
         #region Properties
 
@@ -86,7 +86,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             }
         }
 
-        #endregion
+        #endregion Properties
 
         #region ToString
 
@@ -99,7 +99,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return _value;
         }
 
-        #endregion
+        #endregion ToString
 
         #region Equals
 
@@ -120,7 +120,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return false;
         }
 
-        #endregion
+        #endregion Equals
 
         #region GetHashCode
 
@@ -133,7 +133,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return _guid.GetHashCode();
         }
 
-        #endregion
+        #endregion GetHashCode
 
         #region NewGuid
 
@@ -146,7 +146,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return new(Guid.NewGuid());
         }
 
-        #endregion
+        #endregion NewGuid
 
         #region Encode
 
@@ -177,7 +177,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return encoded.Substring(0, 22);
         }
 
-        #endregion
+        #endregion Encode
 
         #region Decode
 
@@ -195,7 +195,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return new Guid(buffer);
         }
 
-        #endregion
+        #endregion Decode
 
         #region Operators
 
@@ -264,6 +264,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return new(guid);
         }
 
-        #endregion
+        #endregion Operators
     }
 }

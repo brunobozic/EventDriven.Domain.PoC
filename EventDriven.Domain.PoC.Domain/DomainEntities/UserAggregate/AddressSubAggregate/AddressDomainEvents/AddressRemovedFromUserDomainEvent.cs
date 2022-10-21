@@ -11,7 +11,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AddressSubA
         public Guid UserId;
         public DateTimeOffset UtcNow;
 
-
         public AddressRemovedFromUserDomainEvent(
             Guid asignee
             , string assigneeUsername

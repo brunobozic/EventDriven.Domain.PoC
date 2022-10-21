@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
                            //.AddJsonFile("appsettings.local.json", true)
                 .Build();
 
-            // Here we create the DbContextOptionsBuilder manually.        
+            // Here we create the DbContextOptionsBuilder manually.
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
             // Build connection string. This requires that you have a connectionstring in the appsettings.json
@@ -62,6 +63,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.DatabaseContext
 
         public class NoMediator : IMediator
         {
+            public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IAsyncEnumerable<object> CreateStream(object request, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
             public Task Publish<TNotification>(TNotification notification,
                 CancellationToken cancellationToken = default) where TNotification : INotification
             {

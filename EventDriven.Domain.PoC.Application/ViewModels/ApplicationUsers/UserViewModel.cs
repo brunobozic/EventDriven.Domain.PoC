@@ -49,6 +49,6 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers
         public string VerificationToken { get; set; }
         public DateTime Verified { get; set; }
 
-        #endregion EmailVerificationToken operations
+        #endregion EmailVerificationToken operation
     }
 }

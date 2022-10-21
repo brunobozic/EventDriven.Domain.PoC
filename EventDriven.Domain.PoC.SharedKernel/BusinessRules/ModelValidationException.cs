@@ -11,18 +11,15 @@ namespace EventDriven.Domain.PoC.SharedKernel.BusinessRules
         {
         }
 
-
         public ModelValidationException(string message)
             : base(message)
         {
         }
 
-
         public ModelValidationException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
-
 
         public ModelValidationException(string message, Exception innerException,
             IEnumerable<ValidationResult> validationErrors)
@@ -31,19 +28,16 @@ namespace EventDriven.Domain.PoC.SharedKernel.BusinessRules
             ValidationErrors = validationErrors;
         }
 
-
         public ModelValidationException(string message, IEnumerable<ValidationResult> validationErrors)
             : base(message)
         {
             ValidationErrors = validationErrors;
         }
 
-
         protected ModelValidationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-
 
         public IEnumerable<ValidationResult> ValidationErrors { get; }
     }

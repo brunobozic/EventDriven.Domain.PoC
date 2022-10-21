@@ -60,7 +60,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
 
             await Task.WhenAll(tasks);
 
-            // 2PC problem is solved by using an outbox table as a queue 
+            // 2PC problem is solved by using an outbox table as a queue
             // each and every event that needs to be published so other microservices can react to it
             // is first inserted into the local Db (the outbox table) as a single transaction
             // then, a background job (Quartz) will read rows from the outbox table and attempt publishing then unto a message queue (or a kafka topic)

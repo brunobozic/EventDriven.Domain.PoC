@@ -75,9 +75,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
         #endregion Public Props
 
 
-        #region Public Methods
-
-        #endregion Public Methods
 
         #region ITrackable
 
