@@ -1,6 +1,8 @@
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Consul;
+using Steeltoe.Discovery.Client;
+
 using EventDriven.Domain.PoC.Api.Rest.Extensions;
 using EventDriven.Domain.PoC.Api.Rest.Filters;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
@@ -108,15 +110,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
             var connStr = Configuration.GetConnectionString("Sqlite");
             services.AddOptions();
             services.Configure<ServiceDisvoveryOptions>(Configuration.GetSection("ServiceDiscovery"));
-            services.AddConsulConfig(Configuration);
-            services.AddSingleton<IConsulClient>(p => new ConsulClient(cfg =>
-            {
-                var serviceConfiguration = p.GetRequiredService<IOptions<ServiceDisvoveryOptions>>().Value;
-
-                if (!string.IsNullOrEmpty(serviceConfiguration.Consul.HttpEndpoint))
-                    // if not configured, the client will use the default value "127.0.0.1:8500"
-                    cfg.Address = new Uri(serviceConfiguration.Consul.HttpEndpoint);
-            }));
+          
+         
 
             #region MVC wireup
 
@@ -298,18 +293,25 @@ namespace EventDriven.Domain.PoC.Api.Rest
             #region Jaeger wireup
 
             // Adds the Jaeger Tracer.
-            var serviceName = "MyCompany.MyProduct.MyService";
+            var serviceName = "EventDriven.Domain.PoC.Api.Rest";
             var serviceVersion = "1.0.0";
 
-            services.AddOpenTelemetryTracing(tcb =>
+            services.AddOpenTelemetryTracing(b =>
             {
-                tcb
-                .AddSource(serviceName)
-                .SetResourceBuilder(
-                    ResourceBuilder.CreateDefault()
-                        .AddService(serviceName: serviceName, serviceVersion: serviceVersion))
-                .AddAspNetCoreInstrumentation()
-                .AddConsoleExporter();
+                // uses the default Jaeger settings
+                b.AddJaegerExporter();
+
+                // receive traces from our own custom sources
+                b.AddSource("EventDriven.Domain.PoC.Api.Rest");
+
+                // decorate our service name so we can find it when we look inside Jaeger
+                b.SetResourceBuilder(ResourceBuilder.CreateDefault()
+                    .AddService(serviceName, serviceVersion));
+
+                // receive traces from built-in sources
+                b.AddHttpClientInstrumentation();
+                b.AddAspNetCoreInstrumentation();
+                b.AddSqlClientInstrumentation();
             });
 
             services.AddSingleton(TracerProvider.Default.GetTracer(serviceName));
@@ -324,19 +326,13 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #region Eureka
 
-            services.AddDiscoveryClient(Configuration);
+            services.AddServiceDiscovery(); 
 
             #endregion Eureka
 
             #region HealthCheck
 
-            //var consulOptions = new ConsulOptions
-            //{
-            //    HostName = "https://localhost",
-            //    RequireBasicAuthentication = false,
-            //    RequireHttps = true,
-            //    Port = 8500
-            //};
+
 
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy())
@@ -476,7 +472,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
             //, ILoggerFactory loggerFactory
             //, ApplicationDbContext myDbContext
             , IOptions<ServiceDisvoveryOptions> serviceOptions
-            , IConsulClient consul
             , IApplicationLifetime appLife
         )
         {

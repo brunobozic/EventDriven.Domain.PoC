@@ -194,7 +194,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterAsync(RegisterUserRequest request, CancellationToken ct)
         {
-            using var span = _tracer.StartActiveSpan("hello-span");
+            using var span = _tracer.StartActiveSpan("RegisterAsync");
             // As an example of a non-trivial event based flow we got the following:
 
             // [RegisterUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
@@ -247,6 +247,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             command.CreatorId = creatorId;
 
             var user = await _mediator.Send(command, ct);
+            span.SetAttribute("UserEmail", command.Email);
+            span.SetAttribute("RawCommand", Newtonsoft.Json.JsonConvert.SerializeObject(command)) ;
+            span.SetAttribute("Created user Id", user.Id.GetValueOrDefault().ToString());
+            span.AddEvent("User created");
 
             return Created(string.Empty, user);
         }

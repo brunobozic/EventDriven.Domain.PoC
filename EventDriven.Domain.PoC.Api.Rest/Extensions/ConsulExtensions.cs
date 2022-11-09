@@ -25,6 +25,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
             {
                 var address = configuration.GetValue<string>("Consul:Host");
+                if (string.IsNullOrEmpty(address))  throw new ArgumentException(nameof(address));
                 consulConfig.Address = new Uri(address);
             }));
             return services;
@@ -39,31 +40,40 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             if (!(app.Properties["server.Features"] is FeatureCollection features)) return app;
 
             var addresses = features.Get<IServerAddressesFeature>();
-            // this will fail if run within the IIS server
-            var address = addresses.Addresses.First();
-
-            Log.Information($"address={address}");
-
+           
+            
+            try
+            {   // this will fail if run within the IIS server
+                var address = addresses.Addresses.First(); 
+                Log.Information($"address={address}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Consul fail if run within the IIS server", ex);
+                throw;
+            }
+       
             // var uri = new Uri(address);
             var registration = new AgentServiceRegistration
             {
-                ID = "EventDrivenPoC-5000",
+                ID = "EventDrivenPoC-5001",
                 // service name
                 Name = "EventDrivenPoC",
                 Address = "localhost",
-                Port = 5000
+                Port = 5001
             };
 
             Log.Information("Registering with Consul");
-            consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true);
-            consulClient.Agent.ServiceRegister(registration).ConfigureAwait(true);
+            consulClient.Agent.ServiceDeregister("EventDrivenPoC-5000").GetAwaiter().GetResult();
+            consulClient.Agent.ServiceDeregister(registration.ID).GetAwaiter().GetResult();
+            consulClient.Agent.ServiceRegister(registration).GetAwaiter().GetResult();
 
             lifetime.ApplicationStopping.Register(() =>
             {
                 Log.Information("Unregistering from Consul");
                 consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true);
             });
-
+           
             return app;
         }
     }
