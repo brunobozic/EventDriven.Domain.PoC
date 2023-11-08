@@ -25,6 +25,23 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions.Decorated
 
         #endregion ctor
 
+        /// <summary>
+        ///     Reads a single message from Kafka topic/partition the consumer is subscribed to.
+        ///     Crucial information here is the _lastOffset variable, we store the consumed message offset into it (if available).
+        /// </summary>
+        /// <returns></returns>
+        public ConsumeMessageResult Consume()
+        {
+            Log.Information("Reading message from kafka start [ {0} ]", DateTimeOffset.UtcNow);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var retVal = _decorated.Consume();
+            stopwatch.Stop();
+            Log.Information("Reading message from kafka took: [ {0} ] Milliseconds",
+                stopwatch.Elapsed.TotalMilliseconds);
+            return retVal;
+        }
+
         public void Continue()
         {
             _decorated.Continue();
@@ -63,23 +80,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions.Decorated
         public void Pause()
         {
             _decorated.Pause();
-        }
-
-        /// <summary>
-        ///     Reads a single message from Kafka topic/partition the consumer is subscribed to.
-        ///     Crucial information here is the _lastOffset variable, we store the consumed message offset into it (if available).
-        /// </summary>
-        /// <returns></returns>
-        public ConsumeMessageResult Consume()
-        {
-            Log.Information("Reading message from kafka start [ {0} ]", DateTimeOffset.UtcNow);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var retVal = _decorated.Consume();
-            stopwatch.Stop();
-            Log.Information("Reading message from kafka took: [ {0} ] Milliseconds",
-                stopwatch.Elapsed.TotalMilliseconds);
-            return retVal;
         }
 
         public void Seek(TopicPartition topicPartition, long recordOffset)

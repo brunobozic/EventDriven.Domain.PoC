@@ -18,6 +18,11 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base
         }
 
         /// <summary>
+        ///     Gets the information of the connected health check providers.
+        /// </summary>
+        public List<HealthCheckItemResult> HealthChecks { get; } = new();
+
+        /// <summary>
         ///     Gets or sets the current machine name.
         /// </summary>
         public string MachineName { get; set; }
@@ -26,10 +31,5 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base
         ///     Gets or sets the total time in seconds it took to test all connected health check providers.
         /// </summary>
         public double TimeTakenInSeconds { get; set; }
-
-        /// <summary>
-        ///     Gets the information of the connected health check providers.
-        /// </summary>
-        public List<HealthCheckItemResult> HealthChecks { get; } = new();
     }
 }

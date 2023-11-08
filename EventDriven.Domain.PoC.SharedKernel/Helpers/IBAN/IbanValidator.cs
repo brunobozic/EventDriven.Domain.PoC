@@ -142,14 +142,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.IBAN
 
         private static class ValidationMessages
         {
-            public const string IllegalCharactersFound = "The IBAN contains illegal characters.";
-            public const string WrongStructure = "The structure of IBAN is wrong.";
-            public const string WrongCheckDigits = "The check digits of IBAN are wrong.";
             public const string CountryIbanNotDefined = "IBAN for country {0} currently is not avaliable.";
             public const string CountryWrongLength = "The IBAN of {0} needs to be {1} characters long.";
             public const string CountryWrongStructure = "The country specific structure of IBAN is wrong.";
+            public const string IllegalCharactersFound = "The IBAN contains illegal characters.";
             public const string Invalid = "The IBAN is incorrect.";
             public const string Valid = "The IBAN is correct.";
+            public const string WrongCheckDigits = "The check digits of IBAN are wrong.";
+            public const string WrongStructure = "The structure of IBAN is wrong.";
         }
     }
 }

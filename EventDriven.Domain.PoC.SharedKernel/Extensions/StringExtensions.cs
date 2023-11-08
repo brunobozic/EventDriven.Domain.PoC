@@ -7,33 +7,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
 {
     public static class StringExtensions
     {
-        public static string CleanUpSerilogProperties(this string serilogProperty)
-        {
-            var returnValue = string.Empty;
-
-            serilogProperty = serilogProperty.Replace("[", "");
-            serilogProperty = serilogProperty.Replace("]", "");
-            serilogProperty = serilogProperty.Replace(" ", "");
-            serilogProperty = serilogProperty.Replace(",", "");
-            serilogProperty = serilogProperty.Replace("\"", "");
-
-            returnValue = serilogProperty;
-
-            return returnValue;
-        }
-
-        public static Stream GetStreamFromString(this string str)
-        {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-
-            writer.Write(str);
-            writer.Flush();
-            stream.Position = 0;
-
-            return stream;
-        }
-
         public static int CalcLevenshteinDistance(this string s, string t)
         {
             if (s == null) s = string.Empty;
@@ -82,10 +55,19 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
             return d[n, m];
         }
 
-        public static int WordCount(this string str)
+        public static string CleanUpSerilogProperties(this string serilogProperty)
         {
-            return str.Split(new[] { ' ', '.', '?' },
-                StringSplitOptions.RemoveEmptyEntries).Length;
+            var returnValue = string.Empty;
+
+            serilogProperty = serilogProperty.Replace("[", "");
+            serilogProperty = serilogProperty.Replace("]", "");
+            serilogProperty = serilogProperty.Replace(" ", "");
+            serilogProperty = serilogProperty.Replace(",", "");
+            serilogProperty = serilogProperty.Replace("\"", "");
+
+            returnValue = serilogProperty;
+
+            return returnValue;
         }
 
         public static bool ContainsDigits(this string str)
@@ -93,10 +75,28 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
             return str.Any(c => char.IsDigit(c));
         }
 
+        public static Stream GetStreamFromString(this string str)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+
+            writer.Write(str);
+            writer.Flush();
+            stream.Position = 0;
+
+            return stream;
+        }
+
         public static bool IsCamelCased(this string str)
         {
             var rx = new Regex(@"/^[a-z][a-z0-9]+(?:[A-Z][a-z0-9]+)*$/");
             return rx.IsMatch(str);
+        }
+
+        public static int WordCount(this string str)
+        {
+            return str.Split(new[] { ' ', '.', '?' },
+                StringSplitOptions.RemoveEmptyEntries).Length;
         }
     }
 }

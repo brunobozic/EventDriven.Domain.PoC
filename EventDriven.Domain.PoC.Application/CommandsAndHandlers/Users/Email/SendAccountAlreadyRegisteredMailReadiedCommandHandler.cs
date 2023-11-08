@@ -34,12 +34,12 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email
             EmailService = emailService;
         }
 
-        private IMyUnitOfWork UnitOfWork { get; }
-        private ITrackableRepository<Role> RoleRepository { get; }
-        private ITrackableRepository<User> UserRepository { get; }
-        private IMapper Mapper { get; }
         private MyConfigurationValues AppSettings { get; }
         private IEmailService EmailService { get; }
+        private IMapper Mapper { get; }
+        private ITrackableRepository<Role> RoleRepository { get; }
+        private IMyUnitOfWork UnitOfWork { get; }
+        private ITrackableRepository<User> UserRepository { get; }
 
         public Task<bool> Handle(SendAccountAlreadyRegisteredMailReadiedCommand request,
             CancellationToken cancellationToken)

@@ -38,9 +38,44 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             return numArray;
         }
 
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            if (value == null)
+            {
+                writer.WriteNull();
+            }
+            else
+            {
+                var arr = (byte[])value;
+                var y = arr.Select(Convert.ToInt32).ToArray();
+                var z = string.Join(", ", y);
+                var val = @"[" + z.Replace("\"", "") + "]";
+
+                writer.WriteRawValue(val);
+            }
+        }
+
         private byte[] GetByteArray(object value)
         {
             return value as byte[];
+        }
+
+        private byte[] GetByteArrayFromIntArray(int[] intArray)
+        {
+            var data = new byte[intArray.Length * 4];
+
+            for (var i = 0; i < intArray.Length; i++) Array.Copy(BitConverter.GetBytes(intArray[i]), 0, data, i * 4, 4);
+
+            return data;
+        }
+
+        private int[] GetIntArrayFromByteArray(byte[] byteArray)
+        {
+            var intArray = new int[byteArray.Length / 4];
+
+            for (var i = 0; i < byteArray.Length; i += 4) intArray[i / 4] = BitConverter.ToInt32(byteArray, i);
+
+            return intArray;
         }
 
         private byte[] ReadByteArray(JsonReader reader)
@@ -66,41 +101,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
                 }
 
             throw new Exception("Unexpected end when reading bytes.");
-        }
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            if (value == null)
-            {
-                writer.WriteNull();
-            }
-            else
-            {
-                var arr = (byte[])value;
-                var y = arr.Select(Convert.ToInt32).ToArray();
-                var z = string.Join(", ", y);
-                var val = @"[" + z.Replace("\"", "") + "]";
-
-                writer.WriteRawValue(val);
-            }
-        }
-
-        private int[] GetIntArrayFromByteArray(byte[] byteArray)
-        {
-            var intArray = new int[byteArray.Length / 4];
-
-            for (var i = 0; i < byteArray.Length; i += 4) intArray[i / 4] = BitConverter.ToInt32(byteArray, i);
-
-            return intArray;
-        }
-
-        private byte[] GetByteArrayFromIntArray(int[] intArray)
-        {
-            var data = new byte[intArray.Length * 4];
-
-            for (var i = 0; i < intArray.Length; i++) Array.Copy(BitConverter.GetBytes(intArray[i]), 0, data, i * 4, 4);
-
-            return data;
         }
     }
 }

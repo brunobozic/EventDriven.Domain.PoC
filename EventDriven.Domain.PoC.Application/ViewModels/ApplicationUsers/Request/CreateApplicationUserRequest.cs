@@ -20,7 +20,7 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request
 
         public string Password { get; set; }
 
-        [Required] [Compare("Password")] public string ConfirmPassword { get; set; }
+        [Required][Compare("Password")] public string ConfirmPassword { get; set; }
 
         public DateTimeOffset? DateOfBirth { get; set; }
         public string Origin { get; internal set; }

@@ -10,22 +10,21 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.Audit
     [Table("DbAuditTrail", Schema = "Audit")]
     public class AuditTrail : IAuditTrail
     {
+        public string Actions { get; set; }
         public long AuditTrailId { get; set; }
-        public string TableName { get; set; }
-        public Guid UserId { get; set; }
-        public string UserName { get; set; }
-        public string OldData { get; set; }
         public string NewData { get; set; }
+        public string OldData { get; set; }
         public long? TableIdValue { get; set; }
         public Guid TableIdValueGuid { get; set; }
+        public string TableName { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
-        public string Actions { get; set; }
+        public Guid UserId { get; set; }
+        public string UserName { get; set; }
 
         #region ITrackable
 
-        [NotMapped] public TrackingState TrackingState { get; set; }
-
         [NotMapped] public ICollection<string> ModifiedProperties { get; set; }
+        [NotMapped] public TrackingState TrackingState { get; set; }
 
         #endregion ITrackable
     }

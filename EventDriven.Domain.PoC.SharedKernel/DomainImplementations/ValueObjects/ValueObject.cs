@@ -13,6 +13,30 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.ValueObjects
     public abstract class ValueObject<T> : IEquatable<T>, IValidatableObject where T : ValueObject<T>
     {
         /// <summary>
+        ///     Override the not equals comparer.
+        /// </summary>
+        /// <param name="left">The left side to compare.</param>
+        /// <param name="right">The right side to compare.</param>
+        /// <returns>True when the two objects are not equal; false otherwise.</returns>
+        public static bool operator !=(ValueObject<T> left, ValueObject<T> right)
+        {
+            return !(left == right);
+        }
+
+        /// <summary>
+        ///     Override the equality comparer.
+        /// </summary>
+        /// <param name="left">The left side to compare.</param>
+        /// <param name="right">The right side to compare.</param>
+        /// <returns>True when the two objects are equal; false otherwise.</returns>
+        public static bool operator ==(ValueObject<T> left, ValueObject<T> right)
+        {
+            if (Equals(left, null))
+                return Equals(right, null) ? true : false;
+            return left.Equals(right);
+        }
+
+        /// <summary>
         ///     Indicates whether the current object is equal to another object of the same type.
         /// </summary>
         /// <returns>
@@ -35,37 +59,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.ValueObjects
             if (publicProperties.Any())
                 return publicProperties.All(p => CheckValue(p, other));
             return true;
-        }
-
-        /// <summary>
-        ///     Determines whether this object is valid or not.
-        /// </summary>
-        /// <param name="validationContext">Describes the context in which a validation check is performed.</param>
-        /// <returns>A IEnumerable of ValidationResult. The IEnumerable is empty when the object is in a valid state.</returns>
-        public abstract IEnumerable<ValidationResult> Validate(ValidationContext validationContext);
-
-        /// <summary>
-        ///     Determines whether this object is valid or not.
-        /// </summary>
-        /// <returns>A IEnumerable of ValidationResult. The IEnumerable is empty when the object is in a valid state.</returns>
-        public IEnumerable<ValidationResult> Validate()
-        {
-            var validationErrors = new List<ValidationResult>();
-            var ctx = new ValidationContext(this, null, null);
-            Validator.TryValidateObject(this, ctx, validationErrors, true);
-            return validationErrors;
-        }
-
-        private bool CheckValue(PropertyInfo p, T other)
-        {
-            var left = p.GetValue(this, null);
-            var right = p.GetValue(other, null);
-            if (left == null || right == null)
-                return false;
-
-            if (typeof(T).IsAssignableFrom(left.GetType()))
-                return ReferenceEquals(left, right);
-            return left.Equals(right);
         }
 
         /// <summary>
@@ -126,27 +119,34 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.ValueObjects
         }
 
         /// <summary>
-        ///     Override the equality comparer.
+        ///     Determines whether this object is valid or not.
         /// </summary>
-        /// <param name="left">The left side to compare.</param>
-        /// <param name="right">The right side to compare.</param>
-        /// <returns>True when the two objects are equal; false otherwise.</returns>
-        public static bool operator ==(ValueObject<T> left, ValueObject<T> right)
-        {
-            if (Equals(left, null))
-                return Equals(right, null) ? true : false;
-            return left.Equals(right);
-        }
+        /// <param name="validationContext">Describes the context in which a validation check is performed.</param>
+        /// <returns>A IEnumerable of ValidationResult. The IEnumerable is empty when the object is in a valid state.</returns>
+        public abstract IEnumerable<ValidationResult> Validate(ValidationContext validationContext);
 
         /// <summary>
-        ///     Override the not equals comparer.
+        ///     Determines whether this object is valid or not.
         /// </summary>
-        /// <param name="left">The left side to compare.</param>
-        /// <param name="right">The right side to compare.</param>
-        /// <returns>True when the two objects are not equal; false otherwise.</returns>
-        public static bool operator !=(ValueObject<T> left, ValueObject<T> right)
+        /// <returns>A IEnumerable of ValidationResult. The IEnumerable is empty when the object is in a valid state.</returns>
+        public IEnumerable<ValidationResult> Validate()
         {
-            return !(left == right);
+            var validationErrors = new List<ValidationResult>();
+            var ctx = new ValidationContext(this, null, null);
+            Validator.TryValidateObject(this, ctx, validationErrors, true);
+            return validationErrors;
+        }
+
+        private bool CheckValue(PropertyInfo p, T other)
+        {
+            var left = p.GetValue(this, null);
+            var right = p.GetValue(other, null);
+            if (left == null || right == null)
+                return false;
+
+            if (typeof(T).IsAssignableFrom(left.GetType()))
+                return ReferenceEquals(left, right);
+            return left.Equals(right);
         }
     }
 }

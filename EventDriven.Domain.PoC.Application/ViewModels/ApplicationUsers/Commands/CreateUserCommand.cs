@@ -35,28 +35,21 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
                 Creator = creatorUser;
         }
 
+        public DateTimeOffset ActiveFrom { get; set; }
+        public DateTimeOffset ActiveTo { get; set; }
+        [Required][Compare("Password")] public string ConfirmPassword { get; set; }
+        public User Creator { get; set; }
+        public DateTimeOffset? DateOfBirth { get; set; }
+        [EmailAddress] public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Oib { get; set; }
+        public string Origin { get; set; }
+        public string Password { get; set; }
+        [EnumDataType(typeof(RoleEnum))] public string Role { get; set; }
         public string Title { get; set; }
 
         public string UserName { get; set; }
-
-        public string FirstName { get; set; }
-
-        public string LastName { get; set; }
-        public string Origin { get; set; }
-        [EnumDataType(typeof(RoleEnum))] public string Role { get; set; }
-
-        [EmailAddress] public string Email { get; set; }
-
-        public string Password { get; set; }
-
-        [Required] [Compare("Password")] public string ConfirmPassword { get; set; }
-
-        public DateTimeOffset? DateOfBirth { get; set; }
-        public string Oib { get; set; }
-        public DateTimeOffset ActiveFrom { get; set; }
-        public DateTimeOffset ActiveTo { get; set; }
-        public User Creator { get; set; }
-
         // helpers
 
         private string replaceEmptyWithNull(string value)

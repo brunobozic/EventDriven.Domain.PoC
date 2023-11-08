@@ -20,7 +20,7 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email
             UserId = userId;
         }
 
-        public long UserId { get; }
         public Guid Id { get; }
+        public long UserId { get; }
     }
 }

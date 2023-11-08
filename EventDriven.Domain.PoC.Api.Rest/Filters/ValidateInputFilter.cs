@@ -19,6 +19,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Filters
 
         #region IActionFilter Implementation
 
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+            // This filter doesn't do anything post action.
+        }
+
         public void OnActionExecuting(ActionExecutingContext context)
         {
             if (context.ModelState.IsValid)
@@ -37,12 +42,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Filters
                 let k = kvp.Key
                 select new ValidationError(ValidationError.Type.Input, null, k, e.ErrorMessage));
         }
-
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-            // This filter doesn't do anything post action.
-        }
-
         #endregion
     }
 }

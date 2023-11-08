@@ -20,7 +20,7 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.VerifyEma
             UserName = userName;
         }
 
-        public string Origin { get; set; } = "";
         public Guid Id { get; set; } = Guid.NewGuid();
+        public string Origin { get; set; } = "";
     }
 }

@@ -17,6 +17,17 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
 {
     public static class ServiceCollectionExtension
     {
+        public static void AddUrlHelper(this IServiceCollection services)
+        {
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory =>
+            {
+                var actionContext = factory.GetService<IActionContextAccessor>().ActionContext;
+
+                return actionContext != null ? new UrlHelper(actionContext) : null;
+            });
+        }
+
         public static void RegisterRepositories(this IServiceCollection services)
         {
             var models = GetAllModels();
@@ -31,17 +42,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
 
                 services.AddScoped(repositoryInterface, repositoryImplementation);
             }
-        }
-
-        public static void AddUrlHelper(this IServiceCollection services)
-        {
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper>(factory =>
-            {
-                var actionContext = factory.GetService<IActionContextAccessor>().ActionContext;
-
-                return actionContext != null ? new UrlHelper(actionContext) : null;
-            });
         }
 
         private static IEnumerable<Type> GetAllModels()

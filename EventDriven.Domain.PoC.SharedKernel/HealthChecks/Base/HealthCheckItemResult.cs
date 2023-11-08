@@ -24,11 +24,11 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base
         }
 
         /// <summary>
-        ///     Gets the name of the resource.
+        ///     Gets or sets the description of the health check .
         /// </summary>
         [JsonProperty(Order =
-            -70)] // Push them to the top of the list, with the base properties coming first. https://stackoverflow.com/questions/32571695/order-of-fields-when-serializing-the-derived-class-in-json-net
-        public string ResourceName { get; }
+            -50)] // Push them to the top of the list, with the base properties coming first. https://stackoverflow.com/questions/32571695/order-of-fields-when-serializing-the-derived-class-in-json-net
+        public string Description { get; set; }
 
         /// <summary>
         ///     Gets the friendly name for the health check .
@@ -38,24 +38,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base
         public string FriendlyName { get; }
 
         /// <summary>
-        ///     Gets or sets the description of the health check .
-        /// </summary>
-        [JsonProperty(Order =
-            -50)] // Push them to the top of the list, with the base properties coming first. https://stackoverflow.com/questions/32571695/order-of-fields-when-serializing-the-derived-class-in-json-net
-        public string Description { get; set; }
-
-        /// <summary>
         ///     Gets a value that indicates if the current resource is considered to be up and healthy, degraded, or unhealthy.
         /// </summary>
         [JsonIgnore]
         public virtual HealthState HealthState { get; set; }
-
-        /// <summary>
-        ///     Gets a value that describes if the current resource is considered to be up and healthy, degraded, or unhealthy.
-        /// </summary>
-        [JsonProperty(Order =
-            -40)] // Push them to the top of the list, with the base properties coming first. https://stackoverflow.com/questions/32571695/order-of-fields-when-serializing-the-derived-class-in-json-net
-        public virtual string State => HealthState.ToString();
 
         /// <summary>
         ///     Gets a collection of additional messages.
@@ -64,9 +50,23 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Base
         public List<MessageContainer> Messages { get; } = new();
 
         /// <summary>
+        ///     Gets the name of the resource.
+        /// </summary>
+        [JsonProperty(Order =
+            -70)] // Push them to the top of the list, with the base properties coming first. https://stackoverflow.com/questions/32571695/order-of-fields-when-serializing-the-derived-class-in-json-net
+        public string ResourceName { get; }
+
+        /// <summary>
         ///     Defines the order of this provider in the results.
         /// </summary>
         [JsonIgnore]
         public int SortOrder { get; }
+
+        /// <summary>
+        ///     Gets a value that describes if the current resource is considered to be up and healthy, degraded, or unhealthy.
+        /// </summary>
+        [JsonProperty(Order =
+            -40)] // Push them to the top of the list, with the base properties coming first. https://stackoverflow.com/questions/32571695/order-of-fields-when-serializing-the-derived-class-in-json-net
+        public virtual string State => HealthState.ToString();
     }
 }

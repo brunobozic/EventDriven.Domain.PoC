@@ -12,30 +12,6 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
         private string _password;
         private string _role;
 
-        public string Title { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-
-        [EnumDataType(typeof(RoleEnum))]
-        public string RoleEnum
-        {
-            get => _role;
-            set => _role = replaceEmptyWithNull(value);
-        }
-
-        [EmailAddress]
-        public string Email
-        {
-            get => _email;
-            set => _email = replaceEmptyWithNull(value);
-        }
-
-        public string Password
-        {
-            get => _password;
-            set => _password = replaceEmptyWithNull(value);
-        }
-
         [Compare("Password")]
         public string ConfirmPassword
         {
@@ -44,9 +20,33 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Command
         }
 
         public DateTimeOffset? DateOfBirth { get; set; }
-        public string UserName { get; set; }
+
+        [EmailAddress]
+        public string Email
+        {
+            get => _email;
+            set => _email = replaceEmptyWithNull(value);
+        }
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public object Oib { get; internal set; }
 
+        public string Password
+        {
+            get => _password;
+            set => _password = replaceEmptyWithNull(value);
+        }
+
+        [EnumDataType(typeof(RoleEnum))]
+        public string RoleEnum
+        {
+            get => _role;
+            set => _role = replaceEmptyWithNull(value);
+        }
+
+        public string Title { get; set; }
+        public string UserName { get; set; }
         // helpers
 
         private string replaceEmptyWithNull(string value)

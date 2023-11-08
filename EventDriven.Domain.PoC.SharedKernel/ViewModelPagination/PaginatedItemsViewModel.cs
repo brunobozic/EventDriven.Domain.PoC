@@ -12,12 +12,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.ViewModelPagination
             Data = data;
         }
 
+        public long Count { get; }
+        public IEnumerable<TEntity> Data { get; }
         public int PageIndex { get; }
 
         public int PageSize { get; }
-
-        public long Count { get; }
-
-        public IEnumerable<TEntity> Data { get; }
     }
 }

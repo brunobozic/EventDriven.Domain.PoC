@@ -14,9 +14,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Logging
             _provider = new SerilogLoggerProvider(logger, dispose);
         }
 
-        public void Dispose()
+        public void AddProvider(ILoggerProvider provider)
         {
-            _provider.Dispose();
+            // Only Serilog provider is allowed!
+            SelfLog.WriteLine("Ignoring added logger provider {0}", provider);
         }
 
         public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
@@ -24,10 +25,9 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers.Logging
             return _provider.CreateLogger(categoryName);
         }
 
-        public void AddProvider(ILoggerProvider provider)
+        public void Dispose()
         {
-            // Only Serilog provider is allowed!
-            SelfLog.WriteLine("Ignoring added logger provider {0}", provider);
+            _provider.Dispose();
         }
     }
 }

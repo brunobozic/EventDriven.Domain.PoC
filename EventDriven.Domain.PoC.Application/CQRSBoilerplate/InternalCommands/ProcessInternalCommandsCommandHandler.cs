@@ -46,9 +46,8 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.InternalCommands
 
         private class InternalCommandDto
         {
-            public string Type { get; set; }
-
             public string Data { get; set; }
+            public string Type { get; set; }
         }
     }
 }

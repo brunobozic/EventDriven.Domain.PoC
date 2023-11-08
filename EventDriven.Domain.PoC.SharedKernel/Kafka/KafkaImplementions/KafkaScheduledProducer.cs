@@ -37,21 +37,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             }
         }
 
-        public async Task<bool> WriteMessageAsync(string message)
-        {
-            var successfullDelivery = await _producer.ProduceAsync(_topicName,
-                    new Message<string, string> { Key = rand.Next(5).ToString(), Value = message })
-                .ContinueWith(task => task.IsFaulted
-                    ? $"error producing message: {task.Exception.Message}"
-                    : $"produced to: {task.Result.TopicPartitionOffset}");
-
-            // block until all in-flight produce requests have completed (successfully
-            // or otherwise) or 10s has elapsed.
-            _producer.Flush(TimeSpan.FromSeconds(10));
-
-            return true;
-        }
-
         public void Dispose()
         {
             _producer?.Flush();
@@ -66,6 +51,21 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
         public IProducer<string, string> UnderlyingProducerInstance()
         {
             return _producer;
+        }
+
+        public async Task<bool> WriteMessageAsync(string message)
+        {
+            var successfullDelivery = await _producer.ProduceAsync(_topicName,
+                    new Message<string, string> { Key = rand.Next(5).ToString(), Value = message })
+                .ContinueWith(task => task.IsFaulted
+                    ? $"error producing message: {task.Exception.Message}"
+                    : $"produced to: {task.Result.TopicPartitionOffset}");
+
+            // block until all in-flight produce requests have completed (successfully
+            // or otherwise) or 10s has elapsed.
+            _producer.Flush(TimeSpan.FromSeconds(10));
+
+            return true;
         }
     }
 }

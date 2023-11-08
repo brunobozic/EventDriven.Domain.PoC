@@ -52,25 +52,25 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
 
         #region Public Properties
 
+        public readonly TopicPartitionOffset CurrentTopicPartitionOffset;
+
         public IConsumer<string, string> Instance()
         {
             return _c;
         }
 
-        public readonly TopicPartitionOffset CurrentTopicPartitionOffset;
-
         #endregion Public Properties
 
         #region Private Props
 
-        private readonly string _topicName;
         private readonly IConsumer<string, string> _c;
-        private int _currentPartition;
-        private ConsumeResult<string, string> _consumedMessage;
 
         // ReSharper disable once NotAccessedField.Local
         private readonly ConsumerConfig _config;
 
+        private readonly string _topicName;
+        private ConsumeResult<string, string> _consumedMessage;
+        private int _currentPartition;
         private long _currentOffset { get; set; }
         private long _lastOffset { get; set; }
         private long _needsToHitOffset { get; set; }
@@ -152,41 +152,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             return messageConsumingResult;
         }
 
-        /// <summary>
-        ///     Returns the underlying consumer instance.
-        /// </summary>
-        /// <returns></returns>
-        public Handle UnderlyingHandle()
-        {
-            return _c != null ? _c.Handle : null;
-        }
-
-        /// <summary>
-        ///     Returns a list of consumer subscriptions.
-        /// </summary>
-        /// <returns></returns>
-        public List<string> UnderlyingSubscriptions()
-        {
-            return _c != null ? _c.Subscription : null;
-        }
-
-        public void Pause()
-        {
-            // _c.Pause();
-        }
-
         public void Continue()
         {
             // _c.Resume(?);
         }
 
-        /// <summary>
-        ///     Returns the topic we have subscribed our consumer to.
-        /// </summary>
-        /// <returns></returns>
-        public string GetTopic()
+        public string GetBootstrapServers()
         {
-            return _topicName;
+            return _config.BootstrapServers;
         }
 
         /// <summary>
@@ -220,6 +193,54 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             }
 
             return sb.ToString();
+        }
+
+        public string GetKafkaConsumerMaxOffset()
+        {
+            var sb = new StringBuilder();
+
+            if (_c.Assignment.Count > 0)
+            {
+                var counter = 0;
+                sb.AppendFormat("Part/MaxOffset: ");
+                foreach (var item in _c.Assignment)
+                {
+                    var offset = _c.GetWatermarkOffsets(_c.Assignment[counter]);
+
+                    if (offset.High != -1001)
+                    {
+                        sb.AppendFormat("[{0}{1}", item.Partition.Value, "/");
+                        sb.AppendFormat("{0}]", offset.High);
+                        if (counter != _c.Assignment.Count - 1)
+                            sb.AppendFormat("{0}", ",");
+                    }
+
+                    counter += 1;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        ///     Returns the topic we have subscribed our consumer to.
+        /// </summary>
+        /// <returns></returns>
+        public string GetTopic()
+        {
+            return _topicName;
+        }
+
+        public void Pause()
+        {
+            // _c.Pause();
+        }
+
+        public void Seek(TopicPartition topicPartition, long recordOffset)
+        {
+            var offset = new Offset(recordOffset);
+            var tpo = new TopicPartitionOffset(topicPartition, offset);
+            _c.Seek(tpo);
         }
 
         public bool SkipPoisonPill(ConsumeResult<string, string> consumedMessage)
@@ -303,48 +324,64 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
                     "Message of offset: [ {Offset} ], partition: [ {Partition} ], topic: [{Topic}], offset stored");
         }
 
-        public void Seek(TopicPartition topicPartition, long recordOffset)
+        /// <summary>
+        ///     Returns the underlying consumer instance.
+        /// </summary>
+        /// <returns></returns>
+        public Handle UnderlyingHandle()
         {
-            var offset = new Offset(recordOffset);
-            var tpo = new TopicPartitionOffset(topicPartition, offset);
-            _c.Seek(tpo);
+            return _c != null ? _c.Handle : null;
         }
 
-        public string GetBootstrapServers()
+        /// <summary>
+        ///     Returns a list of consumer subscriptions.
+        /// </summary>
+        /// <returns></returns>
+        public List<string> UnderlyingSubscriptions()
         {
-            return _config.BootstrapServers;
-        }
-
-        public string GetKafkaConsumerMaxOffset()
-        {
-            var sb = new StringBuilder();
-
-            if (_c.Assignment.Count > 0)
-            {
-                var counter = 0;
-                sb.AppendFormat("Part/MaxOffset: ");
-                foreach (var item in _c.Assignment)
-                {
-                    var offset = _c.GetWatermarkOffsets(_c.Assignment[counter]);
-
-                    if (offset.High != -1001)
-                    {
-                        sb.AppendFormat("[{0}{1}", item.Partition.Value, "/");
-                        sb.AppendFormat("{0}]", offset.High);
-                        if (counter != _c.Assignment.Count - 1)
-                            sb.AppendFormat("{0}", ",");
-                    }
-
-                    counter += 1;
-                }
-            }
-
-            return sb.ToString();
+            return _c != null ? _c.Subscription : null;
         }
 
         #endregion Public methods
 
         #region Private methods
+
+        /// <summary>
+        ///     Logs a part of the message that was read from Kafka for logging reasons.
+        /// </summary>
+        /// <param name="messageConsumingResult"></param>
+        private static void ParseAndLog(ConsumeMessageResult messageConsumingResult)
+        {
+            // here we want to truncate the message so as to avoid flooding the log
+            var msgLength = messageConsumingResult.Message?.Length;
+            var actualMsg = string.Empty;
+            if (msgLength > 40)
+                actualMsg = messageConsumingResult.Message.Substring(0, 40);
+            else
+                actualMsg = messageConsumingResult.Message;
+
+            Log.ForContext("Partition", messageConsumingResult.Partition)
+                .ForContext("Topic", messageConsumingResult.Topic)
+                .ForContext("Offset", messageConsumingResult.Offset)
+                .ForContext("actualMsg", actualMsg)
+                .ForContext("GADMMessageId", messageConsumingResult.GadmMessageId)
+                .Information(
+                    "Message payload: [ {actualMsg} ] <{GADMRequestMethod}> offset: [ {Offset} ] partition: [ {Partition} ]");
+        }
+
+        /// <summary>
+        ///     Simple wrap for putting a custom message into return value properties.
+        /// </summary>
+        /// <param name="thusFar"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static ConsumeMessageResult PopulateReturnMessage(ConsumeMessageResult thusFar, string message)
+        {
+            thusFar.Message = "IsPartitionEOF";
+            thusFar.ErrorMessage = "IsPartitionEOF";
+
+            return thusFar;
+        }
 
         /// <summary>
         ///     Returns the result of consuming one message from Kafka.
@@ -413,43 +450,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
             }
 
             return returnValue;
-        }
-
-        /// <summary>
-        ///     Simple wrap for putting a custom message into return value properties.
-        /// </summary>
-        /// <param name="thusFar"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        private static ConsumeMessageResult PopulateReturnMessage(ConsumeMessageResult thusFar, string message)
-        {
-            thusFar.Message = "IsPartitionEOF";
-            thusFar.ErrorMessage = "IsPartitionEOF";
-
-            return thusFar;
-        }
-
-        /// <summary>
-        ///     Logs a part of the message that was read from Kafka for logging reasons.
-        /// </summary>
-        /// <param name="messageConsumingResult"></param>
-        private static void ParseAndLog(ConsumeMessageResult messageConsumingResult)
-        {
-            // here we want to truncate the message so as to avoid flooding the log
-            var msgLength = messageConsumingResult.Message?.Length;
-            var actualMsg = string.Empty;
-            if (msgLength > 40)
-                actualMsg = messageConsumingResult.Message.Substring(0, 40);
-            else
-                actualMsg = messageConsumingResult.Message;
-
-            Log.ForContext("Partition", messageConsumingResult.Partition)
-                .ForContext("Topic", messageConsumingResult.Topic)
-                .ForContext("Offset", messageConsumingResult.Offset)
-                .ForContext("actualMsg", actualMsg)
-                .ForContext("GADMMessageId", messageConsumingResult.GadmMessageId)
-                .Information(
-                    "Message payload: [ {actualMsg} ] <{GADMRequestMethod}> offset: [ {Offset} ] partition: [ {Partition} ]");
         }
 
         #endregion Private methods

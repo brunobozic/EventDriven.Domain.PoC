@@ -42,41 +42,37 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         //[EnumDataType(typeof(RoleEnum))] public string BasicRole { get; private set; }
 
-        public string FullName { get; private init; }
-        public string Oib { get; private init; }
         public DateTimeOffset? DateOfBirth { get; private init; }
-        public string FirstName { get; private init; }
-        public string LastName { get; private init; }
         public string Email { get; private init; }
-        public string UserName { get; private init; }
+        public string FirstName { get; private init; }
+        public string FullName { get; private init; }
+        public string LastName { get; private init; }
         public string NormalizedEmail { get; private init; }
         public string NormalizedUserName { get; private init; }
+        public string Oib { get; private init; }
         public bool TwoFactorEnabled { get; private init; }
-
+        public string UserName { get; private init; }
         private int _accountActivationMailsSendAttempts { get; set; }
         private string _latestVerificationFailureMessage { get; set; }
         private DateTime _latestVerificationFailureTime { get; set; }
 
         #region Email Verification
 
-        public DateTime Verified { get; private set; }
-        public string LatestVerificationFailureMessage { get; private set; }
         public DateTime LastVerificationFailureDate { get; private set; }
-
+        public string LatestVerificationFailureMessage { get; private set; }
+        public DateTime Verified { get; private set; }
         private RegistrationStatusEnum _status { get; set; }
 
         #endregion Email Verification
 
         #region Token operations
 
-        public string ResetToken { get; private set; }
-        public string PasswordResetMsg { get; private set; }
-
-        public DateTime? ResetTokenExpires { get; private set; }
+        public string EmailVerificationToken { get; private set; }
         public string PasswordHash { get; private set; }
         public DateTime? PasswordReset { get; private set; }
-        public string EmailVerificationToken { get; private set; }
-
+        public string PasswordResetMsg { get; private set; }
+        public string ResetToken { get; private set; }
+        public DateTime? ResetTokenExpires { get; private set; }
         public DateTime? VerificationTokenExpirationDate { get; private set; }
 
         #endregion Token operations
@@ -94,74 +90,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             _userRoles = new List<UserRole>();
             _journalEntries = new List<AccountJournalEntry>();
             _userAddresses = new List<UserAddress>();
-        }
-
-        /// <summary>
-        ///     Returns a new un-tracked draft of an [ApplicationUser], with [Active] pre-set to false, no password and no email
-        ///     confirmed
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="email"></param>
-        /// <param name="userName"></param>
-        /// <param name="firstName"></param>
-        /// <param name="lastName"></param>
-        /// <param name="password"></param>
-        /// <param name="role"></param>
-        /// <param name="creator"></param>
-        /// <param name="origin"></param>
-        /// <returns></returns>
-        public static User NewDraft(
-            Guid userId
-            , string email
-            , string userName
-            , string firstName
-            , string lastName
-            , string password
-            , string role
-            , User creator
-            , string origin
-        )
-        {
-            if (string.IsNullOrEmpty(email)) throw new ArgumentNullException(nameof(email));
-            if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
-            if (string.IsNullOrEmpty(firstName)) throw new ArgumentNullException(nameof(firstName));
-            if (string.IsNullOrEmpty(lastName)) throw new ArgumentNullException(nameof(lastName));
-            if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
-
-            var user = new User
-            {
-                Id = userId,
-                Email = email.Trim(),
-                UserName = userName,
-                NormalizedEmail = email.Trim().ToUpper(),
-                NormalizedUserName = userName.Trim().ToUpper(),
-                FirstName = firstName.Trim(),
-                LastName = lastName.Trim(),
-                FullName = lastName.Trim() + " " + firstName.Trim(),
-                TwoFactorEnabled = false,
-                DateCreated = DateTime.UtcNow,
-                _status = RegistrationStatusEnum.WaitingForVerification,
-                Oib = ""
-            };
-
-            user.AddPasswordHash(password);
-            user.AddVerificationToken(RandomStringHelper.RandomTokenString());
-
-            user.AddDomainEvent(new UserCreatedDomainEvent(
-                userId
-                , email
-                , userName
-                , firstName
-                , lastName
-                , ""
-                , DateTimeOffset.MinValue
-                , DateTimeOffset.MinValue
-                , ""
-                , creator.Id
-                , origin
-            ));
-
-            return user;
         }
 
         /// <summary>
@@ -349,29 +277,94 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             return user;
         }
 
+        /// <summary>
+        ///     Returns a new un-tracked draft of an [ApplicationUser], with [Active] pre-set to false, no password and no email
+        ///     confirmed
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="email"></param>
+        /// <param name="userName"></param>
+        /// <param name="firstName"></param>
+        /// <param name="lastName"></param>
+        /// <param name="password"></param>
+        /// <param name="role"></param>
+        /// <param name="creator"></param>
+        /// <param name="origin"></param>
+        /// <returns></returns>
+        public static User NewDraft(
+            Guid userId
+            , string email
+            , string userName
+            , string firstName
+            , string lastName
+            , string password
+            , string role
+            , User creator
+            , string origin
+        )
+        {
+            if (string.IsNullOrEmpty(email)) throw new ArgumentNullException(nameof(email));
+            if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
+            if (string.IsNullOrEmpty(firstName)) throw new ArgumentNullException(nameof(firstName));
+            if (string.IsNullOrEmpty(lastName)) throw new ArgumentNullException(nameof(lastName));
+            if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
+
+            var user = new User
+            {
+                Id = userId,
+                Email = email.Trim(),
+                UserName = userName,
+                NormalizedEmail = email.Trim().ToUpper(),
+                NormalizedUserName = userName.Trim().ToUpper(),
+                FirstName = firstName.Trim(),
+                LastName = lastName.Trim(),
+                FullName = lastName.Trim() + " " + firstName.Trim(),
+                TwoFactorEnabled = false,
+                DateCreated = DateTime.UtcNow,
+                _status = RegistrationStatusEnum.WaitingForVerification,
+                Oib = ""
+            };
+
+            user.AddPasswordHash(password);
+            user.AddVerificationToken(RandomStringHelper.RandomTokenString());
+
+            user.AddDomainEvent(new UserCreatedDomainEvent(
+                userId
+                , email
+                , userName
+                , firstName
+                , lastName
+                , ""
+                , DateTimeOffset.MinValue
+                , DateTimeOffset.MinValue
+                , ""
+                , creator.Id
+                , origin
+            ));
+
+            return user;
+        }
+
         #endregion Ctor
 
         #region FK
 
-        public Guid? UndeletedById { get; private set; }
-        public Guid? ReactivatedById { get; private set; }
         public Guid? DeactivatedById { get; private set; }
+        public Guid? ReactivatedById { get; private set; }
+        public Guid? UndeletedById { get; private set; }
 
         #endregion FK
 
         #region Navigation properties
 
-        private readonly List<UserRole> _userRoles;
-        public IReadOnlyCollection<UserRole> UserRoles => _userRoles;
-
         private readonly List<AccountJournalEntry> _journalEntries;
-        public IReadOnlyCollection<AccountJournalEntry> JournalEntries => _journalEntries;
-
         private readonly List<RefreshToken.RefreshToken> _refreshTokens;
-        public IReadOnlyCollection<RefreshToken.RefreshToken> RefreshTokens => _refreshTokens;
         private readonly List<UserAddress> _userAddresses;
-
+        private readonly List<UserRole> _userRoles;
+        public IReadOnlyCollection<AccountJournalEntry> JournalEntries => _journalEntries;
+        public IReadOnlyCollection<RefreshToken.RefreshToken> RefreshTokens => _refreshTokens;
         public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses;
+        public IReadOnlyCollection<UserRole> UserRoles => _userRoles;
 
         #endregion Navigation properties
 
@@ -474,93 +467,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
         #endregion Addresses
 
-        public bool VerifyPasswordResetTokenThenResetPassword(string tokenReceivedByEmail, string newPassword)
-        {
-            if (string.IsNullOrEmpty(tokenReceivedByEmail))
-                throw new DomainException(
-                    $"The token received by email must not be null. Unable to confirm password reset for user [ {UserName} ], email [ {Email} ].");
-            if (string.IsNullOrEmpty(newPassword))
-                throw new DomainException(
-                    $"The new password must not be null. Unable to confirm password reset for user [ {UserName} ], email [ {Email} ].");
-
-            return ResetToken.Trim() == tokenReceivedByEmail.Trim() && UpdatePasswordThenRemoveResetToken(newPassword);
-        }
-
-        #region Email templates
-
-        public bool SendAlreadyRegisteredEmail(string origin)
-        {
-            var message = !string.IsNullOrEmpty(origin)
-                ? $@"<p>If you don't know your password please visit the <a href=""{origin}/applicationUser/forgot-password"">forgot password</a> page.</p>"
-                : "<p>If you don't know your password you can reset it via the <code>/applicationUsers/forgot-password</code> api route.</p>";
-
-            var emailSubject = "Sign-up Verification API - Email Already Registered";
-            var completeEmailMessageBody = $@"<h4>Email Already Registered</h4>
-                         <p>Your email <strong>{Email}</strong> is already registered.</p>
-                         {message}";
-            var emailFrom = "admin.poc@gmail.com";
-
-            // when this domain event gets handled [AccountAlreadyRegisteredMailReadiedDomainEventHandler], a new command [AccountAlreadyRegisteredMailCommand]
-            // will be created that will actually do the email sending
-            AddDomainEvent(new AccountAlreadyRegisteredMailReadiedDomainEvent(
-                Email
-                , UserName
-                , Id
-                , emailSubject
-                , completeEmailMessageBody
-                , emailFrom
-            ));
-
-            return true;
-        }
-
-        #endregion Email templates
-
-        /// <summary>
-        ///     Returns the date time expiry value of the entity
-        /// </summary>
-        /// <param name="theDate"></param>
-        /// <returns></returns>
-        public virtual bool IsExpired(DateTimeOffset theDate)
-        {
-            return ActiveTo < theDate;
-        }
-
-        public bool RevokeToken(string token, string ipAddress, User revokerUser)
-        {
-            var refreshTokenDomain =
-                _refreshTokens.SingleOrDefault(tok =>
-                    string.Equals(tok.Token.Trim(), token.Trim(), StringComparison.CurrentCultureIgnoreCase));
-
-            if (refreshTokenDomain == null) return false;
-            refreshTokenDomain.Revoked = DateTime.UtcNow;
-            refreshTokenDomain.RevokedByIp = ipAddress;
-
-            var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => Token revoked.");
-            journalEntry.AttachActingUser(revokerUser);
-            journalEntry.AttachUser(this);
-            _journalEntries.Add(journalEntry);
-
-            return true;
-        }
-
-        /// <summary>
-        ///     Returns the activity validity of the entity
-        /// </summary>
-        /// <returns></returns>
-        private bool TheUserIsInActiveState()
-        {
-            if (ActiveTo != null)
-                return ActiveTo >= DateTimeOffset.UtcNow;
-
-            return true;
-        }
-
-        private bool TheUserHadBeenVerified()
-        {
-            return Verified != DateTime.MinValue;
-        }
-
         // TODO: transform to event driven
         /// <summary>
         ///     Activates the entity, may throw a domain exception
@@ -582,6 +488,69 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                     $"System error activating the user [{UserName} / {Email}]. Current registration status: {GetCurrentRegistrationStatus()}",
                     ex);
             }
+        }
+
+        public bool AddPasswordHash(string password)
+        {
+            if (!TheUserIsInActiveState() || IsDeleted)
+                throw new DomainException(
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a password to it. Current registration status: {GetCurrentRegistrationStatus()}");
+            PasswordHash = BC.HashPassword(password);
+            return true;
+        }
+
+        public bool AddRefreshToken(RefreshToken.RefreshToken refreshToken)
+        {
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
+                _refreshTokens.Add(refreshToken);
+            else
+                throw new DomainException(
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a refresh token to it. Current registration status: {GetCurrentRegistrationStatus()}");
+
+            return true;
+        }
+
+        public bool AddVerificationToken(string verificationToken)
+        {
+            if (TheUserIsInActiveState() && !IsDeleted)
+            {
+                EmailVerificationToken = verificationToken;
+                VerificationTokenExpirationDate =
+                    DateTime.UtcNow.AddHours(ApplicationWideConstants.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
+            }
+            else
+            {
+                throw new DomainException(
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a verification token to it. Current registration status: {GetCurrentRegistrationStatus()}");
+            }
+
+            return true;
+        }
+
+        // TODO: transform to event driven
+        public bool CreatePasswordResetToken(string randomToken)
+        {
+            if (TheUserIsInActiveState() && !IsDeleted && TheUserHadBeenVerified())
+            {
+                ResetToken = randomToken;
+                ResetTokenExpires = DateTime.UtcNow.AddHours(8);
+
+                var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => Reset password token created.");
+
+                journalEntry.AttachActingUser(null);
+                journalEntry.AttachUser(this);
+
+                _journalEntries.Add(journalEntry);
+            }
+            else
+            {
+                throw new DomainException(
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to create a password reset token for it. Current registration status: {GetCurrentRegistrationStatus()}");
+            }
+
+            AddDomainEvent(new UserRequestedPasswordResetDomainEvent(Email, UserName, Id, randomToken));
+
+            return true;
         }
 
         // TODO: transform to event driven
@@ -607,82 +576,78 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             }
         }
 
-        #region Roles
-
-        public List<Role> GetUserRoles()
+        public RegistrationStatusEnum GetCurrentRegistrationStatus()
         {
-            return _userRoles.Where(userRole => userRole.Active).Select(role => role.Role).ToList();
+            return _status;
         }
 
-        public bool AddRole(Role role, User roleGiver)
+        public List<RefreshToken.RefreshToken> GetRefreshTokens()
         {
-            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
+                return _refreshTokens.ToList();
+            throw new DomainException(
+                $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to fetch refresh tokens for it. Current registration status: {GetCurrentRegistrationStatus()}");
+        }
+
+        /// <summary>
+        ///     Returns the date time expiry value of the entity
+        /// </summary>
+        /// <param name="theDate"></param>
+        /// <returns></returns>
+        public virtual bool IsExpired(DateTimeOffset theDate)
+        {
+            return ActiveTo < theDate;
+        }
+
+        public bool OwnsToken(string refreshToken)
+        {
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
+                return _refreshTokens?.Find(x => x.Token == refreshToken) != null;
+            throw new DomainException(
+                $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to fetch a token to it. Current registration status: {GetCurrentRegistrationStatus()}");
+        }
+
+        public bool RemoveStaleRefreshTokens()
+        {
+            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
+                _refreshTokens.RemoveAll(x =>
+                    x.Created.AddDays(ApplicationWideConstants.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
+            else
                 throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a role [ {role.Name} ] to it. Current registration status: {GetCurrentRegistrationStatus()}");
-            if (role.IsExpired(DateTime.Now) || role.IsDeleted)
-                throw new DomainException(
-                    $"The role entity [ {role.Name} ] is either expired or deleted, hence we are unable to add it to the user.");
-            var newJoin = UserRole.NewActivatedDraft(this, role, roleGiver);
-
-            _userRoles.Add(newJoin);
-
-            // this will get audited, but will not show what had changed (audit works on per-table basis, not on object-graph basis)
-            DateModified = DateTime.UtcNow;
-
-            AddDomainEvent(new RoleAssignedToUserDomainEvent(
-                Id
-                , UserName
-                , Email
-                , role.Id
-                , role.Name
-                , role.ActiveTo
-                , roleGiver.Id
-                , roleGiver.Email
-                , roleGiver.UserName
-                , DateTimeOffset.UtcNow
-            ));
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove stale refresh tokens from it. Current registration status: {GetCurrentRegistrationStatus()}");
 
             return true;
         }
 
-        public bool RemoveRole(Role role, User removerUser)
+        public bool RevokeToken(string token, string ipAddress, User revokerUser)
         {
-            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
-                throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove a role [ {role.Name} ] from it. Current registration status: {GetCurrentRegistrationStatus()}");
-            if (role.IsExpired(DateTime.Now) || role.IsDeleted)
-                throw new DomainException(
-                    $"The role entity [ {role.Name} ] is either expired or deleted, hence we are unable to remove it from the user.");
-            var linkTableEntry =
-                _userRoles.SingleOrDefault(userRole =>
-                    userRole.Active && userRole.Role.Name.Trim().ToUpper() == role.Name);
+            var refreshTokenDomain =
+                _refreshTokens.SingleOrDefault(tok =>
+                    string.Equals(tok.Token.Trim(), token.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
-            if (linkTableEntry == null)
-                throw new AggregateException(
-                    "Could not find an entry in the join table by the role name of: [ " +
-                    role.Name + " ]");
+            if (refreshTokenDomain == null) return false;
+            refreshTokenDomain.Revoked = DateTime.UtcNow;
+            refreshTokenDomain.RevokedByIp = ipAddress;
 
-            _userRoles.Remove(linkTableEntry);
-
-            // this will get audited, but will not show what had changed (audit works on per-table basis, not on object-graph basis)
-            DateModified = DateTime.UtcNow;
-
-            AddDomainEvent(new RoleRemovedFromUserDomainEvent(
-                Id,
-                UserName,
-                Email,
-                role.Id,
-                role.Name,
-                removerUser.Id,
-                removerUser.UserName,
-                removerUser.Email,
-                DateTimeOffset.UtcNow
-            ));
+            var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => Token revoked.");
+            journalEntry.AttachActingUser(revokerUser);
+            journalEntry.AttachUser(this);
+            _journalEntries.Add(journalEntry);
 
             return true;
         }
 
-        #endregion Roles
+        public void SetAccountActivationMailResent()
+        {
+            _accountActivationMailsSendAttempts += 1;
+            var journalEntry =
+                new AccountJournalEntry(DateTime.UtcNow +
+                                        " => Account activation code re-sent to the users e-mail address.");
+            journalEntry.AttachActingUser(null);
+            journalEntry.AttachUser(this);
+            _journalEntries.Add(journalEntry);
+            _status = RegistrationStatusEnum.VerificationEmailResent;
+        }
 
         public string SetEmailIsVerified()
         {
@@ -735,88 +700,146 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             return friendlyErrorResponse;
         }
 
-        public bool AddPasswordHash(string password)
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (!TheUserIsInActiveState() || IsDeleted)
-                throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a password to it. Current registration status: {GetCurrentRegistrationStatus()}");
-            PasswordHash = BC.HashPassword(password);
-            return true;
+            throw new NotImplementedException();
         }
 
-        // TODO: transform to event driven
-        public bool CreatePasswordResetToken(string randomToken)
+        public bool VerifyPasswordResetTokenThenResetPassword(string tokenReceivedByEmail, string newPassword)
         {
-            if (TheUserIsInActiveState() && !IsDeleted && TheUserHadBeenVerified())
-            {
-                ResetToken = randomToken;
-                ResetTokenExpires = DateTime.UtcNow.AddHours(8);
-
-                var journalEntry = new AccountJournalEntry(DateTime.UtcNow + " => Reset password token created.");
-
-                journalEntry.AttachActingUser(null);
-                journalEntry.AttachUser(this);
-
-                _journalEntries.Add(journalEntry);
-            }
-            else
-            {
+            if (string.IsNullOrEmpty(tokenReceivedByEmail))
                 throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to create a password reset token for it. Current registration status: {GetCurrentRegistrationStatus()}");
-            }
+                    $"The token received by email must not be null. Unable to confirm password reset for user [ {UserName} ], email [ {Email} ].");
+            if (string.IsNullOrEmpty(newPassword))
+                throw new DomainException(
+                    $"The new password must not be null. Unable to confirm password reset for user [ {UserName} ], email [ {Email} ].");
 
-            AddDomainEvent(new UserRequestedPasswordResetDomainEvent(Email, UserName, Id, randomToken));
-
-            return true;
+            return ResetToken.Trim() == tokenReceivedByEmail.Trim() && UpdatePasswordThenRemoveResetToken(newPassword);
         }
 
-        public bool AddVerificationToken(string verificationToken)
+        #region Email templates
+
+        public bool SendAlreadyRegisteredEmail(string origin)
         {
-            if (TheUserIsInActiveState() && !IsDeleted)
-            {
-                EmailVerificationToken = verificationToken;
-                VerificationTokenExpirationDate =
-                    DateTime.UtcNow.AddHours(ApplicationWideConstants.VERIFICATION_TOKEN_EXPIRES_IN_HOURS);
-            }
-            else
-            {
-                throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a verification token to it. Current registration status: {GetCurrentRegistrationStatus()}");
-            }
+            var message = !string.IsNullOrEmpty(origin)
+                ? $@"<p>If you don't know your password please visit the <a href=""{origin}/applicationUser/forgot-password"">forgot password</a> page.</p>"
+                : "<p>If you don't know your password you can reset it via the <code>/applicationUsers/forgot-password</code> api route.</p>";
+
+            var emailSubject = "Sign-up Verification API - Email Already Registered";
+            var completeEmailMessageBody = $@"<h4>Email Already Registered</h4>
+                         <p>Your email <strong>{Email}</strong> is already registered.</p>
+                         {message}";
+            var emailFrom = "admin.poc@gmail.com";
+
+            // when this domain event gets handled [AccountAlreadyRegisteredMailReadiedDomainEventHandler], a new command [AccountAlreadyRegisteredMailCommand]
+            // will be created that will actually do the email sending
+            AddDomainEvent(new AccountAlreadyRegisteredMailReadiedDomainEvent(
+                Email
+                , UserName
+                , Id
+                , emailSubject
+                , completeEmailMessageBody
+                , emailFrom
+            ));
 
             return true;
         }
 
-        public bool RemoveStaleRefreshTokens()
+        #endregion Email templates
+
+        private bool TheUserHadBeenVerified()
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
-                _refreshTokens.RemoveAll(x =>
-                    x.Created.AddDays(ApplicationWideConstants.REFREST_TOKEN_TTL_HOURS) <= DateTime.UtcNow);
-            else
-                throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove stale refresh tokens from it. Current registration status: {GetCurrentRegistrationStatus()}");
+            return Verified != DateTime.MinValue;
+        }
+
+        /// <summary>
+        ///     Returns the activity validity of the entity
+        /// </summary>
+        /// <returns></returns>
+        private bool TheUserIsInActiveState()
+        {
+            if (ActiveTo != null)
+                return ActiveTo >= DateTimeOffset.UtcNow;
 
             return true;
         }
 
-        public bool AddRefreshToken(RefreshToken.RefreshToken refreshToken)
+        #region Roles
+
+        public bool AddRole(Role role, User roleGiver)
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
-                _refreshTokens.Add(refreshToken);
-            else
+            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
                 throw new DomainException(
-                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a refresh token to it. Current registration status: {GetCurrentRegistrationStatus()}");
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to add a role [ {role.Name} ] to it. Current registration status: {GetCurrentRegistrationStatus()}");
+            if (role.IsExpired(DateTime.Now) || role.IsDeleted)
+                throw new DomainException(
+                    $"The role entity [ {role.Name} ] is either expired or deleted, hence we are unable to add it to the user.");
+            var newJoin = UserRole.NewActivatedDraft(this, role, roleGiver);
+
+            _userRoles.Add(newJoin);
+
+            // this will get audited, but will not show what had changed (audit works on per-table basis, not on object-graph basis)
+            DateModified = DateTime.UtcNow;
+
+            AddDomainEvent(new RoleAssignedToUserDomainEvent(
+                Id
+                , UserName
+                , Email
+                , role.Id
+                , role.Name
+                , role.ActiveTo
+                , roleGiver.Id
+                , roleGiver.Email
+                , roleGiver.UserName
+                , DateTimeOffset.UtcNow
+            ));
 
             return true;
         }
 
-        public List<RefreshToken.RefreshToken> GetRefreshTokens()
+        public List<Role> GetUserRoles()
         {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
-                return _refreshTokens.ToList();
-            throw new DomainException(
-                $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to fetch refresh tokens for it. Current registration status: {GetCurrentRegistrationStatus()}");
+            return _userRoles.Where(userRole => userRole.Active).Select(role => role.Role).ToList();
         }
+
+        public bool RemoveRole(Role role, User removerUser)
+        {
+            if (!TheUserIsInActiveState() || !TheUserHadBeenVerified() || IsDeleted)
+                throw new DomainException(
+                    $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to remove a role [ {role.Name} ] from it. Current registration status: {GetCurrentRegistrationStatus()}");
+            if (role.IsExpired(DateTime.Now) || role.IsDeleted)
+                throw new DomainException(
+                    $"The role entity [ {role.Name} ] is either expired or deleted, hence we are unable to remove it from the user.");
+            var linkTableEntry =
+                _userRoles.SingleOrDefault(userRole =>
+                    userRole.Active && userRole.Role.Name.Trim().ToUpper() == role.Name);
+
+            if (linkTableEntry == null)
+                throw new AggregateException(
+                    "Could not find an entry in the join table by the role name of: [ " +
+                    role.Name + " ]");
+
+            _userRoles.Remove(linkTableEntry);
+
+            // this will get audited, but will not show what had changed (audit works on per-table basis, not on object-graph basis)
+            DateModified = DateTime.UtcNow;
+
+            AddDomainEvent(new RoleRemovedFromUserDomainEvent(
+                Id,
+                UserName,
+                Email,
+                role.Id,
+                role.Name,
+                removerUser.Id,
+                removerUser.UserName,
+                removerUser.Email,
+                DateTimeOffset.UtcNow
+            ));
+
+            return true;
+        }
+
+        #endregion Roles
 
         private bool UpdatePasswordThenRemoveResetToken(string newPassword)
         {
@@ -850,36 +873,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         private bool VerificationTokenHasNotExpired()
         {
             return !string.IsNullOrEmpty(ResetToken) && ResetTokenExpires <= DateTime.UtcNow;
-        }
-
-        public bool OwnsToken(string refreshToken)
-        {
-            if (TheUserIsInActiveState() && TheUserHadBeenVerified() && !IsDeleted)
-                return _refreshTokens?.Find(x => x.Token == refreshToken) != null;
-            throw new DomainException(
-                $"The user [{UserName} / {Email}] is either deactivated, deleted or has not yet verified his account, hence we are unable to fetch a token to it. Current registration status: {GetCurrentRegistrationStatus()}");
-        }
-
-        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            throw new NotImplementedException();
-        }
-
-        public RegistrationStatusEnum GetCurrentRegistrationStatus()
-        {
-            return _status;
-        }
-
-        public void SetAccountActivationMailResent()
-        {
-            _accountActivationMailsSendAttempts += 1;
-            var journalEntry =
-                new AccountJournalEntry(DateTime.UtcNow +
-                                        " => Account activation code re-sent to the users e-mail address.");
-            journalEntry.AttachActingUser(null);
-            journalEntry.AttachUser(this);
-            _journalEntries.Add(journalEntry);
-            _status = RegistrationStatusEnum.VerificationEmailResent;
         }
 
         #endregion Public methods

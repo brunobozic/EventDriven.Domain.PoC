@@ -10,8 +10,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
     {
         private readonly List<BusinessRule> _brokenRules = new();
 
-        protected abstract void Validate();
-
         public void ThrowExceptionIfInvalid()
         {
             _brokenRules.Clear();
@@ -30,5 +28,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
         {
             _brokenRules.Add(businessRule);
         }
+
+        protected abstract void Validate();
     }
 }

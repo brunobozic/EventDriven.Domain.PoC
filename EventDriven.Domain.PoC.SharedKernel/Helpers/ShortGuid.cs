@@ -200,41 +200,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
         #region Operators
 
         /// <summary>
-        ///     Determines if both ShortGuids have the same underlying
-        ///     Guid value.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public static bool operator ==(ShortGuid x, ShortGuid y)
-        {
-            if ((object)x == null) return (object)y == null;
-            return x._guid == y._guid;
-        }
-
-        /// <summary>
-        ///     Determines if both ShortGuids do not have the
-        ///     same underlying Guid value.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public static bool operator !=(ShortGuid x, ShortGuid y)
-        {
-            return !(x == y);
-        }
-
-        /// <summary>
-        ///     Implicitly converts the ShortGuid to it's string equivilent
-        /// </summary>
-        /// <param name="shortGuid"></param>
-        /// <returns></returns>
-        public static implicit operator string(ShortGuid shortGuid)
-        {
-            return shortGuid._value;
-        }
-
-        /// <summary>
         ///     Implicitly converts the ShortGuid to it's Guid equivilent
         /// </summary>
         /// <param name="shortGuid"></param>
@@ -262,6 +227,41 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
         public static implicit operator ShortGuid(Guid guid)
         {
             return new(guid);
+        }
+
+        /// <summary>
+        ///     Implicitly converts the ShortGuid to it's string equivilent
+        /// </summary>
+        /// <param name="shortGuid"></param>
+        /// <returns></returns>
+        public static implicit operator string(ShortGuid shortGuid)
+        {
+            return shortGuid._value;
+        }
+
+        /// <summary>
+        ///     Determines if both ShortGuids do not have the
+        ///     same underlying Guid value.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static bool operator !=(ShortGuid x, ShortGuid y)
+        {
+            return !(x == y);
+        }
+
+        /// <summary>
+        ///     Determines if both ShortGuids have the same underlying
+        ///     Guid value.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static bool operator ==(ShortGuid x, ShortGuid y)
+        {
+            if ((object)x == null) return (object)y == null;
+            return x._guid == y._guid;
         }
 
         #endregion Operators

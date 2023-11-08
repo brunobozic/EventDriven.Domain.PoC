@@ -9,6 +9,17 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors
 {
     public class ConsumedMessagePersistor : IConsumedMessagePersistor
     {
+        public bool MarkMessageAsFaulty(ConsumeMessageResult consumedMessage, string readStatusMessage)
+        {
+            return true;
+        }
+
+        public bool MarkMessageAsFaulty(string message, Error error, string errorReason,
+            ConsumeResult<byte[], byte[]> consumerRecord)
+        {
+            return true;
+        }
+
         public PersistingResult PersistToDb(ConsumeMessageResult readResult)
         {
             Log
@@ -52,17 +63,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors
                              " ]");
 
             return r;
-        }
-
-        public bool MarkMessageAsFaulty(ConsumeMessageResult consumedMessage, string readStatusMessage)
-        {
-            return true;
-        }
-
-        public bool MarkMessageAsFaulty(string message, Error error, string errorReason,
-            ConsumeResult<byte[], byte[]> consumerRecord)
-        {
-            return true;
         }
     }
 }

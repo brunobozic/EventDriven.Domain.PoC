@@ -8,6 +8,6 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request
 
         public string Password { get; set; }
 
-        [Required] [Compare("Password")] public string ConfirmPassword { get; set; }
+        [Required][Compare("Password")] public string ConfirmPassword { get; set; }
     }
 }

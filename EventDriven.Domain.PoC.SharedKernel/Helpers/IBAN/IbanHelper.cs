@@ -17,9 +17,9 @@
             Sample = sample;
         }
 
-        private string CountryCode { get; }
         public int Length { get; }
         public string Regex { get; }
+        private string CountryCode { get; }
         private bool IsEu924 { get; }
         private string Sample { get; }
     }

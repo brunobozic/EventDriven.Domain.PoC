@@ -44,13 +44,14 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
         #region Private props
 
-        private readonly MyConfigurationValues _configurationValues;
         private readonly IUserService _applicationUserService;
+        private readonly MyConfigurationValues _configurationValues;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly ITracer _tracer;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly IRoleAdministrationService _roleAdministrationService;
+
+        private readonly ITracer _tracer;
 
         #endregion Private props
     }

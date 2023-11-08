@@ -20,8 +20,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.Autofac
             _types.AddRange(types);
         }
 
+        public bool IsAdapterForIndividualComponents => _source.IsAdapterForIndividualComponents;
+
         public IEnumerable<IComponentRegistration> RegistrationsFor(
-            Service service,
+                    Service service,
             Func<Service, IEnumerable<ServiceRegistration>> registrationAccessor)
         {
             var components = _source.RegistrationsFor(service, registrationAccessor);
@@ -35,7 +37,5 @@ namespace EventDriven.Domain.PoC.SharedKernel.Autofac
                     yield return c;
             }
         }
-
-        public bool IsAdapterForIndividualComponents => _source.IsAdapterForIndividualComponents;
     }
 }

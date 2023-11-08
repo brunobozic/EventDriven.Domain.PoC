@@ -40,8 +40,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
     [Route("user")]
     public class UserController : BaseController, IUserController
     {
-        #region ctor
-
         /// <summary>
         /// </summary>
         /// <param name="applicationUserService"></param>
@@ -71,10 +69,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             _tracer = tracer;
         }
 
-        #endregion ctor
-
-        #region Private props
-
         private readonly MyConfigurationValues _configurationValues;
         private readonly IUserService _applicationUserService;
         private readonly IHttpContextAccessor _contextAccessor;
@@ -87,10 +81,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 #pragma warning restore IDE0052 // Remove unread private members
         private readonly IMediator _mediator;
         private readonly Tracer _tracer;
-
-        #endregion Private props
-
-        #region Public props
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
@@ -116,10 +106,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         public string UserName { get; private set; }
 
 #pragma warning restore 1591
-
-        #endregion Public props
-
-        #region Token
 
         /// <summary>
         /// </summary>
@@ -179,10 +165,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return BadRequest(serviceLayerResponse.Message);
         }
 
-        #endregion Token
-
-        #region CUD CQRS
-
         /// <summary>
         /// </summary>
         /// <param name="request"></param>
@@ -214,8 +196,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             // => Forgot password Flow
             // => Resend activation link Flow
 
-            #region For development purposes this is unfortunately needed
-
             // ReSharper disable once PossibleNullReferenceException
             var creator =
                 (User)_contextAccessor.HttpContext
@@ -242,13 +222,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
                 creatorId = creator.Id;
             }
 
-            #endregion For development purposes this is unfortunately needed
-
             command.CreatorId = creatorId;
 
             var user = await _mediator.Send(command, ct);
             span.SetAttribute("UserEmail", command.Email);
-            span.SetAttribute("RawCommand", Newtonsoft.Json.JsonConvert.SerializeObject(command)) ;
+            span.SetAttribute("RawCommand", Newtonsoft.Json.JsonConvert.SerializeObject(command));
             span.SetAttribute("Created user Id", user.Id.GetValueOrDefault().ToString());
             span.AddEvent("User created");
 
@@ -309,8 +287,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return Created(string.Empty, user);
         }
 
-        #region User roles
-
         /// <summary>
         /// </summary>
         /// <param name="request"></param>
@@ -368,10 +344,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
             return Ok();
         }
-
-        #endregion User roles
-
-        #region User addresses
 
         /// <summary>
         /// </summary>
@@ -441,8 +413,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return Ok();
         }
 
-        #endregion User addresses
-
         /// <summary>
         /// </summary>
         /// <param name="id"></param>
@@ -469,10 +439,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return null;
         }
 
-        #endregion CUD CQRS
-
-        #region Other
-
         /// <summary>
         /// </summary>
         /// <param name="id"></param>
@@ -484,8 +450,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         {
             return null;
         }
-
-        #region Email verification
 
         /// <summary>
         /// </summary>
@@ -532,10 +496,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return BadRequest(response.Message);
         }
 
-        #endregion Email verification
-
-        #region User has forgotten his password
-
         /// <summary>
         /// </summary>
         /// <param name="request"></param>
@@ -580,12 +540,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return Ok(response);
         }
 
-        #endregion User has forgotten his password
-
-        #endregion Other
-
-        #region Helpers
-
         private void SetTokenCookie(string token)
         {
             var cookieOptions = new CookieOptions
@@ -604,8 +558,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             // ReSharper disable once PossibleNullReferenceException
             return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
-
-        #endregion Helpers
 
         //[HttpPost("verify-email")]
         //[ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
@@ -1093,8 +1045,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //    return Ok(user);
         //}
 
-        #region CUD non CQRS
-
         //[MyAuthorize(RoleEnum.Admin)]
         //[HttpPost]
         //[Produces(typeof(ApplicationUserResponse))]
@@ -1151,50 +1101,5 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         //        return BadRequest(serviceLayerResponse.Message);
         //    return Ok(serviceLayerResponse.ViewModel);
         //}
-
-        #endregion CUD non CQRS
-    }
-
-    /// <summary>
-    /// </summary>
-    public class RemoveAddressFromUserRequest
-    {
-        /// <summary>
-        /// </summary>
-        public Guid UserId { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public string AddressName { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public Guid RoleId { get; set; }
-    }
-
-    /// <summary>
-    /// </summary>
-    public class RemoveRoleFromUserRequest
-    {
-        /// <summary>
-        /// </summary>
-        public string RoleName { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public Guid UserIdToRemoveFrom { get; set; }
-    }
-
-    /// <summary>
-    /// </summary>
-    public class AssignRoleToUserRequest
-    {
-        /// <summary>
-        /// </summary>
-        public Guid UserIdToAssignTo { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public string RoleName { get; set; }
     }
 }

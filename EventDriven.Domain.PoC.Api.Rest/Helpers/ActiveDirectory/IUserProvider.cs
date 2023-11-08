@@ -16,6 +16,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ActiveDirectory
 
         Task Create(HttpContext context, IConfiguration config, IWebHostEnvironment env);
 
+        Task<List<AdUser>> FindDomainUser(string search);
+
         Task<AdUser> GetAdUser(IIdentity identity, IConfiguration config);
 
         Task<AdUser> GetAdUser(string samapplicationUserName);
@@ -23,7 +25,5 @@ namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ActiveDirectory
         Task<AdUser> GetAdUser(Guid guid);
 
         Task<List<AdUser>> GetDomainUsers();
-
-        Task<List<AdUser>> FindDomainUser(string search);
     }
 }

@@ -9,19 +9,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
     {
         #region Public Methods
 
-        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AttachUser(User user)
-        {
-            UserActedUpon = user;
-            UserNameActedUpon = user.UserName;
-            EmailActedUpon = user.Email;
-            UserActedUponId = user.Id;
-        }
-
         public void AttachActingUser(User activatedBy)
         {
             if (activatedBy != null)
@@ -33,37 +20,49 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
             }
         }
 
+        public void AttachUser(User user)
+        {
+            UserActedUpon = user;
+            UserNameActedUpon = user.UserName;
+            EmailActedUpon = user.Email;
+            UserActedUponId = user.Id;
+        }
+
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion Public Methods
 
         #region ctor
-
-        private AccountJournalEntry()
-        {
-        }
 
         public AccountJournalEntry(string msg)
         {
             Message = msg;
         }
 
+        private AccountJournalEntry()
+        {
+        }
+
         #endregion ctor
 
         #region Public Props
 
-        public string EmailActedUpon { get; private set; }
-        public string UserNameActedUpon { get; private set; }
-
-        public string Message { get; }
-        public string ActingUserName { get; private set; }
         public string ActingEmail { get; private set; }
+        public string ActingUserName { get; private set; }
+        public string EmailActedUpon { get; private set; }
+        public string Message { get; }
         public DateTimeOffset? Seen { get; private set; }
+        public string UserNameActedUpon { get; private set; }
 
         #endregion Public Props
 
         #region Navigation
 
-        public virtual User UserActedUpon { get; private set; }
         public virtual User ActingUser { get; private set; }
+        public virtual User UserActedUpon { get; private set; }
 
         #endregion Navigation
 

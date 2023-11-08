@@ -4,10 +4,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern
 {
     public class OutboxMessage
     {
-        private OutboxMessage()
-        {
-        }
-
         public OutboxMessage(DateTime occurredOn, string type, string data)
         {
             Id = Guid.NewGuid();
@@ -16,14 +12,16 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern
             Data = data;
         }
 
+        private OutboxMessage()
+        {
+        }
+
+        public string Data { get; set; }
         public Guid Id { get; set; }
 
         public DateTime OccurredOn { get; set; }
 
-        public string Type { get; set; }
-
-        public string Data { get; set; }
-
         public DateTime? ProcessedDate { get; set; }
+        public string Type { get; set; }
     }
 }

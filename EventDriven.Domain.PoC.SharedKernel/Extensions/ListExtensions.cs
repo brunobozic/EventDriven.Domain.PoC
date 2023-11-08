@@ -6,22 +6,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
 {
     public static class ListExtensions
     {
-        public static List<Guid> ParseString(string input, char separator = ',')
-        {
-            return input.Split(separator).Select(x => new Guid(x)).ToList();
-        }
-
-        public static List<T> Swap<T>(this List<T> list, int firstIndex, int secondIndex)
-        {
-            if (firstIndex == secondIndex || firstIndex < 0 || secondIndex < 0) return list;
-
-            var temp = list[firstIndex];
-            list[firstIndex] = list[secondIndex];
-            list[secondIndex] = temp;
-
-            return list;
-        }
-
         ///<summary>Finds the index of the first item matching an expression in an enumerable.</summary>
         ///<param name="items">The enumerable to search.</param>
         ///<param name="predicate">The expression to test the items against.</param>
@@ -50,6 +34,22 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
         public static int IndexOf<T>(this IEnumerable<T> items, T item)
         {
             return items.FindIndex(i => EqualityComparer<T>.Default.Equals(item, i));
+        }
+
+        public static List<Guid> ParseString(string input, char separator = ',')
+        {
+            return input.Split(separator).Select(x => new Guid(x)).ToList();
+        }
+
+        public static List<T> Swap<T>(this List<T> list, int firstIndex, int secondIndex)
+        {
+            if (firstIndex == secondIndex || firstIndex < 0 || secondIndex < 0) return list;
+
+            var temp = list[firstIndex];
+            list[firstIndex] = list[secondIndex];
+            list[secondIndex] = temp;
+
+            return list;
         }
     }
 }

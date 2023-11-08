@@ -15,11 +15,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
     public abstract class DomainEntity<TK> : IHandlesConcurrency, ISoftDeletable, IDeactivatableEntity,
         ICreationAuditedEntity, IModificationAuditedEntity, IDeletionAuditedEntity, ITrackable
     {
+        [Column("Description", Order = 2)] public string Description { get; set; }
         public TK Id { get; set; }
 
-        [Required] [Column("Name", Order = 1)] public string Name { get; set; }
-
-        [Column("Description", Order = 2)] public string Description { get; set; }
+        [Required][Column("Name", Order = 1)] public string Name { get; set; }
 
         #region IHandlesConcurrency
 
@@ -35,14 +34,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
 
         #endregion ISoftDeletable
 
-        public override bool Equals(object entity)
+        public static bool operator !=(DomainEntity<TK> entity1,
+            DomainEntity<TK> entity2)
         {
-            return entity is DomainEntity<TK> @base && this == @base;
-        }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
+            return !(entity1 == entity2);
         }
 
         public static bool operator ==(DomainEntity<TK> entity1,
@@ -60,10 +55,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
             return false;
         }
 
-        public static bool operator !=(DomainEntity<TK> entity1,
-            DomainEntity<TK> entity2)
+        public override bool Equals(object entity)
         {
-            return !(entity1 == entity2);
+            return entity is DomainEntity<TK> @base && this == @base;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
         }
 
         /// <summary>
@@ -80,11 +79,12 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
 
         #region ICreationAuditedEntity
 
+        public Guid? CreatedById { get; set; }
+
         [Required]
         [Column("DateCreated", Order = 1005)]
         public DateTimeOffset DateCreated { get; set; } = DateTimeOffset.UtcNow;
 
-        public Guid? CreatedById { get; set; }
         public bool IsDraft { get; set; } = false;
         public bool IsSeed { get; set; } = false;
 
@@ -107,10 +107,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         #region IDeactivatableEntity
 
         [Required]
-        [Column("IsActive", Order = 990)]
-        public bool IsActive { get; set; } = true;
-
-        [Required]
         [Column("ActiveFrom", Order = 991)]
         public DateTimeOffset ActiveFrom { get; set; } = DateTimeOffset.UtcNow;
 
@@ -118,24 +114,22 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         [Column("ActiveTo", Order = 992)]
         public DateTimeOffset? ActiveTo { get; set; }
 
+        [Required]
+        [Column("IsActive", Order = 990)]
+        public bool IsActive { get; set; } = true;
+
         #endregion IDeactivatableEntity
 
         #region ITrackable
 
-        [NotMapped] public TrackingState TrackingState { get; set; }
-
         [NotMapped] public ICollection<string> ModifiedProperties { get; set; }
+        [NotMapped] public TrackingState TrackingState { get; set; }
 
         #endregion ITrackable
 
         #region Business rules
 
         private readonly List<BusinessRule> _brokenRules = new();
-
-        protected void AddBrokenRule(BusinessRule businessRule)
-        {
-            _brokenRules.Add(businessRule);
-        }
 
         public void ThrowExceptionIfInvalid()
         {
@@ -169,30 +163,25 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
             return validationErrors;
         }
 
+        protected void AddBrokenRule(BusinessRule businessRule)
+        {
+            _brokenRules.Add(businessRule);
+        }
+
         #endregion Business rules
 
         #region Domain Events
 
-        public Guid CreatedBy { get; set; }
-        public Guid ModifiedBy { get; set; }
-        public Guid DeletedBy { get; set; }
-
         private List<IDomainEvent> _domainEvents;
+        public Guid CreatedBy { get; set; }
+        public Guid DeletedBy { get; set; }
 
         /// <summary>
         ///     Domain events occurred.
         /// </summary>
         public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents?.AsReadOnly();
 
-        /// <summary>
-        ///     Add domain event.
-        /// </summary>
-        /// <param name="domainEvent"></param>
-        protected void AddDomainEvent(IDomainEvent domainEvent)
-        {
-            _domainEvents ??= new List<IDomainEvent>();
-            _domainEvents.Add(domainEvent);
-        }
+        public Guid ModifiedBy { get; set; }
 
         /// <summary>
         ///     Clear domain events.
@@ -205,6 +194,16 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         protected static void CheckRule(IBusinessRule rule)
         {
             if (rule.IsBroken()) throw new BusinessRuleValidationException(rule);
+        }
+
+        /// <summary>
+        ///     Add domain event.
+        /// </summary>
+        /// <param name="domainEvent"></param>
+        protected void AddDomainEvent(IDomainEvent domainEvent)
+        {
+            _domainEvents ??= new List<IDomainEvent>();
+            _domainEvents.Add(domainEvent);
         }
 
         #endregion Domain Events

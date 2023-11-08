@@ -4,9 +4,8 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainCoreInterfaces
 {
     public interface ICreationAuditedEntity
     {
-        DateTimeOffset DateCreated { get; set; }
-
         Guid? CreatedById { get; set; }
+        DateTimeOffset DateCreated { get; set; }
         bool IsDraft { get; set; }
         bool IsSeed { get; set; }
     }

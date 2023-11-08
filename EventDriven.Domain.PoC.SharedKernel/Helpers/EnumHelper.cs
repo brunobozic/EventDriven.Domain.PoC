@@ -5,14 +5,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
 {
     public static class EnumExtensions
     {
-        public static string GetOracleParamName<TEnum>(this TEnum @enum)
-        {
-            var info = @enum.GetType().GetField(@enum.ToString());
-            var attributes = (DescriptionAttribute[])info.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-            return attributes?[0].Description ?? @enum.ToString();
-        }
-
         public static string GetDescriptionString<TEnum>(this TEnum @enum)
         {
             try
@@ -26,6 +18,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.Helpers
             {
                 return "Nepoznato";
             }
+        }
+
+        public static string GetOracleParamName<TEnum>(this TEnum @enum)
+        {
+            var info = @enum.GetType().GetField(@enum.ToString());
+            var attributes = (DescriptionAttribute[])info.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return attributes?[0].Description ?? @enum.ToString();
         }
 
         public static T GetValueFromDescription<T>(this string description)

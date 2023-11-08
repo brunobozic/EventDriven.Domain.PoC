@@ -55,12 +55,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
         /// </summary>
         public static IContainer Container { get; private set; }
 
-        private static string GetBasePath()
-        {
-            using var processModule = Process.GetCurrentProcess().MainModule;
-            return Path.GetDirectoryName(processModule?.FileName);
-        }
-
         /// <summary>
         ///     Takes your connection string and your collection of services and cross-wires everything.
         ///     Returns a fully populated and configured AutoFac container instance.
@@ -369,6 +363,12 @@ namespace EventDriven.Domain.PoC.Api.Rest
             CompositionRoot.SetContainer(builtContainer);
 
             return builtContainer;
+        }
+
+        private static string GetBasePath()
+        {
+            using var processModule = Process.GetCurrentProcess().MainModule;
+            return Path.GetDirectoryName(processModule?.FileName);
         }
     }
 }

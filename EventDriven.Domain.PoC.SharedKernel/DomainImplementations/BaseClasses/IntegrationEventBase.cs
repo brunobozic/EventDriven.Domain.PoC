@@ -12,8 +12,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
             IntegrationEvent = integrationEvent;
         }
 
-        [JsonIgnore] public T IntegrationEvent { get; }
-
         public Guid Id { get; }
+        [JsonIgnore] public T IntegrationEvent { get; }
     }
 }

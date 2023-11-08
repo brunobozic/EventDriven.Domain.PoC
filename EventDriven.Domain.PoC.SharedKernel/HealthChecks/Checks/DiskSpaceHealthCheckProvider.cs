@@ -14,6 +14,11 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
         private const int WarningPercentageFree = 20;
 
         /// <summary>
+        ///     Defines the order of this provider in the results.
+        /// </summary>
+        public int SortOrder => 30;
+
+        /// <summary>
         ///     Returns the health heck info.
         /// </summary>
         public Task<HealthCheckItemResult> GetHealthCheckAsync()
@@ -36,10 +41,12 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
             return Task.FromResult(result);
         }
 
-        /// <summary>
-        ///     Defines the order of this provider in the results.
-        /// </summary>
-        public int SortOrder => 30;
+        private static HealthState DetermineState(double percentageFree)
+        {
+            if (percentageFree < MinPercentageFree) return HealthState.Unhealthy;
+            if (percentageFree < WarningPercentageFree) return HealthState.Degraded;
+            return HealthState.Healthy;
+        }
 
         private static double GetPercentageFree(string drive)
         {
@@ -48,13 +55,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
             var totalSpace = driveInfo.TotalSize;
             var percentageFree = Convert.ToDouble(freeSpace) / Convert.ToDouble(totalSpace) * 100;
             return percentageFree;
-        }
-
-        private static HealthState DetermineState(double percentageFree)
-        {
-            if (percentageFree < MinPercentageFree) return HealthState.Unhealthy;
-            if (percentageFree < WarningPercentageFree) return HealthState.Degraded;
-            return HealthState.Healthy;
         }
     }
 }

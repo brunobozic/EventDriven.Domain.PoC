@@ -6,18 +6,18 @@
 
         public static class Type
         {
-            public static string Input = "input";
             public static string Domain = "domain";
+            public static string Input = "input";
         }
 
         #endregion Constants
 
         #region Properties
 
-        public string ErrorType { get; set; }
         public string ErrorCode { get; set; }
-        public object Source { get; set; }
         public string ErrorMessage { get; set; }
+        public string ErrorType { get; set; }
+        public object Source { get; set; }
 
         #endregion Properties
 

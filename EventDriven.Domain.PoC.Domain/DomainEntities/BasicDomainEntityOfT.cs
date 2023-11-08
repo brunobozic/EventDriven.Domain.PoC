@@ -16,14 +16,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
     public abstract class BasicDomainEntity<TK> : ITrackable, ICreationAuditedEntity, IDeletionAuditedEntity,
         IModificationAuditedEntity
     {
-        public override bool Equals(object entity)
+        public static bool operator !=(BasicDomainEntity<TK> entity1,
+            BasicDomainEntity<TK> entity2)
         {
-            return entity is BasicDomainEntity<TK> @base && this == @base;
-        }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
+            return !(entity1 == entity2);
         }
 
         public static bool operator ==(BasicDomainEntity<TK> entity1,
@@ -41,10 +37,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             return false;
         }
 
-        public static bool operator !=(BasicDomainEntity<TK> entity1,
-            BasicDomainEntity<TK> entity2)
+        public override bool Equals(object entity)
         {
-            return !(entity1 == entity2);
+            return entity is BasicDomainEntity<TK> @base && this == @base;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
         }
 
         /// <summary>
@@ -61,46 +61,43 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         #region Public Props
 
-        [NotMapped] public bool IsDraft { get; set; } = false;
-
-        public DateTimeOffset? ActiveFrom { get; private set; } = DateTimeOffset.UtcNow;
-        public DateTimeOffset? ActiveTo { get; private set; }
-        public User ReactivatedBy { get; private set; }
-        public string ReactivatedReason { get; private set; }
         public User ActivatedBy { get; private set; }
         public Guid? ActivatedById { get; set; }
         public bool Active { get; set; } = true;
+        public DateTimeOffset? ActiveFrom { get; private set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset? ActiveTo { get; private set; }
+        public User CreatedBy { get; private set; }
+        public Guid? CreatedById { get; set; }
+        public DateTimeOffset DateCreated { get; set; }
+        public DateTimeOffset? DateDeleted { get; set; }
+        public DateTimeOffset? DateModified { get; set; }
         public User DeactivatedBy { get; private set; }
         public string DeactivateReason { get; private set; }
-
+        public User DeletedBy { get; private set; }
+        public Guid? DeletedById { get; set; }
+        public string DeleteReason { get; private set; }
+        public string Description { get; set; }
+        public TK Id { get; set; }
+        [NotMapped] public bool IsDraft { get; set; } = false;
+        public User ModifiedBy { get; private set; }
+        public Guid? ModifiedById { get; set; }
+        public string Name { get; set; }
+        public User ReactivatedBy { get; private set; }
+        public string ReactivatedReason { get; private set; }
         public User UndeletedBy { get; private set; }
+
+        public string UndeleteReason { get; private set; }
 
         internal void AssignCreatedBy(User creatorUser)
         {
             CreatedBy = creatorUser;
         }
 
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public TK Id { get; set; }
-
-        public User CreatedBy { get; private set; }
-        public DateTimeOffset DateCreated { get; set; }
-        public Guid? CreatedById { get; set; }
-        public User ModifiedBy { get; private set; }
-
-        public DateTimeOffset? DateModified { get; set; }
-        public Guid? ModifiedById { get; set; }
-        public User DeletedBy { get; private set; }
-        public DateTimeOffset? DateDeleted { get; set; }
-
-        public Guid? DeletedById { get; set; }
-        public string UndeleteReason { get; private set; }
-        public string DeleteReason { get; private set; }
-
         #endregion Public Props
 
         #region Public Methods
+
+        public bool IsDeleted { get; set; }
 
         public void Activate(DateTimeOffset activeFrom, DateTimeOffset activeTo, User activatedBy)
         {
@@ -126,6 +123,13 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             DeactivateReason = reason;
         }
 
+        public void Delete(User deletedBy, string reason)
+        {
+            IsDeleted = true;
+            DeletedBy = deletedBy;
+            DeleteReason = reason;
+        }
+
         public void Reactivate(DateTimeOffset activeFrom, DateTimeOffset activeTo, User reactivatedBy, string reason)
         {
             Active = true;
@@ -134,15 +138,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             ReactivatedBy = reactivatedBy;
             ReactivatedReason = reason;
         }
-
-        public void Delete(User deletedBy, string reason)
-        {
-            IsDeleted = true;
-            DeletedBy = deletedBy;
-            DeleteReason = reason;
-        }
-
-        public bool IsDeleted { get; set; }
 
         public void Undelete(User undeletedBy, string reason)
         {
@@ -155,20 +150,14 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         #region ITrackable
 
-        [NotMapped] public TrackingState TrackingState { get; set; }
-
         [NotMapped] public ICollection<string> ModifiedProperties { get; set; }
+        [NotMapped] public TrackingState TrackingState { get; set; }
 
         #endregion ITrackable
 
         #region Business rules
 
         private readonly List<BusinessRule> _brokenRules = new();
-
-        protected void AddBrokenRule(BusinessRule businessRule)
-        {
-            _brokenRules.Add(businessRule);
-        }
 
         public void ThrowExceptionIfInvalid()
         {
@@ -202,6 +191,11 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
             return validationErrors;
         }
 
+        protected void AddBrokenRule(BusinessRule businessRule)
+        {
+            _brokenRules.Add(businessRule);
+        }
+
         #endregion Business rules
 
         #region Domain Events
@@ -212,12 +206,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
 
         public bool IsSeed { get; set; } = false;
 
-        protected void AddDomainEvent(IDomainEvent domainEvent)
-        {
-            _domainEvents ??= new List<IDomainEvent>();
-            _domainEvents.Add(domainEvent);
-        }
-
         public void ClearDomainEvents()
         {
             _domainEvents?.Clear();
@@ -226,6 +214,12 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities
         protected static void CheckRule(IBusinessRule rule)
         {
             if (rule.IsBroken()) throw new BusinessRuleValidationException(rule);
+        }
+
+        protected void AddDomainEvent(IDomainEvent domainEvent)
+        {
+            _domainEvents ??= new List<IDomainEvent>();
+            _domainEvents.Add(domainEvent);
         }
 
         #endregion Domain Events

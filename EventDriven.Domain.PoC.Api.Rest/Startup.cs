@@ -1,8 +1,5 @@
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
-using Consul;
-using Steeltoe.Discovery.Client;
-
 using EventDriven.Domain.PoC.Api.Rest.Extensions;
 using EventDriven.Domain.PoC.Api.Rest.Filters;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
@@ -110,8 +107,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
             var connStr = Configuration.GetConnectionString("Sqlite");
             services.AddOptions();
             services.Configure<ServiceDisvoveryOptions>(Configuration.GetSection("ServiceDiscovery"));
-          
-         
 
             #region MVC wireup
 
@@ -326,13 +321,11 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #region Eureka
 
-            services.AddServiceDiscovery(); 
+            services.AddServiceDiscovery();
 
             #endregion Eureka
 
             #region HealthCheck
-
-
 
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy())

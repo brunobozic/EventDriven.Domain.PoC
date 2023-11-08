@@ -18,13 +18,13 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.JournalServices
 {
     public class JournalService : Service<AccountJournalEntry>, IJournalService
     {
-        private readonly IMyUnitOfWork UnitOfWork;
-        private readonly ITrackableRepository<Role> RoleRepository;
-        private readonly ITrackableRepository<User> UserRepository;
-        private readonly ITrackableRepository<AccountJournalEntry> JournalRepository;
-        private readonly IMapper _mapper;
         private readonly MyConfigurationValues _appSettings;
         private readonly IEmailService _emailService;
+        private readonly IMapper _mapper;
+        private readonly ITrackableRepository<AccountJournalEntry> JournalRepository;
+        private readonly ITrackableRepository<Role> RoleRepository;
+        private readonly IMyUnitOfWork UnitOfWork;
+        private readonly ITrackableRepository<User> UserRepository;
 
         public JournalService(
            IMyUnitOfWork unitOfWork,

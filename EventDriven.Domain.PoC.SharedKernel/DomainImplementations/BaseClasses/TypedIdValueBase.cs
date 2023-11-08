@@ -11,6 +11,22 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
 
         public Guid Value { get; }
 
+        public static bool operator !=(TypedIdValueBase x, TypedIdValueBase y)
+        {
+            return !(x == y);
+        }
+
+        public static bool operator ==(TypedIdValueBase obj1, TypedIdValueBase obj2)
+        {
+            if (Equals(obj1, null))
+            {
+                if (Equals(obj2, null)) return true;
+                return false;
+            }
+
+            return obj1.Equals(obj2);
+        }
+
         public bool Equals(TypedIdValueBase other)
         {
             return Value == other.Value;
@@ -25,22 +41,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
         public override int GetHashCode()
         {
             return Value.GetHashCode();
-        }
-
-        public static bool operator ==(TypedIdValueBase obj1, TypedIdValueBase obj2)
-        {
-            if (Equals(obj1, null))
-            {
-                if (Equals(obj2, null)) return true;
-                return false;
-            }
-
-            return obj1.Equals(obj2);
-        }
-
-        public static bool operator !=(TypedIdValueBase x, TypedIdValueBase y)
-        {
-            return !(x == y);
         }
     }
 }

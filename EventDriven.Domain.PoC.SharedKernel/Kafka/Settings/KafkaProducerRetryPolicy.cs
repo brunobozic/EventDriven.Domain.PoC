@@ -2,7 +2,7 @@
 {
     public class KafkaProducerRetryPolicy
     {
-        public int RetryTimes { get; set; }
         public KafkaSharedExponentialBackoff ExponentialBackoff { get; set; }
+        public int RetryTimes { get; set; }
     }
 }

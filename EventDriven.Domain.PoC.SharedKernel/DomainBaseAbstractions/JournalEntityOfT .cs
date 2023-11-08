@@ -15,14 +15,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
     {
         #region Public methods
 
-        public override bool Equals(object entity)
+        public static bool operator !=(JournalEntityOfT<TK> entity1,
+            JournalEntityOfT<TK> entity2)
         {
-            return entity is JournalEntityOfT<TK> @base && this == @base;
-        }
-
-        public override int GetHashCode()
-        {
-            return JournalId.GetHashCode();
+            return !(entity1 == entity2);
         }
 
         public static bool operator ==(JournalEntityOfT<TK> entity1,
@@ -40,10 +36,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
             return false;
         }
 
-        public static bool operator !=(JournalEntityOfT<TK> entity1,
-            JournalEntityOfT<TK> entity2)
+        public override bool Equals(object entity)
         {
-            return !(entity1 == entity2);
+            return entity is JournalEntityOfT<TK> @base && this == @base;
+        }
+
+        public override int GetHashCode()
+        {
+            return JournalId.GetHashCode();
         }
 
         /// <summary>
@@ -63,30 +63,22 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         #region Public Props
 
         public DateTimeOffset DateCreated { get; } = DateTimeOffset.UtcNow;
-        public bool Deleted { get; } = false;
-
         public DateTimeOffset? DateDeleted { get; private set; }
-
+        public bool Deleted { get; } = false;
         public TK JournalId { get; private set; }
 
         #endregion Public Props
 
         #region ITrackable
 
-        [NotMapped] public TrackingState TrackingState { get; set; }
-
         [NotMapped] public ICollection<string> ModifiedProperties { get; set; }
+        [NotMapped] public TrackingState TrackingState { get; set; }
 
         #endregion ITrackable
 
         #region Business rules
 
         private readonly List<BusinessRule> _brokenRules = new();
-
-        protected void AddBrokenRule(BusinessRule businessRule)
-        {
-            _brokenRules.Add(businessRule);
-        }
 
         public void ThrowExceptionIfInvalid()
         {
@@ -120,6 +112,11 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
             return validationErrors;
         }
 
+        protected void AddBrokenRule(BusinessRule businessRule)
+        {
+            _brokenRules.Add(businessRule);
+        }
+
         #endregion Business rules
 
         #region Domain Events
@@ -132,16 +129,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents?.AsReadOnly();
 
         /// <summary>
-        ///     Add domain event.
-        /// </summary>
-        /// <param name="domainEvent"></param>
-        protected void AddDomainEvent(IDomainEvent domainEvent)
-        {
-            _domainEvents ??= new List<IDomainEvent>();
-            _domainEvents.Add(domainEvent);
-        }
-
-        /// <summary>
         ///     Clear domain events.
         /// </summary>
         public void ClearDomainEvents()
@@ -152,6 +139,16 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         protected static void CheckRule(IBusinessRule rule)
         {
             if (rule.IsBroken()) throw new BusinessRuleValidationException(rule);
+        }
+
+        /// <summary>
+        ///     Add domain event.
+        /// </summary>
+        /// <param name="domainEvent"></param>
+        protected void AddDomainEvent(IDomainEvent domainEvent)
+        {
+            _domainEvents ??= new List<IDomainEvent>();
+            _domainEvents.Add(domainEvent);
         }
 
         #endregion Domain Events

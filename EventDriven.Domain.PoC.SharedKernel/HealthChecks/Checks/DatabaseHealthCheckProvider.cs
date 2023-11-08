@@ -9,6 +9,11 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
     public class DatabaseHealthCheckProvider : IHealthCheckProvider
     {
         /// <summary>
+        ///     Defines the order of this provider in the results.
+        /// </summary>
+        public int SortOrder { get; } = 20;
+
+        /// <summary>
         ///     Tries to connect to the application's main database.
         /// </summary>
         public Task<HealthCheckItemResult> GetHealthCheckAsync()
@@ -39,10 +44,5 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
 
             return Task.FromResult(result);
         }
-
-        /// <summary>
-        ///     Defines the order of this provider in the results.
-        /// </summary>
-        public int SortOrder { get; } = 20;
     }
 }

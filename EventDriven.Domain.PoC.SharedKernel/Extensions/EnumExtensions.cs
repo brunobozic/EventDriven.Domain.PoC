@@ -5,21 +5,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
 {
     public static class EnumExtensions
     {
-        public static string ToDescriptionString<TEnum>(this TEnum @enum)
-        {
-            try
-            {
-                var info = @enum.GetType().GetField(@enum.ToString());
-                var attributes = (DescriptionAttribute[])info.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-                return attributes?[0].Description ?? @enum.ToString();
-            }
-            catch (Exception)
-            {
-                return "Nepoznato";
-            }
-        }
-
         public static T GetValueFromDescription<T>(this string description)
         {
             var type = typeof(T);
@@ -42,6 +27,21 @@ namespace EventDriven.Domain.PoC.SharedKernel.Extensions
 
             throw new ArgumentException("Not found.", nameof(description));
             // or return default(T);
+        }
+
+        public static string ToDescriptionString<TEnum>(this TEnum @enum)
+        {
+            try
+            {
+                var info = @enum.GetType().GetField(@enum.ToString());
+                var attributes = (DescriptionAttribute[])info.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+                return attributes?[0].Description ?? @enum.ToString();
+            }
+            catch (Exception)
+            {
+                return "Nepoznato";
+            }
         }
     }
 }

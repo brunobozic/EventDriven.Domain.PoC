@@ -41,6 +41,13 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType
             _applicationUserService = applicationUserService;
         }
 
+        // returns the current authenticated ApplicationUser (null if not logged in)
+        public User ApplicationUser => (User)HttpContext.Items["ApplicationUser"];
+
+        public MyConfigurationValues ConfigurationValues { get; }
+
+        public IHttpContextAccessor ContextAccessor { get; }
+
         /// <summary>
         /// </summary>
         public IMapper Mapper { get; }
@@ -49,14 +56,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType
         /// </summary>
         public IMemoryCache MemCache { get; }
 
-        public MyConfigurationValues ConfigurationValues { get; }
-
-        public IHttpContextAccessor ContextAccessor { get; }
-
         public IMyUnitOfWork UnitOfWork { get; }
-
-        // returns the current authenticated ApplicationUser (null if not logged in)
-        public User ApplicationUser => (User)HttpContext.Items["ApplicationUser"];
 
         protected PagedResult<TDto> ConvertToPagedResult<TEntity, TDto>(PagedResult<TEntity> pagedResult)
         {

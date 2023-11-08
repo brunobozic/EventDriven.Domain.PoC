@@ -27,8 +27,8 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
             RoleRepository = roleRepository;
         }
 
-        private IMyUnitOfWork UnitOfWork { get; }
         private ITrackableRepository<Role> RoleRepository { get; }
+        private IMyUnitOfWork UnitOfWork { get; }
         private ITrackableRepository<User> UserRepository { get; }
 
         public async Task<UserDto> Handle(RegisterUserCommand command, CancellationToken cancellationToken)

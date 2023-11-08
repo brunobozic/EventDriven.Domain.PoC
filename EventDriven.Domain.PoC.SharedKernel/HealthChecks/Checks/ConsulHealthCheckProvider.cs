@@ -53,10 +53,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.HealthChecks.Checks
     public class ConsulOptions
     {
         public string HostName { get; set; }
-        public int Port { get; set; }
-        public bool RequireHttps { get; set; }
-        public bool RequireBasicAuthentication { get; set; }
-        public string Username { get; set; }
         public string Password { get; set; }
+        public int Port { get; set; }
+        public bool RequireBasicAuthentication { get; set; }
+        public bool RequireHttps { get; set; }
+        public string Username { get; set; }
     }
 }

@@ -25,7 +25,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
             {
                 var address = configuration.GetValue<string>("Consul:Host");
-                if (string.IsNullOrEmpty(address))  throw new ArgumentException(nameof(address));
+                if (string.IsNullOrEmpty(address)) throw new ArgumentException(nameof(address));
                 consulConfig.Address = new Uri(address);
             }));
             return services;
@@ -40,11 +40,10 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             if (!(app.Properties["server.Features"] is FeatureCollection features)) return app;
 
             var addresses = features.Get<IServerAddressesFeature>();
-           
-            
+
             try
             {   // this will fail if run within the IIS server
-                var address = addresses.Addresses.First(); 
+                var address = addresses.Addresses.First();
                 Log.Information($"address={address}");
             }
             catch (Exception ex)
@@ -52,7 +51,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
                 Log.Error("Consul fail if run within the IIS server", ex);
                 throw;
             }
-       
+
             // var uri = new Uri(address);
             var registration = new AgentServiceRegistration
             {
@@ -73,7 +72,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
                 Log.Information("Unregistering from Consul");
                 consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true);
             });
-           
+
             return app;
         }
     }

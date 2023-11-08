@@ -2,9 +2,8 @@
 {
     public interface IResponse
     {
-        string Message { get; set; }
-
         bool IsSuccessful { get; set; }
+        string Message { get; set; }
     }
 
     public interface IResponse<TModel>
