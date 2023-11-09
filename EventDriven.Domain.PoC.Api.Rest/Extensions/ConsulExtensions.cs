@@ -22,12 +22,15 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
     {
         public static IServiceCollection AddConsulConfig(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
+            if (configuration.GetSectionWithFallBack("UseConsul", "false").Value.ToLower() == "true".ToLower())
             {
-                var address = configuration.GetValue<string>("Consul:Host");
-                if (string.IsNullOrEmpty(address)) throw new ArgumentException(nameof(address));
-                consulConfig.Address = new Uri(address);
-            }));
+                services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
+                {
+                    var address = configuration.GetValue<string>("Consul:Host");
+                    if (string.IsNullOrEmpty(address)) throw new ArgumentException(nameof(address));
+                    consulConfig.Address = new Uri(address);
+                }));
+            }
             return services;
         }
 

@@ -80,21 +80,21 @@ services:
     networks:
       - jaeger-example
   consul-agent-1:
-    image: consul:latest
+    image: consul:1.9.5
     networks:
       - consul-demo
     command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
 
   consul-agent-2:
     # Complete copy of 'consul-agent-1'
-    image: consul:latest
+    image: consul:1.9.5
     networks:
       - consul-demo
     command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
 
   consul-agent-3:
     # Complete copy of 'consul-agent-1'
-    image: consul:latest
+    image: consul:1.9.5
     networks:
       - consul-demo
     command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
@@ -102,14 +102,14 @@ services:
   consul-server-1:
     # Uses only image and networks from 'consul-agent-1'
     # while 'command' is overwritten
-    image: consul:latest
+    image: consul:1.9.5
     networks:
       - consul-demo
     command: "agent -server -retry-join consul-server-bootstrap -client 0.0.0.0"
 
   consul-server-2:
     # Complete copy of 'consul-server-1'
-    image: consul:latest
+    image: consul:1.9.5
     networks:
       - consul-demo
     command: "agent -server -retry-join consul-server-bootstrap -client 0.0.0.0"
@@ -117,7 +117,7 @@ services:
   consul-server-bootstrap:
     # Uses only image and networks from 'consul-agent-1'
     # while 'command' is overwritten and 'ports' are defined
-    image: consul:latest
+    image: consul:1.9.5
     networks:
       - consul-demo
     ports:

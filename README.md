@@ -17,6 +17,14 @@
           - if the app container is located within a docker network that is proscribed within the `docker-compose` file, you will be using `kafka:9092`
             if, on the other hand, it is located outside the docker network proscribed within the `docker-compose` file, you will be using `localhost:29092`
             - investigate the docker-compose file, specifically the kafka section for more information on this detail
+- the app uses consul for discoverability and may fail if consule service is not found, again you need to run the docker-compose file before playing with the stack
+    - the consul cluster needs time to elect the leader and to settle, wait for it to complete
+- by default, the Kafka UI will become available at http://localhost:8080/
+
+## Database
+- I use SQLite for quicker early development cycles
+- For production I would use PostgreSQL (or similar)
+- There are minor changes as far as EF is concerned, between the two, so this is a slight problem with this approach but if you are aware of these differences, you will easily compensate for them
 
 ## How to quicky start debugging the app
 
