@@ -16,6 +16,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
         public string Origin;
         public Guid UserId;
         public string UserName;
+        public Guid UserResourceId;
 
         public UserCreatedDomainEvent(
             Guid userId
@@ -28,6 +29,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , DateTimeOffset? activationLinkGenerated
             , string activationLink
             , Guid? creatorUserId
+            , Guid userResourceId
             , string origin
         )
         {
@@ -42,6 +44,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             ActivationLink = activationLink;
             CreatorUserId = creatorUserId;
             Origin = origin;
+            UserResourceId = userResourceId;
         }
     }
 }

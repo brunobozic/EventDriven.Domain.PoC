@@ -5,6 +5,7 @@ using EventDriven.Domain.PoC.Api.Rest.Filters;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
 using EventDriven.Domain.PoC.Api.Rest.Middleware;
 using EventDriven.Domain.PoC.Api.Rest.QuartzJobs;
+using EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides;
 using EventDriven.Domain.PoC.Application.AutomapperMaps;
 using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
@@ -39,6 +40,7 @@ using Quartz.Impl;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using Steeltoe.Discovery.Client;
+using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Diagnostics;
@@ -187,12 +189,16 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     Contact = new OpenApiContact
                     { Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/") }
                 });
+            
                 //options.AddAutoQueryable(); // this does not always work, depending on the assembly version(s)
                 //Set the comments path for the swagger json and ui.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
                 options.AddFluentValidationRules(); // make fluent validations visible to swagger OpenApi
+                options.ExampleFilters();
+                // Add the custom operation filter here
+                options.OperationFilter<RandomizeRegisterUserExamplesOperationFilter>();
 
                 var securitySchema = new OpenApiSecurityScheme
                 {
@@ -214,7 +220,10 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     {securitySchema, new[] {"Bearer"}}
                 };
                 options.AddSecurityRequirement(securityRequirement);
+                // Register the custom operation filter here
+                options.OperationFilter<UserRegistrationCustomOperationFilter>();
             });
+            services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 
             #endregion Swagger
 
@@ -324,6 +333,8 @@ namespace EventDriven.Domain.PoC.Api.Rest
             services.AddServiceDiscovery();
 
             #endregion Eureka
+
+         
 
             #region HealthCheck
 

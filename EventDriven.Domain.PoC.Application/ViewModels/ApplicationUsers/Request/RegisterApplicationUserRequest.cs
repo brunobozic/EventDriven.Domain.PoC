@@ -5,6 +5,11 @@ namespace EventDriven.Domain.PoC.Application.ViewModels.ApplicationUsers.Request
 {
     public class RegisterUserRequest
     {
+        public RegisterUserRequest()
+        {
+
+        }
+
         public RegisterUserRequest(
             string email
             , string confirmPassword

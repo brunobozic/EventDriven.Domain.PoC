@@ -66,15 +66,26 @@ namespace EventDriven.Domain.PoC.Api.Rest.Extensions
             };
 
             Log.Information("Registering with Consul");
-            consulClient.Agent.ServiceDeregister("EventDrivenPoC-5000").GetAwaiter().GetResult();
-            consulClient.Agent.ServiceDeregister(registration.ID).GetAwaiter().GetResult();
-            consulClient.Agent.ServiceRegister(registration).GetAwaiter().GetResult();
 
-            lifetime.ApplicationStopping.Register(() =>
+            try
             {
-                Log.Information("Unregistering from Consul");
-                consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true);
-            });
+                consulClient.Agent.ServiceDeregister("EventDrivenPoC-5000").GetAwaiter().GetResult();
+                consulClient.Agent.ServiceDeregister(registration.ID).GetAwaiter().GetResult();
+                consulClient.Agent.ServiceRegister(registration).GetAwaiter().GetResult();
+
+                lifetime.ApplicationStopping.Register(() =>
+                {
+                    Log.Information("Unregistering from Consul");
+                    consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true);
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Consul fail if run within the IIS server", ex);
+                throw;
+            }
+
+  
 
             return app;
         }

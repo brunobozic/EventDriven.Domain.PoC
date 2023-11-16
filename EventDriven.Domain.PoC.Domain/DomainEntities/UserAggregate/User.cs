@@ -90,6 +90,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
             _userRoles = new List<UserRole>();
             _journalEntries = new List<AccountJournalEntry>();
             _userAddresses = new List<UserAddress>();
+            UserResourceId = Guid.NewGuid();
         }
 
         /// <summary>
@@ -135,6 +136,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
 
             var user = new User
             {
+                UserResourceId = Guid.NewGuid(),
                 Email = email.Trim(),
                 UserName = userName,
                 NormalizedEmail = email.Trim().ToUpper(),
@@ -168,6 +170,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 , DateTime.UtcNow
                 , user.EmailVerificationToken
                 , creatorId
+                , user.UserResourceId
                 , origin
             ));
 
@@ -257,6 +260,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                     , DateTime.UtcNow
                     , user.EmailVerificationToken
                     , activator.Id
+                    , user.UserResourceId
                     , origin
                 ));
             else // seeding related issue
@@ -271,6 +275,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                     , DateTime.UtcNow
                     , user.EmailVerificationToken
                     , null // <== this will happen when seeding, the first user inserted (via seeding) does not have a [User] entity as its own creator
+                    , user.UserResourceId
                     , origin
                 ));
 
@@ -339,6 +344,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
                 , DateTimeOffset.MinValue
                 , ""
                 , creator.Id
+                , user.UserResourceId
                 , origin
             ));
 
@@ -365,6 +371,8 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         public IReadOnlyCollection<RefreshToken.RefreshToken> RefreshTokens => _refreshTokens;
         public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses;
         public IReadOnlyCollection<UserRole> UserRoles => _userRoles;
+
+        public Guid UserResourceId { get; private set; }
 
         #endregion Navigation properties
 

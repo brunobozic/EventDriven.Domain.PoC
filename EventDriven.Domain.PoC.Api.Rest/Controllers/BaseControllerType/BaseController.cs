@@ -48,12 +48,8 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers.BaseControllerType
 
         public IHttpContextAccessor ContextAccessor { get; }
 
-        /// <summary>
-        /// </summary>
         public IMapper Mapper { get; }
 
-        /// <summary>
-        /// </summary>
         public IMemoryCache MemCache { get; }
 
         public IMyUnitOfWork UnitOfWork { get; }

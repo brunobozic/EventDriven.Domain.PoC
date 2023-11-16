@@ -47,6 +47,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             _mapper = mapper;
             _appSettings = appSettings.Value;
             _emailService = emailService;
+            _jwtOptions = jwtOptions.Value;
         }
 
         #endregion ctor
@@ -88,7 +89,7 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             var applicationUser = await Repository.Queryable().SingleOrDefaultAsync(x => x.Email.ToUpper().Trim() == model.Email.ToUpper().Trim());
 
             if (applicationUser == null ||
-                applicationUser.GetCurrentRegistrationStatus() != RegistrationStatusEnum.Verified ||
+                applicationUser.GetCurrentRegistrationStatus() != RegistrationStatusEnum.WaitingForVerification ||
                 !BC.Verify(model.Password, applicationUser.PasswordHash))
                 throw new AppException("Email or password is incorrect, or the user has not verified his account [ " + model.Email.ToUpper().Trim() + " ]");
 

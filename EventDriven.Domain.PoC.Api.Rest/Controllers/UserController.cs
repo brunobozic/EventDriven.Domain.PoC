@@ -33,8 +33,6 @@ using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 {
-    /// <summary>
-    /// </summary>
     [ApiController]
     [Produces("application/json")]
     [Route("user")]
@@ -166,6 +164,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         }
 
         /// <summary>
+        /// Register a new user. Will create a new user record, will send an email confirmation.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="ct"></param>
@@ -174,7 +173,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RegisterAsync(RegisterUserRequest request, CancellationToken ct)
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserRequest request, CancellationToken ct)
         {
             using var span = _tracer.StartActiveSpan("RegisterAsync");
             // As an example of a non-trivial event based flow we got the following:

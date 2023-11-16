@@ -83,6 +83,7 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
 
             await UnitOfWork.SaveChangesAsync(cancellationToken);
 
+            // TODO: add user roles
             return new UserDto
             {
                 Id = user.Id,
