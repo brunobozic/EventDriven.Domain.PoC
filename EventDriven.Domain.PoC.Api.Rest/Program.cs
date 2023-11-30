@@ -1,3 +1,4 @@
+using Consul;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.Repository.EF.DatabaseContext;
 using EventDriven.Domain.PoC.Repository.EF.Seed;
@@ -11,6 +12,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace EventDriven.Domain.PoC.Api.Rest
 {
@@ -68,6 +70,24 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
                 Log.Warning("Starting web host ({ApplicationContext})...", AppName);
 
+                try
+                {
+                    var consulClient = host.Services.GetRequiredService<IConsulClient>();
+
+                    if (configuration.GetValue<bool>("UseConsul"))
+                    {
+                        PopulateConsulWithSettings(consulClient, configuration, "MyConfigurationValues/");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Fatal("Error while populating Consul configuration KVs...", ex);
+
+                    Debug.WriteLine(ex.Message);
+
+                    Console.WriteLine(ex.Message);
+                }
+
                 host.Run();
 
                 return 0;
@@ -76,7 +96,36 @@ namespace EventDriven.Domain.PoC.Api.Rest
             {
                 Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", AppName);
 
+                Debug.WriteLine(ex.Message);
+
+                Console.WriteLine(ex.Message);
+
                 return 1;
+            }
+        }
+
+        private static void PopulateConsulWithSettings(IConsulClient consulClient, IConfiguration config, string keyPrefix)
+        {
+            foreach (var section in config.GetChildren())
+            {
+                ProcessSection(consulClient, section, keyPrefix + section.Key);
+            }
+        }
+
+        private static void ProcessSection(IConsulClient consulClient, IConfigurationSection section, string currentPath)
+        {
+            // If the section has children, it's a complex object
+            if (section.GetChildren().Any())
+            {
+                foreach (var child in section.GetChildren())
+                {
+                    ProcessSection(consulClient, child, $"{currentPath}/{child.Key}");
+                }
+            }
+            else
+            {
+                // It's a key-value pair, so put it in Consul
+                consulClient.KV.Put(new KVPair(currentPath) { Value = System.Text.Encoding.UTF8.GetBytes(section.Value) });
             }
         }
 

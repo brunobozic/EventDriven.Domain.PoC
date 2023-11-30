@@ -33,17 +33,18 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using Steeltoe.Discovery.Client;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -189,7 +190,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     Contact = new OpenApiContact
                     { Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/") }
                 });
-            
+
                 //options.AddAutoQueryable(); // this does not always work, depending on the assembly version(s)
                 //Set the comments path for the swagger json and ui.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -294,47 +295,11 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             #endregion Service Registration
 
-            #region Jaeger wireup
-
-            // Adds the Jaeger Tracer.
-            var serviceName = "EventDriven.Domain.PoC.Api.Rest";
-            var serviceVersion = "1.0.0";
-
-            services.AddOpenTelemetryTracing(b =>
-            {
-                // uses the default Jaeger settings
-                b.AddJaegerExporter();
-
-                // receive traces from our own custom sources
-                b.AddSource("EventDriven.Domain.PoC.Api.Rest");
-
-                // decorate our service name so we can find it when we look inside Jaeger
-                b.SetResourceBuilder(ResourceBuilder.CreateDefault()
-                    .AddService(serviceName, serviceVersion));
-
-                // receive traces from built-in sources
-                b.AddHttpClientInstrumentation();
-                b.AddAspNetCoreInstrumentation();
-                b.AddSqlClientInstrumentation();
-            });
-
-            services.AddSingleton(TracerProvider.Default.GetTracer(serviceName));
-
-            #endregion Jaeger wireup
-
             #region Consul
 
             services.AddConsulConfig(Configuration);
 
             #endregion Consul
-
-            #region Eureka
-
-            services.AddServiceDiscovery();
-
-            #endregion Eureka
-
-         
 
             #region HealthCheck
 
@@ -391,7 +356,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             // ================================================================================================
             // ================================================================================================
-            // ======================================== Mapper ===============================================
+            // ==================================== AutoMapper ===============================================
             // ================================================================================================
             // ================================================================================================
             MapperConfiguration = new MapperConfiguration(cfg =>
@@ -410,9 +375,64 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             // ================================================================================================
             // ================================================================================================
-            // ======================================== / Mapper ==============================================
+            // ==================================== / AutoMapper ==============================================
             // ================================================================================================
             // ================================================================================================
+
+
+            // ================================================================================================
+            // ================================================================================================
+            // ========================================   OTEL   ==============================================
+            // ================================================================================================
+            // ================================================================================================
+            var greeterMeter = new Meter("OtPrGrYa", "1.0.0");
+
+            // Custom ActivitySource for the application
+            var greeterActivitySource = new ActivitySource("OtPrGrJa");
+            var tracingOtlpEndpoint = "http://localhost:4317";
+            var otel = services.AddOpenTelemetry();
+
+            // Configure OpenTelemetry Resources with the application name
+            otel.ConfigureResource(resource => resource
+                .AddService(serviceName: "OtPrGrJa"));
+
+            // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
+            otel.WithMetrics(metrics => metrics
+                // Metrics provider from OpenTelemetry
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddMeter(greeterMeter.Name)
+                // Metrics provides by ASP.NET Core in .NET 8
+                //.AddMeter("Microsoft.AspNetCore.Hosting")
+                //.AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+                //.AddPrometheusExporter()
+                );
+
+            // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
+            otel.WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation();
+                tracing.AddHttpClientInstrumentation();
+                tracing.AddSource(greeterActivitySource.Name);
+                if (!string.IsNullOrEmpty(tracingOtlpEndpoint))
+                {
+                    tracing.AddOtlpExporter(otlpOptions =>
+                    {
+                        otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint);
+                    });
+                }
+                else
+                {
+                    tracing.AddConsoleExporter();
+                }
+            });
+            // ================================================================================================
+            // ================================================================================================
+            // ========================================   /OTEL   =============================================
+            // ================================================================================================
+            // ================================================================================================
+
+
 
             // ================================================================================================
             // ================================================================================================
@@ -427,6 +447,13 @@ namespace EventDriven.Domain.PoC.Api.Rest
             // ======================================== / AutoFac =============================================
             // ================================================================================================
             // ================================================================================================
+
+            // ================================================================================================
+            // ================================================================================================
+            // ========================================     Quartz       =====================================
+            // ================================================================================================
+            // ================================================================================================
+
 
             var schedulerFactory = new StdSchedulerFactory();
             var scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
@@ -456,7 +483,19 @@ namespace EventDriven.Domain.PoC.Api.Rest
                     .Build();
 
             scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
+            //=======================================
+            //=====   Kafka polling consumer   ======
+            //=======================================
+            var processKafkaPollJob = JobBuilder.Create<KafkaPollJob>().Build();
 
+            var triggerKafkaPollJob =
+                TriggerBuilder
+                    .Create()
+                    .StartNow()
+                    .WithCronSchedule("0/15 * * ? * *")
+                    .Build();
+
+            scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
             // ================================================================================================
             // ================================================================================================
             // ======================================      / Quartz       =====================================
@@ -572,7 +611,7 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
                                 await context.Response.WriteAsync(payload);
 
-                                Log.Error("{0} for identity: [ {1} ]", error.Error.Message, context.User.Identity.Name);
+                                Serilog.Log.Error("{0} for identity: [ {1} ]", error.Error.Message, context.User.Identity.Name);
                             }
                         });
                 });
@@ -621,12 +660,6 @@ namespace EventDriven.Domain.PoC.Api.Rest
             app.UseConsul();
 
             #endregion Consul
-
-            #region Eureka
-
-            app.UseDiscoveryClient();
-
-            #endregion Eureka
         }
 
         private ILogger ConfigureLogger(IConfiguration configuration)

@@ -47,6 +47,10 @@ using URF.Core.Services;
 
 namespace EventDriven.Domain.PoC.Api.Rest
 {
+    internal static class Assemblies
+    {
+        public static readonly Assembly Application = typeof(InternalCommandBase).Assembly;
+    }
     /// <summary>
     /// </summary>
     public class Bootstrap
@@ -139,11 +143,24 @@ namespace EventDriven.Domain.PoC.Api.Rest
             if (settings.KafkaConsumerSettings.Debug.HasValue && settings.KafkaConsumerSettings.Debug.Value)
                 kafkaConsumerConfig.Debug = "ALL";
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                kafkaConsumerConfig.SaslKerberosKeytab =
-                    settings.KafkaConsumerSettings.SaslKerberosKeytab; //"/etc/secrets/ID.keytab";
-                kafkaConsumerConfig.SaslKerberosPrincipal = settings.KafkaConsumerSettings.KerberosPrincipal;
+                if (settings.KafkaConsumerSettings.SecurityProtocol.ToUpper() == SecurityProtocolEnum.Kerberos.GetDescriptionString()) { kafkaConsumerConfig.SecurityProtocol = SecurityProtocol.SaslSsl; }
+                if (settings.KafkaConsumerSettings.SaslMechanism.ToUpper() == SaslMechanismEnum.GSSAPI.GetDescriptionString()) { kafkaConsumerConfig.SaslMechanism = SaslMechanism.Gssapi; }
+                kafkaConsumerConfig.SaslKerberosKeytab = settings.KafkaConsumerSettings.SaslKerberosKeytab;
+                kafkaConsumerConfig.SaslKerberosPrincipal = settings.KafkaConsumerSettings.SaslKerberosPrincipal;
+                kafkaConsumerConfig.SaslKerberosKinitCmd = settings.KafkaConsumerSettings.SaslKerberosKinitCmd;
+                kafkaConsumerConfig.SaslKerberosServiceName = settings.KafkaConsumerSettings.SaslKerberosServiceName;
+                kafkaConsumerConfig.SslCaLocation = settings.KafkaConsumerSettings.SslCaLocation;
+                kafkaConsumerConfig.SslCertificateLocation = settings.KafkaConsumerSettings.SslCertificateLocation;
+                kafkaConsumerConfig.SslKeyLocation = settings.KafkaConsumerSettings.SslKeyLocation;
+                kafkaConsumerConfig.ApiVersionRequest = settings.KafkaConsumerSettings.ApiVersionRequest;
+            }
+            else // Windows and OSX
+            {
+                if (settings.KafkaConsumerSettings.SecurityProtocol.ToUpper() == SecurityProtocolEnum.SASL_Plaintext.GetDescriptionString()) { kafkaConsumerConfig.SecurityProtocol = SecurityProtocol.SaslPlaintext; }
+                if (settings.KafkaConsumerSettings.SaslMechanism.ToUpper() == SaslMechanismEnum.Plain.GetDescriptionString()) { kafkaConsumerConfig.SaslMechanism = SaslMechanism.Plain; }
+
             }
 
             var kafkaProducerConfig = new ProducerConfig
@@ -338,6 +355,15 @@ namespace EventDriven.Domain.PoC.Api.Rest
             containerBuilder.RegisterGenericDecorator(
                 typeof(LoggingCommandHandlerWithResultDecorator<,>),
                 typeof(ICommandHandler<,>));
+
+            containerBuilder.RegisterGenericDecorator(
+                typeof(DomainEventsDispatcherNotificationHandlerDecorator<>),
+                typeof(INotificationHandler<>));
+
+            containerBuilder.RegisterAssemblyTypes(Assemblies.Application)
+                .AsClosedTypesOf(typeof(IDomainEventNotification<>))
+                .InstancePerDependency()
+                .FindConstructorsWith(new AllConstructorFinder());
 
             #endregion MediatR
 

@@ -2,7 +2,7 @@
 using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using System;
 
-namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
+namespace EventDriven.Domain.PoC.Application
 {
     public class RegisterUserCommand : CommandBase<UserDto>
     {

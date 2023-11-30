@@ -1,8 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Linq;
 using System;
-using Microsoft.OpenApi.Any;
+using System.Linq;
 
 namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
 {
@@ -22,17 +22,21 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
                         case "dateOfBirth":
                             parameter.Schema.Example = new OpenApiString(RandomPastDate());
                             break;
+
                         case "email":
                             parameter.Schema.Example = new OpenApiString($"user{random.Next(1000, 9999)}@example.com");
                             break;
+
                         case "firstName":
                         case "lastName":
                         case "userName":
                             parameter.Schema.Example = new OpenApiString(RandomString(10));
                             break;
+
                         case "oib":
                             parameter.Schema.Example = new OpenApiString(random.Next(100000, 999999).ToString());
                             break;
+
                         case "password":
                         case "confirmPassword":
                             if (string.IsNullOrEmpty(sharedPassword))
@@ -41,6 +45,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
                             }
                             parameter.Schema.Example = new OpenApiString(sharedPassword);
                             break;
+
                         case "acceptTerms":
                             parameter.Schema.Example = new OpenApiBoolean(true);
                             break;

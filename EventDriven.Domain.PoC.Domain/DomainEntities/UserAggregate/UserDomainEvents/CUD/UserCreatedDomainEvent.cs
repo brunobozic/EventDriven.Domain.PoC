@@ -1,4 +1,5 @@
-﻿using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
+﻿using EventDriven.Domain.PoC.SharedKernel;
+using EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses;
 using System;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD
@@ -31,6 +32,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             , Guid? creatorUserId
             , Guid userResourceId
             , string origin
+            , EventTypeEnum typeOfEvent
         )
         {
             Email = email;
@@ -45,6 +47,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.UserDomainE
             CreatorUserId = creatorUserId;
             Origin = origin;
             UserResourceId = userResourceId;
+            base.TypeOfEvent = typeOfEvent;
         }
     }
 }

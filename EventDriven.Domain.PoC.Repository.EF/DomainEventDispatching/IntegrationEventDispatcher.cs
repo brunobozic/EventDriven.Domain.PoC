@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,6 +30,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
 
         public async Task DispatchEventsAsync()
         {
+            var greeterActivitySource = new ActivitySource("OtPrGrJa");
+            using var activity = greeterActivitySource.StartActivity("RegisterUserCommandHandler");
+
             var domainEntities = _context.ChangeTracker
                 .Entries<BasicDomainEntity<long>>()
                 .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
@@ -36,7 +40,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
             var domainEntitiesWithGuid = _context.ChangeTracker
                 .Entries<BasicDomainEntity<Guid>>()
                 .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
-            
+
             var domainEvents = domainEntities.SelectMany(x => x.Entity.DomainEvents).ToList();
 
             List<IDomainEvent> domainEventsWithGuid = domainEntitiesWithGuid.SelectMany(x => x.Entity.DomainEvents).ToList();
@@ -56,7 +60,6 @@ namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
                 if (integrationEvent != null) integrationEvents.Add(integrationEvent as IIntegrationEvent<IDomainEvent>);
             }
 
-
             foreach (var guidEvent in domainEventsWithGuid)
             {
                 var integrationEventType = typeof(IIntegrationEvent<>);
@@ -71,10 +74,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
                     integrationEvents.Add(integrationEvent as IIntegrationEvent<IDomainEvent>);
             }
 
-
             domainEntities.ForEach(entity => entity.Entity.ClearDomainEvents());
             domainEntitiesWithGuid.ForEach(entity => entity.Entity.ClearDomainEvents());
-    
+
             var tasks = domainEvents.Select(async domainEvent => { await _mediator.Publish(domainEvent); });
             var tasksWithGuid = domainEventsWithGuid.Select(async domainEvent => { await _mediator.Publish(domainEvent); });
 
@@ -90,12 +92,22 @@ namespace EventDriven.Domain.PoC.Repository.EF.DomainEventDispatching
             foreach (var integrationEvent in integrationEvents)
             {
                 var type = integrationEvent.GetType().FullName;
+
+                if (type == null) { throw new Exception("Cannot extract type from the provided assembly, perhaps your integration event cs class is put in a wrong assembly?"); }
+
+                activity.SetTag("Integration event handled", integrationEvent.GetType().FullName);
+
                 var data = JsonConvert.SerializeObject(integrationEvent);
                 var outboxMessage = new OutboxMessage(
                     integrationEvent.IntegrationEvent.OccurredOn,
                     type,
-                    data);
+                    data,
+                    integrationEvent.IntegrationEvent.TypeOfEvent);
+
                 await _context.OutboxMessages.AddAsync(outboxMessage);
+
+                var ae = new ActivityEvent($"Type of integration event: [ {type} ] added to the outbox");
+                activity?.AddEvent(ae);
             }
         }
     }

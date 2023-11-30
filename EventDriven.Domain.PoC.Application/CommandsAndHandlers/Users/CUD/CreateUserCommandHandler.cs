@@ -66,7 +66,15 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD
 
             await UnitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new UserDto { Id = user.Id, UserName = user.UserName, UserRoles = user.GetUserRoles() };
+            return new UserDto(
+                ActiveTo: user.ActiveTo,
+                Email: user.Email,
+                HasBeenVerified: user.Verified,
+                Id: user.Id,
+                Status: user.GetCurrentRegistrationStatus().ToString(),
+                UserName: user.UserName,
+                UserRoles: user.GetUserRoles()
+            );
         }
     }
 }

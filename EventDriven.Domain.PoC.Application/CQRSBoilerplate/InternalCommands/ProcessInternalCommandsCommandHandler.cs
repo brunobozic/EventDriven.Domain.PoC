@@ -1,10 +1,12 @@
 ﻿using Dapper;
-using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
 using MediatR;
 using Newtonsoft.Json;
+using OpenTelemetry.Trace;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,27 +24,40 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.InternalCommands
 
         public async Task<Unit> Handle(ProcessInternalCommandsCommand command, CancellationToken cancellationToken)
         {
-            var connection = _sqlConnectionFactory.GetOpenConnection();
+            using var connection = _sqlConnectionFactory.GetOpenConnection();
 
-            const string sql = "SELECT " +
-                               "[Command].[Type], " +
-                               "[Command].[Data] " +
-                               "FROM [InternalCommands] AS [Command] " +
-                               "WHERE [Command].[ProcessedDate] IS NULL";
-            var commands = await connection.QueryAsync<InternalCommandDto>(sql);
-
-            var internalCommandsList = commands.AsList();
+            const string sql = @"SELECT [Type], [Data] 
+                         FROM [InternalCommands] 
+                         WHERE [ProcessedDate] IS NULL";
+            var internalCommandsList = (await connection.QueryAsync<InternalCommandDto>(sql)).AsList();
 
             foreach (var internalCommand in internalCommandsList)
             {
-                var type = typeof(RegisterUserCommand).Assembly.GetType(internalCommand.Type);
-                dynamic commandToProcess = JsonConvert.DeserializeObject(internalCommand.Data, type);
+                var activitySource = new ActivitySource("OtPrGrJa");
+                using var activity = activitySource.StartActivity("ProcessInternalCommandsCommandHandler");
 
-                await CommandsExecutor.Execute(commandToProcess);
+                var type = Type.GetType(internalCommand.Type);
+
+                try
+                {
+                    dynamic commandToProcess = JsonConvert.DeserializeObject(internalCommand.Data, type);
+
+                    activity?.SetTag("CommandType", type.FullName);
+                    activity?.SetTag("CommandData", internalCommand.Data);
+
+                    await CommandsExecutor.Execute(commandToProcess);
+                }
+                catch (Exception ex)
+                {
+                    activity?.RecordException(ex);
+                    activity?.SetStatus(ActivityStatusCode.Error);
+                    // Consider how to handle the exception. Log or rethrow?
+                }
             }
 
             return Unit.Value;
         }
+
 
         private class InternalCommandDto
         {

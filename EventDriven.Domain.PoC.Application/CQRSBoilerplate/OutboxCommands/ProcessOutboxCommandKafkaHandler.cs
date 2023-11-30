@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD;
 using EventDriven.Domain.PoC.Application.ViewModels.OutboxMessage;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
@@ -6,11 +7,14 @@ using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
 using Framework.Kafka.Core.Contracts;
 using MediatR;
 using Newtonsoft.Json;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
 using System;
+using System.Data.Common;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,45 +50,83 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.OutboxCommands
                                                   "SET [ProcessedDate] = @Date " +
                                                   "WHERE [Id] = @Id";
             if (messagesList.Count > 0)
+            {
+                var activitySource = new ActivitySource("OtPrGrJa");
                 foreach (var message in messagesList)
                 {
-                    try
+                    using var activity = activitySource.StartActivity("ProcessOutboxMessage", ActivityKind.Internal);
+                    activity?.SetTag("Message.Type", message.Type);
+                    activity?.SetTag("Message.Id", message.Id.ToString());
+
+                    using (LogContext.PushProperty("MessageType", message.Type))
+                    using (LogContext.PushProperty("MessageId", message.Id))
                     {
-                        var type = typeof(User).Assembly.GetType(message.Type);
-
-                        var integrationEvent =
-                            JsonConvert.DeserializeObject(message.Data, type) as IIntegrationEventNotification;
-
-                        using (LogContext.Push(new OutboxMessageContextEnricher(integrationEvent)))
+                        try
                         {
-                            #region Publish the integration event to Kafka
+                            var type = typeof(CreateUserCommandHandler).Assembly.GetType(message.Type);
 
-                            var success = await _kafkaProducer.WriteMessageAsync(message.Data);
+                            activity?.SetTag("Type of message put on Outbox", message.Type);
+                            activity?.SetTag("Message.Id", message.Id.ToString());
 
-                            #endregion Publish the integration event to Kafka
+                            var integrationEvent =
+                                JsonConvert.DeserializeObject(message.Data, type) as IIntegrationEventNotification;
 
-                            if (success)
+                            using (LogContext.Push(new OutboxMessageContextEnricher(integrationEvent)))
                             {
-                                // be mindfull that in certain cases the raw sql for this might have to include the schema name (eg. [dbo].[OutboxMessages])
-                                // if you encounter problems similar to "no table found", try adding the schema name to the table name
-                                var storeResult = await connection.ExecuteAsync(sqlUpdateProcessedDate, new
+                                #region Publish the integration event to Kafka
+
+                                var success = await _kafkaProducer.WriteMessageAsync(message.Data);
+
+                                #endregion Publish the integration event to Kafka
+
+                                if (success)
                                 {
-                                    Date = DateTime.UtcNow,
-                                    message.Id
-                                });
+                                    // be mindfull that in certain cases the raw sql for this might have to include the schema name (eg. [dbo].[OutboxMessages])
+                                    // if you encounter problems similar to "no table found", try adding the schema name to the table name
+                                    var storeResult = await connection.ExecuteAsync(sqlUpdateProcessedDate, new
+                                    {
+                                        Date = DateTime.UtcNow,
+                                        message.Id
+                                    });
+
+                                    activity?.SetTag("IntegrationEvent Id", $"OutboxMessage:{integrationEvent.Id}");
+                                    activity?.SetTag("Message stored into Kafka", storeResult);
+                                    var ae = new ActivityEvent("Message stored into Kafka");
+                                    activity?.AddEvent(ae);
+                                }
+                                else
+                                {
+                                    var ae = new ActivityEvent("Message not stored into Kafka");
+                                    activity?.AddEvent(ae);
+                                    activity?.SetStatus(Status.Error);
+                                }
                             }
                         }
-                    }
-                    catch (Exception possibleAsyncProblems)
-                    {
-                        Log.Error(possibleAsyncProblems.Message, possibleAsyncProblems);
-                        // this will break the consistency of the app, better stop and investigate
-                        // possible outcomes might include perpetual sending of the same set of messages to kafka
-                        // obviously kafka would survice but the messages would then need to be cleaned up, which might end up in a maintenance nightmare
-                        throw;
+                        catch (JsonException jsonEx)
+                        {
+                            Log.Error(jsonEx, "JSON deserialization failed for message {MessageId}", message.Id);
+                            activity?.RecordException(jsonEx);
+                            activity?.SetStatus(ActivityStatusCode.Error);
+                        }
+                        catch (DbException dbEx)
+                        {
+                            Log.Error(dbEx, "Database operation failed for message {MessageId}", message.Id);
+                            activity?.RecordException(dbEx);
+                            activity?.SetStatus(ActivityStatusCode.Error);
+                        }
+                        catch (Exception possibleAsyncProblems)
+                        {
+                            Log.Error(possibleAsyncProblems.Message, possibleAsyncProblems);
+                            activity?.RecordException(possibleAsyncProblems);
+                            activity?.SetStatus(Status.Error);
+                            // this will break the consistency of the app, better stop and investigate
+                            // possible outcomes might include perpetual sending of the same set of messages to kafka
+                            // obviously kafka would survice but the messages would then need to be cleaned up, which might end up in a maintenance nightmare
+                            throw;
+                        }
                     }
                 }
-
+            }
             return Unit.Value;
         }
 

@@ -10,6 +10,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
     {
         private Random random = new Random();
         private string sharedPassword;
+
         private string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -22,6 +23,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
             var daysAgo = random.Next(1, 10000);
             return DateTime.Now.AddDays(-daysAgo).ToString("o");
         }
+
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Handle the request body
@@ -43,17 +45,21 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
                                     case "dateOfBirth":
                                         property.Value.Example = new OpenApiString(RandomPastDate());
                                         break;
+
                                     case "email":
                                         property.Value.Example = new OpenApiString($"user{random.Next(1000, 9999)}@example.com");
                                         break;
+
                                     case "firstName":
                                     case "lastName":
                                     case "userName":
                                         property.Value.Example = new OpenApiString(RandomString(10));
                                         break;
+
                                     case "oib":
                                         property.Value.Example = new OpenApiString(random.Next(100000, 999999).ToString());
                                         break;
+
                                     case "password":
                                     case "confirmPassword":
                                         if (string.IsNullOrEmpty(sharedPassword))
@@ -62,6 +68,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
                                         }
                                         property.Value.Example = new OpenApiString(sharedPassword);
                                         break;
+
                                     case "acceptTerms":
                                         property.Value.Example = new OpenApiBoolean(true);
                                         break;
@@ -73,5 +80,4 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
             }
         }
     }
-
 }

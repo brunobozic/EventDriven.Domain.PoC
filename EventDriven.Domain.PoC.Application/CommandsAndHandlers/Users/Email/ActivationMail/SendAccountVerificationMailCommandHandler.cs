@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
+﻿using EventDriven.Domain.PoC.Application.DomainServices.EmailServices;
 using EventDriven.Domain.PoC.Domain.DomainEntities.DomainExceptions;
 using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate;
-using EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using EventDriven.Domain.PoC.Repository.EF.CustomUnitOfWork.Interfaces;
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
@@ -17,50 +15,63 @@ using URF.Core.Abstractions.Trackable;
 
 namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.ActivationMail
 {
-    public class
-        SendAccountVerificationMailCommandHandler : ICommandHandler<SendAccountVerificationMailCommand,
-            AccountVerificationMailSentDto>
+    public class SendAccountVerificationMailCommandHandler : ICommandHandler<SendAccountVerificationMailCommand, AccountVerificationMailSentDto>
     {
         private readonly IEmailService _emailService;
-
         private readonly IMyUnitOfWork _unitOfWork;
         private readonly ITrackableRepository<User> _userRepository;
-        private MyConfigurationValues _appSettings;
-        private IMapper _mapper;
-        private ITrackableRepository<Role> _roleRepository;
+        private readonly MyConfigurationValues _appSettings;
 
         public SendAccountVerificationMailCommandHandler(
             IMyUnitOfWork unitOfWork,
             ITrackableRepository<User> userRepository,
-            ITrackableRepository<Role> roleRepository,
-            IMapper mapper,
             IOptions<MyConfigurationValues> appSettings,
             IEmailService emailService
         )
         {
             _unitOfWork = unitOfWork;
             _userRepository = userRepository;
-            _roleRepository = roleRepository;
-            _mapper = mapper;
             _appSettings = appSettings.Value;
             _emailService = emailService;
         }
 
-        /// <summary>
-        ///     Will compose and send the account verification email
-        /// </summary>
-        public async Task<AccountVerificationMailSentDto> Handle(SendAccountVerificationMailCommand command,
-            CancellationToken cancellationToken)
+        public async Task<AccountVerificationMailSentDto> Handle(SendAccountVerificationMailCommand command, CancellationToken cancellationToken)
+        {
+            ValidateCommand(command);
+
+            var user = await FindUserAsync(command, cancellationToken);
+            var emailContent = ComposeEmailContent(command, user);
+
+            try
+            {
+                _emailService.Send(user.Email, "Sign-up Verification API - Verify Account", emailContent, "admin.poc@gmail.com");
+                user.SetAccountActivationMailResent();
+                // Uncomment the next line if you decide to save changes in the unit of work
+                // await _unitOfWork.SaveChangesAsync(cancellationToken);
+                return CreateResultDto(command, true);
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e.Message, e);
+                return CreateResultDto(command, false);
+            }
+        }
+
+        private void ValidateCommand(SendAccountVerificationMailCommand command)
         {
             if (string.IsNullOrEmpty(command.FirstName))
                 throw new ArgumentNullException(nameof(command.FirstName));
-            if (command.UserId == Guid.Empty) throw new ArgumentNullException(nameof(command.UserId));
-            if (string.IsNullOrEmpty(command.LastName)) throw new ArgumentNullException(nameof(command.LastName));
+            if (command.UserId == Guid.Empty)
+                throw new ArgumentNullException(nameof(command.UserId));
+            if (string.IsNullOrEmpty(command.LastName))
+                throw new ArgumentNullException(nameof(command.LastName));
             if (string.IsNullOrEmpty(command.ActivationLink))
                 throw new ArgumentNullException(nameof(command.ActivationLink));
+            // Add any additional validation as needed
+        }
 
-            var retVal = new AccountVerificationMailSentDto();
-
+        private async Task<User> FindUserAsync(SendAccountVerificationMailCommand command, CancellationToken cancellationToken)
+        {
             var user = await _userRepository
                 .Queryable()
                 .Where(u => u.NormalizedEmail == command.Email.Trim().ToUpper() &&
@@ -68,63 +79,28 @@ namespace EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.Act
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (user == null)
-                throw new DomainException("Application user not found by requested Id of: [ " + command.UserId +
-                                          " ]");
+                throw new DomainException("Application user not found by requested Id of: [ " + command.UserId + " ]");
 
-            string message;
+            return user;
+        }
+
+        private string ComposeEmailContent(SendAccountVerificationMailCommand command, User user)
+        {
             var origin = command.Origin;
+            string message = !string.IsNullOrEmpty(origin) ?
+                $@"<p>Please click the below link to activate your account:</p>
+               <p><a href=""{origin}/user/verify-email?token={command.ActivationLink}"">{origin}/user/verify-email?token={command.ActivationLink}</a></p>" :
+                $@"<p>Please use the below token to activate your account with the <code>/user/verify-email</code> api route:</p>
+               <p><code>{command.ActivationLink}</code></p>";
 
-            if (!string.IsNullOrEmpty(origin))
-            {
-                var verifyUrl = $"{origin}/user/verify-email?token={command.ActivationLink}";
-                message = $@"<p>Please click the below link to activate your account:</p>
-                             <p><a href=""{verifyUrl}"">{verifyUrl}</a></p>";
-            }
-            else
-            {
-                message =
-                    $@"<p>Please use the below token to activate your account with the <code>/user/verify-email</code> api route:</p>
-                             <p><code>{command.ActivationLink}</code></p>";
-            }
+            return $@"<h4>Verify Account</h4>
+                  <p>Thanks for registering!</p>
+                  {message}";
+        }
 
-            var emailSubject = "Sign-up Verification API - Verify Account";
-            var completeEmailMessageBody = $@"<h4>Verify Account</h4>
-                         <p>Thanks for registering!</p>
-                         {message}";
-            var emailFrom = "admin.poc@gmail.com";
-
-            try
-            {
-                _emailService.Send(user.Email, emailSubject, completeEmailMessageBody, emailFrom);
-
-                user.SetAccountActivationMailResent();
-
-                // await _unitOfWork.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception e)
-            {
-                Log.Fatal(e.Message, e);
-
-                retVal.SuccessfullySent = false;
-                retVal.FirstName = command.FirstName;
-                retVal.LastName = command.LastName;
-                retVal.Email = command.Email;
-                retVal.ActivationLink = command.ActivationLink;
-                retVal.ActivationLinkGenerated = command.ActivationLinkGenerated;
-                retVal.UserId = command.UserId;
-
-                return retVal;
-            }
-
-            retVal.SuccessfullySent = true;
-            retVal.FirstName = command.FirstName;
-            retVal.LastName = command.LastName;
-            retVal.Email = command.Email;
-            retVal.ActivationLink = command.ActivationLink;
-            retVal.ActivationLinkGenerated = command.ActivationLinkGenerated;
-            retVal.UserId = command.UserId;
-
-            return retVal;
+        private AccountVerificationMailSentDto CreateResultDto(SendAccountVerificationMailCommand command, bool success)
+        {
+            return new AccountVerificationMailSentDto(true, command.FirstName, command.LastName, command.Email, command.ActivationLink, command.ActivationLinkGenerated, command.UserId);
         }
     }
 }

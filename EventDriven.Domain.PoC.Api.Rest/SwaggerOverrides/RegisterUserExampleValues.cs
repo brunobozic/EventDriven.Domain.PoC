@@ -11,19 +11,18 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
 
         public RegisterUserRequest GetExamples()
         {
-            pwd = GenerateRandomPassword();
-            return new RegisterUserRequest()
-            {
-                AcceptTerms = true,
-                DateOfBirth = RandomPastDate(),
-                Email = GenerateRandomEmail(),
-                FirstName = GetRandomName(),
-                LastName = GetRandomSurname(),
-                ConfirmPassword = pwd,
-                Oib = GenerateRandomOib(),
-                Password = pwd,
-                UserName = GenerateRandomUsername()
-            };
+            var pwd = GenerateRandomPassword();
+            return new RegisterUserRequest(
+                Email: GenerateRandomEmail(),
+                ConfirmPassword: pwd,
+                DateOfBirth: RandomPastDate(),
+                FirstName: GetRandomName(),
+                LastName: GetRandomSurname(),
+                Password: pwd,
+                UserName: GenerateRandomUsername(),
+                Oib: GenerateRandomOib(),
+                AcceptTerms: true
+            );
         }
 
         private string GenerateRandomEmail()
@@ -79,8 +78,6 @@ namespace EventDriven.Domain.PoC.Api.Rest.SwaggerOverrides
 
             return $"{surnames[random.Next(surnames.Length)]}{random.Next(10, 100)}";
         }
-
-
 
         private string GenerateRandomUsername()
         {

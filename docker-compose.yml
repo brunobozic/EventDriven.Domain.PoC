@@ -17,15 +17,19 @@ services:
   #   networks:
   #    - jaeger-example
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.37
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true  # Enable OTLP receiver
     ports:
-       - "5775:5775/udp"
-       - "6831:6831/udp"
-       - "6832:6832/udp"
-       - "5778:5778"
-       - "16686:16686"
-       - "14268:14268"
-       - "9411:9411"
+      - "5775:5775/udp"    # Zipkin thrift compact
+      - "6831:6831/udp"    # Jaeger agent compact thrift
+      - "6832:6832/udp"    # Jaeger agent binary thrift
+      - "5778:5778"        # Config endpoint
+      - "16686:16686"      # Jaeger UI
+      - "14268:14268"      # Jaeger collector HTTP
+      - "9411:9411"        # Zipkin
+      - "4317:4317"        # OTLP gRPC
+      - "4318:4318"        # OTLP HTTP
     networks:
       - jaeger-example
   eureka-server:

@@ -14,7 +14,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.No
         public string LastName;
         public string Origin;
         public Guid UserId;
-
+        public Guid ResourceId;
         public string UserName;
 
         public UserCreatedNotification(UserCreatedDomainEvent integrationEvent) : base(integrationEvent)
@@ -26,6 +26,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.No
             Email = integrationEvent.Email;
             ActivationLinkGenerated = integrationEvent.ActivationLinkGenerated;
             Origin = integrationEvent.Origin;
+            ResourceId = integrationEvent.UserResourceId;
         }
 
         [JsonConstructor]
@@ -37,6 +38,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.No
             string email,
             string userName,
             DateTimeOffset? activationLinkGenerated,
+            Guid resourceId,
             string Origin
         ) : base(null)
         {
@@ -49,6 +51,7 @@ namespace EventDriven.Domain.PoC.Application.EventsAndEventHandlers.Users.CUD.No
             Email = email;
             UserName = userName;
             Origin = this.Origin;
+            ResourceId = resourceId;
         }
     }
 }

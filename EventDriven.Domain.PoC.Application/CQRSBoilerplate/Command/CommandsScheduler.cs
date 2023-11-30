@@ -2,7 +2,9 @@
 using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using EventDriven.Domain.PoC.SharedKernel.Helpers.Database;
 using Newtonsoft.Json;
+using OpenTelemetry.Trace;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command
@@ -18,19 +20,35 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command
 
         public async Task EnqueueAsync<T>(ICommand<T> command)
         {
-            var connection = _sqlConnectionFactory.GetOpenConnection();
+            var activitySource = new ActivitySource("OtPrGrJa");
+            using var activity = activitySource.StartActivity("CommandsScheduler");
+
+            using var connection = _sqlConnectionFactory.GetOpenConnection();
 
             const string sqlInsert =
-                "INSERT INTO [InternalCommands] ([Id], [EnqueueDate] , [Type], [Data]) VALUES " +
+                "INSERT INTO [InternalCommands] ([Id], [EnqueueDate], [Type], [Data]) VALUES " +
                 "(@Id, @EnqueueDate, @Type, @Data)";
 
-            await connection.ExecuteAsync(sqlInsert, new
+            try
             {
-                command.Id,
-                EnqueueDate = DateTime.UtcNow,
-                Type = command.GetType().FullName,
-                Data = JsonConvert.SerializeObject(command)
-            });
+                await connection.ExecuteAsync(sqlInsert, new
+                {
+                    command.Id,
+                    EnqueueDate = DateTime.UtcNow,
+                    Type = command.GetType().FullName,
+                    Data = JsonConvert.SerializeObject(command)
+                });
+
+                activity?.SetTag("CommandId", command.Id.ToString());
+                activity?.SetTag("CommandType", command.GetType().FullName);
+            }
+            catch (Exception ex)
+            {
+                activity?.RecordException(ex);
+                activity?.SetStatus(ActivityStatusCode.Error);
+                throw;
+            }
         }
+
     }
 }

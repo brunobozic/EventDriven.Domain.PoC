@@ -146,7 +146,6 @@ namespace EventDriven.Domain.PoC.Application.DomainServices.UserServices
             return retVal;
         }
 
-
         public async Task<ApplicationUserResponse> GetByIdAsync(Guid id)
         {
             var applicationUser = await Repository.Queryable().Where(user => user.Id == id).SingleOrDefaultAsync();

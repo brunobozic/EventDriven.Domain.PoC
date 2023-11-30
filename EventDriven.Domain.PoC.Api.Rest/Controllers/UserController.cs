@@ -6,7 +6,6 @@ using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Addresses;
 using EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.PhaseOne;
 using EventDriven.Domain.PoC.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo;
 using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Roles;
-using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD;
 using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.VerifyEmail;
 using EventDriven.Domain.PoC.Application.DomainServices.UserServices;
@@ -26,7 +25,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Trace;
+using Serilog;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +58,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             , IMediator mediator
             , IMemoryCache memCache
             , IHttpContextAccessor contextAccessor
-            , Tracer tracer
+            , TracerProvider tracer
         ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, applicationUserService)
         {
             _applicationUserService = applicationUserService;
@@ -78,7 +80,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
 
 #pragma warning restore IDE0052 // Remove unread private members
         private readonly IMediator _mediator;
-        private readonly Tracer _tracer;
+        private readonly TracerProvider _tracer;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
@@ -163,6 +165,11 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
             return BadRequest(serviceLayerResponse.Message);
         }
 
+        private Tracer GetTracer()
+        {
+            return _tracer.GetTracer("OtPrGrYa");
+        }
+
         /// <summary>
         /// Register a new user. Will create a new user record, will send an email confirmation.
         /// </summary>
@@ -170,66 +177,79 @@ namespace EventDriven.Domain.PoC.Api.Rest.Controllers
         /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("register")]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), 201)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserRequest request, CancellationToken ct)
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Summary = "Registers a new user", Description = "Registers a new user and returns the user data")]
+        [SwaggerResponse(StatusCodes.Status201Created, "User registered successfully", typeof(UserDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request data")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        public async ValueTask<IActionResult> RegisterAsync([FromBody] RegisterUserRequest request, CancellationToken ct)
         {
-            using var span = _tracer.StartActiveSpan("RegisterAsync");
-            // As an example of a non-trivial event based flow we got the following:
-
-            // [RegisterUserCommand] will get handled by [RegisterApplicationUserCommandHandler]
-            // that one will fire an event [ApplicationUserCreatedDomainEvent] (when the user is created, the user has not yet confirmed his email so his account is not yet fully activated)
-            // this will get handled by [ApplicationUserCreatedDomainEventHandler]
-            // this will fire [SendAccountVerificationMailCommand]
-            // this will get handled by [SendAccountVerificationMailCommandHandler] that will send an email containing the activation link
-            // the flow continues when the user clicks on the provided url (found in an email that we had sent to the user)
-            // [EmailVerifiedDomainEvent] is then fired, and is handled by [EmailVerifiedDomainEventHandler] and the user will be marked as "verified"
-            // finally a greeting mail is sent to the user
-            // this will fire a new command: [SendAWelcomeMailCommand]
-            // this command will get handled by [SendAWelcomeMailCommandHandler], that will send a greeting email to the users email address
-            // a domain event is fired in response to this => [MarkApplicationUserAsWelcomedDomainEvent] is sent
-            // and is handled by [MarkApplicationUserAsWelcomedDomainEventHandler] marking the user as "welcomed"
-
-            // this flow if naturally extended by the "forgot password" flow and the "resend activation link" flow, both of which supplement the "happy road" flow with logical contingencies
-            // => Forgot password Flow
-            // => Resend activation link Flow
-
-            // ReSharper disable once PossibleNullReferenceException
-            var creator =
-                (User)_contextAccessor.HttpContext
-                    .Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
-
-            var newUserId = Guid.NewGuid();
-
-            var command = new RegisterUserCommand(newUserId, request.Email, request.ConfirmPassword,
-                    request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
-                    request.Oib)
-            { Origin = Request.Headers["origin"] };
-
-            Guid? creatorId = Guid.Empty;
-
-            if (creator == null)
+            var greeterActivitySource = new ActivitySource("OtPrGrJa");
+            using var activity = greeterActivitySource.StartActivity("RegisterAsync");
+            try
             {
-                if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
-                    _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
-                    creatorId = Guid.Parse(ApplicationWideConstants
-                        .SYSTEM_USER); // User ApplicationWideConstants.SYSTEM_USER is a pre-seeded "system" user
+                activity?.SetTag("greeting", "Hello World!");
+                activity?.SetTag("Request.Email", request.Email);
+                activity?.SetTag("Request.UserName", request.UserName);
+                activity?.SetTag("Request.AcceptTerms", request.AcceptTerms);
+                activity?.SetTag("Environment", _configurationValues.Environment.Trim().ToUpper());
+                activity?.SetTag("Request origin", Request.Headers["origin"]);
+
+                // ReSharper disable once PossibleNullReferenceException
+                var creator =
+                    (User)_contextAccessor.HttpContext
+                        .Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
+
+                var newUserId = Guid.NewGuid();
+
+                var command = new RegisterUserCommand(newUserId, request.Email, request.ConfirmPassword,
+                        request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
+                        request.Oib)
+                { Origin = Request.Headers["origin"] };
+
+                Guid? creatorId = Guid.Empty;
+
+                if (creator == null)
+                {
+                    if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
+                        _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
+                        creatorId = Guid.Parse(ApplicationWideConstants
+                            .SYSTEM_USER); // User ApplicationWideConstants.SYSTEM_USER is a pre-seeded "system" user
+                }
+                else
+                {
+                    creatorId = creator.Id;
+                }
+
+                command.CreatorId = creatorId;
+
+                var user = await _mediator.Send(command, ct);
+                activity?.SetTag("Response.UserId", user.Id.GetValueOrDefault().ToString());
+                activity?.SetTag("Response.Success", true);
+                activity?.SetTag("User registration status", user.Status);
+                var ae = new ActivityEvent("User registration successful");
+                activity?.AddEvent(ae);
+
+                return Created(string.Empty, user);
             }
-            else
+            catch (UserAlreadyExistsException ex)
             {
-                creatorId = creator.Id;
+                activity?.RecordException(ex);
+                activity?.SetTag("Response.Success", false);
+                activity?.SetTag("Response.Error", ex.Message);
+                Log.Warning(ex, "User registration failed: {Email}, user with the same username and/or email already exists", request.Email);
+                return BadRequest("User already exists.");
             }
-
-            command.CreatorId = creatorId;
-
-            var user = await _mediator.Send(command, ct);
-            span.SetAttribute("UserEmail", command.Email);
-            span.SetAttribute("RawCommand", Newtonsoft.Json.JsonConvert.SerializeObject(command));
-            span.SetAttribute("Created user Id", user.Id.GetValueOrDefault().ToString());
-            span.AddEvent("User created");
-
-            return Created(string.Empty, user);
+            catch (Exception exc)
+            {
+                activity?.RecordException(exc);
+                activity?.SetTag("Response.Success", false);
+                activity?.SetTag("Response.Error", exc.Message);
+                Log.Warning(exc, "User registration failed: {Email}", request.Email);
+                return StatusCode((int)HttpStatusCode.InternalServerError);
+            }
         }
 
         [HttpPost("login")]

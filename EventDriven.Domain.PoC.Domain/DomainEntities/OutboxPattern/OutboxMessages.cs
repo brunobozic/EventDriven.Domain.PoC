@@ -1,15 +1,17 @@
-﻿using System;
+﻿using EventDriven.Domain.PoC.SharedKernel;
+using System;
 
 namespace EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern
 {
     public class OutboxMessage
     {
-        public OutboxMessage(DateTime occurredOn, string type, string data)
+        public OutboxMessage(DateTime occurredOn, string type, string data, EventTypeEnum eventType)
         {
             Id = Guid.NewGuid();
             OccurredOn = occurredOn;
             Type = type;
             Data = data;
+            EventType = eventType;
         }
 
         private OutboxMessage()
@@ -23,5 +25,6 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.OutboxPattern
 
         public DateTime? ProcessedDate { get; set; }
         public string Type { get; set; }
+        public EventTypeEnum EventType { get; set; }
     }
 }

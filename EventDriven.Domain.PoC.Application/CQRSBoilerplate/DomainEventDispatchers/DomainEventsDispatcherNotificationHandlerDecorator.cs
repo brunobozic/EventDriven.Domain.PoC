@@ -1,5 +1,8 @@
 ﻿using EventDriven.Domain.PoC.SharedKernel.DomainContracts;
 using MediatR;
+using OpenTelemetry.Trace;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,8 +23,23 @@ namespace EventDriven.Domain.PoC.Application.CQRSBoilerplate.DomainEventDispatch
 
         public async Task Handle(T notification, CancellationToken cancellationToken)
         {
-            await _decorated.Handle(notification, cancellationToken);
-            await _domainEventsDispatcher.DispatchEventsAsync();
+            var activitySource = new ActivitySource("OtPrGrJa");
+            using var activity = activitySource.StartActivity("DomainEventsDispatcherNotificationHandlerDecorator");
+
+            try
+            {
+                activity?.SetTag("Notification.Type", notification.GetType().Name);
+
+                await _decorated.Handle(notification, cancellationToken);
+                await _domainEventsDispatcher.DispatchEventsAsync();
+            }
+            catch (Exception ex)
+            {
+                activity?.RecordException(ex);
+                activity?.SetStatus(ActivityStatusCode.Error);
+                throw;
+            }
         }
+
     }
 }

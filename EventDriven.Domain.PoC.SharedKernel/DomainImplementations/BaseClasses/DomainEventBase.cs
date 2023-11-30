@@ -8,8 +8,10 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainImplementations.BaseClasses
         public DomainEventBase()
         {
             OccurredOn = DateTime.Now;
+            TypeOfEvent = EventTypeEnum.Undefined;
         }
 
         public DateTime OccurredOn { get; }
+        public EventTypeEnum TypeOfEvent { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using EventDriven.Domain.PoC.Application.CommandsAndHandlers.Users.CUD;
-using FluentValidation;
+﻿using FluentValidation;
 using System;
 using System.Text.RegularExpressions;
 

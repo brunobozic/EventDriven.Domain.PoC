@@ -20,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		docker-compose.yml = docker-compose.yml
 		README.md = README.md
+		UserRegistration.md = UserRegistration.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.Kafka.Core", "Framework.Kafka.Core\Framework.Kafka.Core.csproj", "{5F5D2E52-4542-4446-B570-8759078D7D49}"
@@ -30,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.Serilog.Sink.Kafk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Ocelot.ApiGateway", "EventDriven.Domain.PoC.Ocelot.ApiGateway\EventDriven.Domain.PoC.Ocelot.ApiGateway.csproj", "{E19D2BAD-C49F-4177-9CD7-2C772AFDAE13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventDriven.Domain.PoC.Api.Rest", "EventDriven.Domain.PoC.Api.Rest\EventDriven.Domain.PoC.Api.Rest.csproj", "{27157384-2B55-4C40-9983-03FFC7338EFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventDriven.Domain.PoC.Api.Rest", "EventDriven.Domain.PoC.Api.Rest\EventDriven.Domain.PoC.Api.Rest.csproj", "{27157384-2B55-4C40-9983-03FFC7338EFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,10 +63,6 @@ Global
 		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8AF175F-8A9F-4FE3-9E51-0A7DF250469F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64F7217D-AB14-464E-898B-38452AF1E89C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64F7217D-AB14-464E-898B-38452AF1E89C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64F7217D-AB14-464E-898B-38452AF1E89C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64F7217D-AB14-464E-898B-38452AF1E89C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5F5D2E52-4542-4446-B570-8759078D7D49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5F5D2E52-4542-4446-B570-8759078D7D49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F5D2E52-4542-4446-B570-8759078D7D49}.Release|Any CPU.ActiveCfg = Release|Any CPU
