@@ -40,6 +40,7 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate.AccountJour
         public AccountJournalEntry(string msg)
         {
             Message = msg;
+            base.JournalId = Guid.NewGuid();
         }
 
         private AccountJournalEntry()

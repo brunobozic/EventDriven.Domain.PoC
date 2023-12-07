@@ -4,6 +4,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka
 {
     public enum SaslMechanismEnum
     {
-        [Description("PLAIN")] Plain
+        [Description("PLAIN")] Plain,
+        [Description("GSSAPI")] GSSAPI
     }
 }

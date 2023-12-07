@@ -6,6 +6,8 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka
     {
         [Description("PLAINTEXT")] PlainText,
 
-        [Description("SASL_PLAINTEXT")] SASL_Plaintext
+        [Description("SASL_PLAINTEXT")] SASL_Plaintext,
+
+        [Description("KERBEROS")] Kerberos
     }
 }

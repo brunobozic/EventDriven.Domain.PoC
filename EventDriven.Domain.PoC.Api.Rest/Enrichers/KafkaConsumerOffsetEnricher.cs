@@ -37,7 +37,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.Enrichers
             // Don't care about thread-safety, in the worst case the field gets overwritten and one property will be GCed
             if (_consumer == null)
             {
-                _consumer = IoCContainer.Bootstrap.Container.Resolve<IKafkaScheduledConsumer>();
+               // _consumer = IoCContainer.Bootstrap.Container.Resolve<IKafkaScheduledConsumer>();
             }
 
             // if (_cachedProperty == null)

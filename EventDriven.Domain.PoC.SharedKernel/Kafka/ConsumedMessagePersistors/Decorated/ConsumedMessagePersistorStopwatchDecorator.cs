@@ -20,14 +20,14 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors.De
 
         public IConsumedMessagePersistor _decorated { get; }
 
-        public PersistingResult PersistToDb(ConsumeMessageResult readResult)
+        public PersistingResult PersistToInbox(ConsumeMessageResult readResult)
         {
             Log.Information("Persisting message from kafka start [ {0} ]", DateTimeOffset.UtcNow);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var retVal = _decorated.PersistToDb(readResult);
+            var retVal = _decorated.PersistToInbox(readResult);
             stopwatch.Stop();
-            Log.Information("Persisting message to Donat database took: [ {0} ] Milliseconds",
+            Log.Information("Persisting message to database took: [ {0} ] Milliseconds",
                 stopwatch.Elapsed.TotalMilliseconds);
 
             return retVal;

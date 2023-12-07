@@ -12,6 +12,6 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors.Co
         /// </summary>
         /// <param name="readResult"></param>
         /// <returns></returns>
-        PersistingResult PersistToDb(ConsumeMessageResult readResult);
+        PersistingResult PersistToInbox(ConsumeMessageResult readResult);
     }
 }

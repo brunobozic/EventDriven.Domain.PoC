@@ -20,7 +20,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors
             return true;
         }
 
-        public PersistingResult PersistToDb(ConsumeMessageResult readResult)
+        public PersistingResult PersistToInbox(ConsumeMessageResult readResult)
         {
             Log
                 .ForContext("GADMMessageId", readResult.GadmMessageId)

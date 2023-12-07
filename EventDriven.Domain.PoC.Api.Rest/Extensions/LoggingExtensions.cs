@@ -1,6 +1,7 @@
 ﻿using Serilog.Configuration;
 using Serilog;
 using System;
+using EventDriven.Domain.PoC.Api.Rest.Enrichers;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Extensions
 {

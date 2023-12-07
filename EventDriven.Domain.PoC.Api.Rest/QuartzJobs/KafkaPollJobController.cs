@@ -1,15 +1,16 @@
 ﻿using Confluent.Kafka;
+using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using EventDriven.Domain.PoC.SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
 using EventDriven.Domain.PoC.SharedKernel.Kafka.Settings;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Framework.Kafka.Core.DTOs.MessageProcessor;
-using Quartz;
-using System.Collections.Generic;
-using System;
-using Polly.Contrib.WaitAndRetry;
 using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Quartz;
 using Serilog;
+using System;
+using System.Collections.Generic;
 
 namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
 {
@@ -18,7 +19,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
         #region ctor
 
         public KafkaPollJobController(
-            ApplicationSettings settings
+            MyConfigurationValues settings
             , IKafkaScheduledConsumer kafkaScheduledConsumer
             , IConsumedMessagePersistor messagePersistor
         )
@@ -38,6 +39,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
             PersistingResult persistResult = null;
             PersistingResult resultOfPersisting = new PersistingResult();
 
+            if (_c.Instance().Assignment.Count>0)
             Log.Information("Topic: [ {KafkaConsumerTopic} ]" + ", partition: " + _c.Instance().Assignment[0].Partition);
 
             // Kafka will retry producing a message by itself, given the defined produce interval is large enough
@@ -97,7 +99,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
             // if it is a fail then we need to *skip* the faulted kafka message
             if (kafkaMessage.Success)
             {
-                // if reading the kafkaMessage was a *success*, process the kafkaMessage (in other words => persist it into donat database)
+                // if reading the kafkaMessage was a *success*, process the kafkaMessage (in other words => persist it into database)
                 // if persistance is successfull, commit the ofset (remember, we are *manually* commiting the offset, so that we can ensure that the entire
                 // process is completed successfully before commiting),
                 // otherwise *do not* commit the offset and skip the message after n failed attempts to persist it
@@ -116,7 +118,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
                            .ForContext("RetryCount", retryCount)
                            .ForContext("Offset", persistResult.Offset)
                            .ForContext("Partition", persistResult.Partition)
-                           
+
                            .ForContext("GADMMessageId", kafkaMessage.GadmMessageId)
                            .Warning("Persistor retry count: [ {RetryCount} ] => " + "offset: [ {KafkaOffset} ] <{GADMRequestMethod}>" + Environment.NewLine + "      ===> Retry reason: " + response.Result.Message + " ]");
                     });
@@ -124,7 +126,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
                 /// =========================================================
                 /// ===========       Message Persisting       ==============
                 /// =========================================================
-                resultOfPersisting = persistorRetryPolicy.Execute(() => _messagePersistor.PersistToDb(kafkaMessage));
+                resultOfPersisting = persistorRetryPolicy.Execute(() => _messagePersistor.PersistToInbox(kafkaMessage));
 
                 if (resultOfPersisting.Success)
                 {
@@ -139,7 +141,7 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
                     {
                         Log.ForContext("Offset", kafkaMessage.Offset)
                            .ForContext("Partition", kafkaMessage.Partition)
-                      
+
                            .ForContext("GADMMessageId", kafkaMessage.GadmMessageId)
                            .Error("Message of offset: [ {Offset} ], partition: [ {Partition} ] <{GADMRequestMethod}> not persisted, reason: [ " + offsetStoreException.Message + " ]", offsetStoreException);
                     }
@@ -255,13 +257,15 @@ namespace EventDriven.Domain.PoC.Api.Rest.QuartzJobs
                .ForContext("Partition", message.Partition)
                .Warning("Rereading the message, setting offset position to: [ {Offset} ], partition: [ {Partition} ] " + ", Broker: [ {KafkaConsumerBootstrapServer} ]");
         }
+
         #endregion Private methods
 
         #region Private props
 
         private readonly IKafkaScheduledConsumer _c;
         private readonly IConsumedMessagePersistor _messagePersistor;
-        private readonly ApplicationSettings _settings;
+        private readonly IMyConfigurationValues _settings;
+
         #endregion Private props
     }
 }

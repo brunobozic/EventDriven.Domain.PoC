@@ -65,7 +65,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.DomainBaseAbstractions
         public DateTimeOffset DateCreated { get; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? DateDeleted { get; private set; }
         public bool Deleted { get; } = false;
-        public TK JournalId { get; private set; }
+        public TK JournalId { get; set; }
 
         #endregion Public Props
 

@@ -4,6 +4,7 @@ using Autofac.Extras.CommonServiceLocator;
 using CommonServiceLocator;
 using Confluent.Kafka;
 using EventDriven.Domain.PoC.Api.Rest.Controllers;
+using EventDriven.Domain.PoC.Api.Rest.QuartzJobs;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.Command.Handlers;
 using EventDriven.Domain.PoC.Application.CQRSBoilerplate.DomainEventDispatchers;
@@ -183,11 +184,11 @@ namespace EventDriven.Domain.PoC.Api.Rest
 
             containerBuilder.RegisterType<KafkaScheduledProducer>().As<IKafkaScheduledProducer>()
                  .UsingConstructor(typeof(ProducerConfig), typeof(string))
-                 .WithParameters(new[] { new NamedParameter("topicName", "identity-provider-event-stream") })
+                 .WithParameters(new[] { new NamedParameter("topicName", settings.KafkaLoggingProducerSettings.KafkaTopic) })
                  .SingleInstance();
 
             containerBuilder.RegisterType<KafkaLoggingProducer>().As<IKafkaLoggingProducer>()
-                .UsingConstructor(typeof(ApplicationSettings), typeof(string))
+                .UsingConstructor(typeof(MyConfigurationValues), typeof(string))
                 .WithParameters(new[]
                     {new NamedParameter("topicName", settings.KafkaLoggingProducerSettings.KafkaTopic)})
                 .SingleInstance();
@@ -197,6 +198,10 @@ namespace EventDriven.Domain.PoC.Api.Rest
                 //.WithParameters(new[] { new NamedParameter("topicName", "my-new-topic") })
                 .SingleInstance();
 
+            containerBuilder.RegisterType<KafkaPollJobController>()
+               .As<IJobController>()
+               .UsingConstructor(typeof(MyConfigurationValues), typeof(IKafkaScheduledConsumer), typeof(IConsumedMessagePersistor)
+               );
             #endregion Kafka
 
             #region Application services

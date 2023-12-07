@@ -845,8 +845,10 @@ namespace EventDriven.Domain.PoC.Domain.DomainEntities.UserAggregate
         private void LogJournalEntry(string message)
         {
             var journalEntry = new AccountJournalEntry($"{DateTime.UtcNow} => {message}");
+            journalEntry.JournalId = Guid.NewGuid();
             journalEntry.AttachActingUser(null);
             journalEntry.AttachUser(this);
+            journalEntry.TrackingState = TrackingState.Added;
             _journalEntries.Add(journalEntry);
         }
 

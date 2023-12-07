@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using EventDriven.Domain.PoC.SharedKernel.Helpers;
+using EventDriven.Domain.PoC.SharedKernel.Helpers.Configuration;
 using EventDriven.Domain.PoC.SharedKernel.Kafka.Settings;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaProducer;
@@ -20,7 +21,7 @@ namespace EventDriven.Domain.PoC.SharedKernel.Kafka.KafkaImplementions
         {
         }
 
-        public KafkaLoggingProducer(ApplicationSettings settings, string topicName)
+        public KafkaLoggingProducer(MyConfigurationValues settings, string topicName)
         {
             _topicName = topicName;
 

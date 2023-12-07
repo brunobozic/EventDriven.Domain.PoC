@@ -21,5 +21,10 @@
         public int? MetadataRequestTimeoutMs { get; set; }
         public string KafkaTopic { get; set; }
         public bool? EnableAutoCommit { get; set; }
+        public string SaslKerberosPrincipal { get; set; }
+        public string SaslKerberosKinitCmd { get; set; }
+        public string SslCertificateLocation { get; set; }
+        public string SslKeyLocation { get; set; }
+        public bool? ApiVersionRequest { get; set; }
     }
 }
