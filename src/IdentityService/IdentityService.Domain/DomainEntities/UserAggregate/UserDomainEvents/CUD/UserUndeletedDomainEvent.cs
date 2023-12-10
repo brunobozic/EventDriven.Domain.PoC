@@ -1,0 +1,51 @@
+﻿using System;
+using SharedKernel.DomainImplementations.BaseClasses;
+
+namespace IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
+
+public class UserUndeletedDomainEvent : DomainEventBase
+{
+    public string Email;
+    public long Id;
+    public long UndeletedByUser;
+    public string UndeletionReason;
+    public Guid UserId;
+    public string UserName;
+
+    public UserUndeletedDomainEvent(string email, long undeletedByUser, string undeletionReason)
+    {
+        Email = email;
+        UndeletedByUser = undeletedByUser;
+        UndeletionReason = undeletionReason;
+    }
+
+    public UserUndeletedDomainEvent(long id, long undeletedByUser, string undeletionReason)
+    {
+        Id = id;
+        UndeletedByUser = undeletedByUser;
+        UndeletionReason = undeletionReason;
+    }
+}
+
+public class UserUndeletedByEmailEvent : DomainEventBase
+{
+    public string Email;
+    public long Id;
+    public long UndeletedByUser;
+    public string UndeletionReason;
+    public string UserName;
+
+    public UserUndeletedByEmailEvent(string email, long undeletedByUser, string undeletionReason)
+    {
+        Email = email;
+        UndeletedByUser = undeletedByUser;
+        UndeletionReason = undeletionReason;
+    }
+
+    public UserUndeletedByEmailEvent(long id, long undeletedByUser, string undeletionReason)
+    {
+        Id = id;
+        UndeletedByUser = undeletedByUser;
+        UndeletionReason = undeletionReason;
+    }
+}

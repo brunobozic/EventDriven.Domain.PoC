@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.5.0" />
+    <PackageReference Include="Autofac.Extras.CommonServiceLocator" Version="6.1.0" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Dapper" Version="2.1.24" />
+    <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+    <PackageReference Include="FluentValidation" Version="11.8.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.8.1" />
+    <PackageReference Include="MailKit" Version="4.3.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.14" />
+    <PackageReference Include="MimeKit" Version="4.3.0" />
+    <PackageReference Include="Quartz" Version="3.8.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    <PackageReference Include="URF.Core.Abstractions" Version="3.1.3" />
+    <PackageReference Include="URF.Core.Abstractions.Services" Version="3.1.3" />
+    <PackageReference Include="URF.Core.Abstractions.Trackable" Version="3.1.3" />
+    <PackageReference Include="URF.Core.Services" Version="3.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CommandsAndHandlers\Addresses\CUD\" />
+    <Folder Include="CommandsAndHandlers\Roles\CUD\" />
+    <Folder Include="EventsAndEventHandlers\Users\PasswordReset\" />
+    <Folder Include="EventsAndEventHandlers\Users\UserUpdates\Handlers\" />
+    <Folder Include="EventsAndEventHandlers\Roles\Activation\Handlers\" />
+    <Folder Include="EventsAndEventHandlers\Roles\RoleUpdates\" />
+    <Folder Include="ViewModels\Contact\" />
+    <Folder Include="ViewModels\CellPhoneNumber\" />
+    <Folder Include="ViewModels\LandLine\" />
+    <Folder Include="ViewModels\City\" />
+    <Folder Include="ViewModels\Municipality\" />
+    <Folder Include="ViewModels\Company\" />
+    <Folder Include="ViewModels\Town\" />
+    <Folder Include="ViewModels\Person\" />
+    <Folder Include="ViewModels\OrganizationUnit\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SharedKernel\SharedKernel.csproj" />
+    <ProjectReference Include="..\IdentityService.Data\IdentityService.Data.csproj" />
+    <ProjectReference Include="..\IdentityService.Domain\IdentityService.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
