@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
@@ -97,7 +98,7 @@ public class IntegrationEventDispatcher : IDomainEventsDispatcher
                 throw new Exception(
                     "Cannot extract type from the provided assembly, perhaps your integration event cs class is put in a wrong assembly?");
 
-            activity.SetTag("Integration event handled", integrationEvent.GetType().FullName);
+            activity?.SetTag("Integration event handled", integrationEvent.GetType().FullName);
 
             var data = JsonConvert.SerializeObject(integrationEvent);
             var outboxMessage = new OutboxMessage(

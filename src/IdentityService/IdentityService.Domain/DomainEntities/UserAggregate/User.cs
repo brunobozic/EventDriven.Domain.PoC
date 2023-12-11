@@ -881,7 +881,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         journalEntry.AttachUser(this);
         journalEntry.TrackingState = TrackingState.Added;
 
-        _journalEntries.Add(journalEntry);
+        //_journalEntries.Add(journalEntry);
     }
 
     private bool TheUserHadBeenVerified()

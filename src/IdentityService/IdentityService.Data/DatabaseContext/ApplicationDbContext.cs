@@ -27,7 +27,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     private readonly List<EntityEntry> _list = new();
 
     private DbAuditTrailFactory _auditFactory;
-    private DbContextOptions options;
 
     public DbSet<AuditTrail> AuditTrail { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
@@ -306,18 +305,27 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     #region ctor
 
+
+    //public ApplicationDbContext(DbContextOptions options) : base(options)
+    //{
+    //    Log.Information("Entrancy");
+    //}
+
+    //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
+    //{
+    //    if (fromFactory)
+    //    {
+    //        _auditFactory = new DbAuditTrailFactory(this);
+    //    }
+    //}
+
+    //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    //{
+    //    this.Options = options;
+    //}
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {
+        Log.Information("Entrancy");
     }
-
-    public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
-    {
-    }
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-        this.options = options;
-    }
-
     #endregion ctor
 }

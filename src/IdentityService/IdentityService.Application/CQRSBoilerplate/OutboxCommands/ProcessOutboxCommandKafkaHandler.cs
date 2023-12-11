@@ -106,12 +106,14 @@ internal class ProcessOutboxCommandKafkaHandler : ICommandHandler<ProcessOutboxC
                         Log.Error(jsonEx, "JSON deserialization failed for message {MessageId}", message.Id);
                         activity?.RecordException(jsonEx);
                         activity?.SetStatus(ActivityStatusCode.Error);
+                        throw;
                     }
                     catch (DbException dbEx)
                     {
                         Log.Error(dbEx, "Database operation failed for message {MessageId}", message.Id);
                         activity?.RecordException(dbEx);
                         activity?.SetStatus(ActivityStatusCode.Error);
+                        throw;
                     }
                     catch (Exception possibleAsyncProblems)
                     {

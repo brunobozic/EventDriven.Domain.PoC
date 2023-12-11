@@ -13,7 +13,6 @@ public class UnitOfWorkCommandHandlerDecorator<T> : ICommandHandler<T> where T :
 {
     private readonly ApplicationDbContext _context;
     private readonly ICommandHandler<T> _decorated;
-
     private readonly IMyUnitOfWork _unitOfWork;
 
     public UnitOfWorkCommandHandlerDecorator(
@@ -43,4 +42,5 @@ public class UnitOfWorkCommandHandlerDecorator<T> : ICommandHandler<T> where T :
 
         return Unit.Value;
     }
+
 }

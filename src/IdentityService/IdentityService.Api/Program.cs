@@ -15,11 +15,8 @@ using AutoMapper;
 using CommonServiceLocator;
 using Confluent.Kafka;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using Framework.Kafka.Core;
 using Framework.Kafka.Core.Contracts;
-using HealthChecks.UI.Client;
 using IdentityService.Api.Controllers;
 using IdentityService.Api.Extensions;
 using IdentityService.Api.Filters;
@@ -27,6 +24,7 @@ using IdentityService.Api.Middleware;
 using IdentityService.Api.QuartzJobs;
 using IdentityService.Api.SwaggerOverrides;
 using IdentityService.Application.AutomapperMaps;
+using IdentityService.Application.CommandsAndHandlers.Addresses;
 using IdentityService.Application.CQRSBoilerplate.Command;
 using IdentityService.Application.CQRSBoilerplate.Command.Handlers;
 using IdentityService.Application.CQRSBoilerplate.DomainEventDispatchers;
@@ -34,6 +32,8 @@ using IdentityService.Application.CQRSBoilerplate.UnitOfWorkImplementations;
 using IdentityService.Application.DomainServices.EmailServices;
 using IdentityService.Application.DomainServices.UserServices;
 using IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
+using IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Handlers;
+using IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
 using IdentityService.Application.Ports.Input.Contracts;
 using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Data.CustomUnitOfWork;
@@ -84,7 +84,6 @@ using Swashbuckle.AspNetCore.Filters;
 using URF.Core.Abstractions.Services;
 using URF.Core.Services;
 using ILogger = Serilog.ILogger;
-using static SharedKernel.Helpers.Startup;
 
 // ReSharper disable CommentTypo
 // ReSharper disable StringLiteralTypo
@@ -115,14 +114,65 @@ public class Program
                         .UseConfiguration(configuration)
                         .ConfigureServices((context, services) =>
                         {
-                            ConfigureServices(services, context.Configuration);
-                            var containerBuilder = new ContainerBuilder();
-                            containerBuilder.Populate(services);
                             var connStr = context.Configuration.GetConnectionString("Sqlite");
                             var environment = context.HostingEnvironment;
-                            ConfigureContainer(containerBuilder, services, environment,
-                                connStr); // Place your Autofac-specific registrations in this method
-                            // Container = containerBuilder.Build();
+                            var containerBuilder = new ContainerBuilder();
+                            containerBuilder.Populate(services);
+                            // Place your Autofac-specific registrations in this method
+                            ConfigureContainer(containerBuilder, environment, connStr);
+
+                            ConfigureServices(services, context.Configuration);
+
+                            
+                           
+                            // finally build the container itself
+                            Container = containerBuilder.Build();
+
+                            // set the service locator to the Autofac one
+                            ServiceLocator.SetLocatorProvider(() => new AutofacServiceLocator(Container));
+
+                            // populate the composition root container, so we can use this code later on to define scope (BeginLifetimeScope)
+                            CompositionRoot.SetContainer(Container);
+
+                            var schedulerFactory = new StdSchedulerFactory();
+                            var scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
+
+                            scheduler.JobFactory = new JobFactory(Container);
+
+                            scheduler.Start().GetAwaiter().GetResult();
+
+                            var processOutboxJob = JobBuilder.Create<ProcessOutboxJob>().Build();
+
+                            var trigger =
+                                TriggerBuilder
+                                    .Create()
+                                    .StartNow()
+                                    .WithCronSchedule("0/15 * * ? * *")
+                                    .Build();
+
+                            scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
+
+                            var processInternalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().Build();
+
+                            var triggerCommandsProcessing =
+                                TriggerBuilder
+                                    .Create()
+                                    .StartNow()
+                                    .WithCronSchedule("0/15 * * ? * *")
+                                    .Build();
+
+                            scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
+
+                            var processKafkaPollJob = JobBuilder.Create<KafkaPollJob>().Build();
+
+                            var triggerKafkaPollJob =
+                                TriggerBuilder
+                                    .Create()
+                                    .StartNow()
+                                    .WithCronSchedule("0/15 * * ? * *")
+                                    .Build();
+
+                            scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
                         })
                         .Configure(app =>
                         {
@@ -132,6 +182,8 @@ public class Program
                             Configure(app, env, serviceOptions);
                         });
                 });
+
+            
 
             var host = builder.Build();
 
@@ -160,15 +212,15 @@ public class Program
             {
                 // opt.Filters.Add(typeof(ValidateFilterAttribute));
             })
-            .AddFluentValidation(fv =>
-            {
-                fv.RegisterValidatorsFromAssembly(
-                    Assembly.Load(
-                        "IdentityService.Application")); // the assembly that houses the implemented validators
-                // fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false; // dont run MVC validators after having run the fluent ones
-                fv.ImplicitlyValidateChildProperties =
-                    true; // fall through and validate all child elements and their child elements
-            })
+            //.AddFluentValidation(fv =>
+            //{
+            //    fv.RegisterValidatorsFromAssembly(
+            //        Assembly.Load(
+            //            "IdentityService.Application")); // the assembly that houses the implemented validators
+            //    // fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false; // dont run MVC validators after having run the fluent ones
+            //    fv.ImplicitlyValidateChildProperties =
+            //        true; // fall through and validate all child elements and their child elements
+            //})
             .AddNewtonsoftJson(options =>
             {
                 // options.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy())); // Fine tuning, enum resolving
@@ -198,8 +250,9 @@ public class Program
                 options.ClientErrorMapping[404].Link =
                     "https://httpstatuses.com/404";
             })
-            .AddControllersAsServices(); // as the name implies, this makes all controllers become registered with IoC just as any other class would be (by default, they are not)
-
+            .AddControllersAsServices() // as the name implies, this makes all controllers become registered with IoC just as any other class would be (by default, they are not)
+    
+           ; 
         #endregion MVC wireup
 
         #region Current culture
@@ -239,7 +292,9 @@ public class Program
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath);
+
             // options.AddFluentValidationRules(); // make fluent validations visible to swagger OpenApi
+
             options.ExampleFilters();
             // Add the custom operation filter here
             options.OperationFilter<RandomizeRegisterUserExamplesOperationFilter>();
@@ -319,7 +374,7 @@ public class Program
         #region Service Registration
 
         services.RegisterRepositories();
-        services.AddTransient<IValidatorFactory, ServiceProviderValidatorFactory>();
+        //services.AddTransient<IValidatorFactory, ServiceProviderValidatorFactory>();
         services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddTransient<IEmailService, GmailService>();
@@ -329,12 +384,19 @@ public class Program
         services.Configure<MailOptions>(configuration.GetSection(nameof(MailOptions)));
         services.Configure<JwtIssuerOptions>(configuration.GetSection(nameof(JwtIssuerOptions)));
 
+        //services.AddTransient<IUserService, UserService>();
+        //services.AddTransient<IMyUnitOfWork, MyUnitOfWork>();
+        //services.AddSingleton<IDomainEventsDispatcher, IntegrationEventDispatcher>();
+
+
         #region AD
 
         // Uncomment this when the AD comes into play!
         //services.AddScoped<IUserProvider, AdUserProvider>();
 
         #endregion AD
+
+        services.AddSingleton(provider => Log.Logger);
 
         #endregion Service Registration
 
@@ -363,15 +425,6 @@ public class Program
             // .AddUrlGroup(new Uri("https://localhost:5001/swagger"), name: "base URL", failureStatus: HealthStatus.Degraded)
             ;
 
-        //adding healthchecks UI
-        services.AddHealthChecksUI(opt =>
-        {
-            opt.SetEvaluationTimeInSeconds(15); //time in seconds between check
-            opt.MaximumHistoryEntriesPerEndpoint(60); //maximum history of checks
-            opt.SetApiMaxActiveRequests(1); //api requests concurrency
-            opt.AddHealthCheckEndpoint("api", "/health"); //map health check api
-        }).AddSqliteStorage(connStr);
-
         #endregion HealthCheck
 
         services.AddAuthorization(options =>
@@ -380,6 +433,18 @@ public class Program
                 .RequireAuthenticatedUser()
                 .Build();
         });
+
+        #region DbContext
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlite(connStr, x => x.MigrationsAssembly("IdentityService.Data"));
+            options.ReplaceService<IValueConverterSelector, StronglyTypedIdValueConverterSelector>();
+            options.EnableSensitiveDataLogging(); // Only for local development
+            options.EnableDetailedErrors(); // Only for local development
+        });
+
+        #endregion DbContext
 
         #region CORS
 
@@ -405,10 +470,8 @@ public class Program
 
         services.AddSingleton(sp => mapperConfiguration.CreateMapper());
 
-        var AMconfig = new MapperConfiguration(cfg => { cfg.AddMaps("IdentityService.Application"); });
-
-        var mapper = AMconfig.CreateMapper();
-        //config.AssertConfigurationIsValid();
+        var mapper = mapperConfiguration.CreateMapper();
+        // mapper.ConfigurationProvider.AssertConfigurationIsValid();
         services.AddSingleton(mapper);
 
         var greeterMeter = new Meter("OtPrGrYa", "1.0.0");
@@ -447,27 +510,12 @@ public class Program
         });
     }
 
-    private static void ConfigureContainer(ContainerBuilder containerBuilder, IServiceCollection services,
-        IWebHostEnvironment environment, string connStr)
+    private static void ConfigureContainer(ContainerBuilder containerBuilder, IWebHostEnvironment environment, string connStr)
     {
-        // detect assembly name
-        var executingAssembly = Assembly.GetExecutingAssembly();
-        var path = Assembly.GetEntryAssembly().Location;
-        // detect process module
-        var processModule = Process.GetCurrentProcess().MainModule;
+        //IExecutionContextAccessor executionContextAccessor =
+        //    new ExecutionContextAccessor(services.GetService<IHttpContextAccessor>());
 
-        // build a .net core native service provider so we can later cross-wire it with AutoFac
-        var builtServiceProvider = services.BuildServiceProvider();
-
-        IExecutionContextAccessor executionContextAccessor =
-            new ExecutionContextAccessor(builtServiceProvider.GetService<IHttpContextAccessor>());
-
-        // cross-wire services that are detected within the native .net core provider with AutoFac
-        containerBuilder.Populate(services);
-
-        containerBuilder.RegisterInstance(executionContextAccessor);
-
-        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        //containerBuilder.RegisterInstance(executionContextAccessor);
 
         // read values from appsettings
         var config = new ConfigurationBuilder()
@@ -603,6 +651,8 @@ public class Program
             .InstancePerLifetimeScope();
         containerBuilder.RegisterType<UserController>().PropertiesAutowired();
 
+        containerBuilder.RegisterType<UserService>().As<IUserService>();
+
         #endregion Application services
 
         #region Entity Framework
@@ -619,22 +669,6 @@ public class Program
         containerBuilder.RegisterType<StronglyTypedIdValueConverterSelector>()
             .As<IValueConverterSelector>()
             .InstancePerLifetimeScope();
-
-        containerBuilder.Register(c =>
-            {
-                var dbContextOptionsBuilder = new DbContextOptionsBuilder();
-                dbContextOptionsBuilder.UseSqlite(connStr,
-                    x => x.MigrationsAssembly("IdentityService.Data"));
-                dbContextOptionsBuilder
-                    .ReplaceService<IValueConverterSelector, StronglyTypedIdValueConverterSelector>();
-                dbContextOptionsBuilder.EnableSensitiveDataLogging(); // only for local development
-                dbContextOptionsBuilder.EnableDetailedErrors(); // only for local development
-
-                return new ApplicationDbContext(dbContextOptionsBuilder.Options);
-            })
-            .AsSelf()
-            .As<DbContext>()
-            .InstancePerLifetimeScope(); // within one lifetime, will keep getting the same instance, different lifetimes will resolve a different instance!
 
         #endregion Entity Framework
 
@@ -661,12 +695,6 @@ public class Program
 
         containerBuilder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
         containerBuilder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
-
-        containerBuilder.Register<ServiceFactory>(ctx =>
-        {
-            var c = ctx.Resolve<IComponentContext>();
-            return t => c.Resolve(t);
-        });
 
         // container.RegisterGeneric(typeof(CommandValidationBehavior<,>)).As(typeof(IPipelineBehavior<,>));
 
@@ -709,8 +737,12 @@ public class Program
             typeof(DomainEventsDispatcherNotificationHandlerDecorator<>),
             typeof(INotificationHandler<>));
 
-        containerBuilder.RegisterAssemblyTypes(Assemblies.Application)
+        containerBuilder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AsClosedTypesOf(typeof(IDomainEventNotification<>))
+            .InstancePerDependency();
+
+        containerBuilder.RegisterType<EmailVerifiedDomainEventHandler>()
+            .As<INotificationHandler<EmailVerifiedNotification>>()
             .InstancePerDependency();
 
         #endregion MediatR
@@ -720,67 +752,12 @@ public class Program
         // This section defines the *VERY IMPORTANT* job runners without which the app, such as it is (event driven) will not function
         // The code here basically runs background jobs that pick up internal commands and integration events from db tables and execute them
         // Therefore without these jobs, the db tables will keep filling up with rows (jobs) that will never get handled
-        containerBuilder.RegisterAssemblyTypes(executingAssembly).Where(x => typeof(IJob).IsAssignableFrom(x))
+        containerBuilder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).Where(x => typeof(IJob).IsAssignableFrom(x))
             .InstancePerDependency();
 
         #endregion Quartz
 
-        // finally build the container itself
-        Container = containerBuilder.Build();
-
-        var schedulerFactory = new StdSchedulerFactory();
-        var scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
-
-        scheduler.JobFactory = new JobFactory(Container);
-
-        scheduler.Start().GetAwaiter().GetResult();
-
-        var processOutboxJob = JobBuilder.Create<ProcessOutboxJob>().Build();
-
-        var trigger =
-            TriggerBuilder
-                .Create()
-                .StartNow()
-                .WithCronSchedule("0/15 * * ? * *")
-                .Build();
-
-        scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
-
-        var processInternalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().Build();
-
-        var triggerCommandsProcessing =
-            TriggerBuilder
-                .Create()
-                .StartNow()
-                .WithCronSchedule("0/15 * * ? * *")
-                .Build();
-
-        scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
-        //=======================================
-        //=====   Kafka polling consumer   ======
-        //=======================================
-        var processKafkaPollJob = JobBuilder.Create<KafkaPollJob>().Build();
-
-        var triggerKafkaPollJob =
-            TriggerBuilder
-                .Create()
-                .StartNow()
-                .WithCronSchedule("0/15 * * ? * *")
-                .Build();
-
-        scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
-
-
-        ServiceLocator.SetLocatorProvider(() => new AutofacServiceLocator(Container));
-
-        // populate the composition root container so we can use this code later on to define scope (BeginLifetimeScope)
-        CompositionRoot.SetContainer(Container);
-
-
-        using (var scope = Container.BeginLifetimeScope())
-        {
-            var dbContext = scope.Resolve<ApplicationDbContext>(); // Check if this works
-        }
+        
     }
 
     private static void Configure(IApplicationBuilder app, IWebHostEnvironment env,
@@ -793,6 +770,7 @@ public class Program
         }
         else
         {
+            app.UseDeveloperExceptionPage();
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
@@ -812,12 +790,6 @@ public class Program
         #endregion Swagger wireup
 
         #region HealthCheck
-
-        app.UseHealthChecks("/hc", new HealthCheckOptions
-        {
-            Predicate = _ => true,
-            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        });
 
         app.UseHealthChecks("/liveness", new HealthCheckOptions
         {
@@ -846,8 +818,8 @@ public class Program
 
         #region Global exception handling
 
-        // The idea here is to hijack all exceptions, and decide whether to show the full trace (for developers) or to show a cleaned up
-        // safe, user friendly messages to end users (commonly this is done in Production)
+        //The idea here is to hijack all exceptions, and decide whether to show the full trace(for developers) or to show a cleaned up
+        // safe, user friendly messages to end users(commonly this is done in Production)
         app.UseExceptionHandler(
             builder =>
             {
@@ -863,7 +835,7 @@ public class Program
 
                         if (error != null)
                         {
-                            var json = new JsonErrorResponse
+                            var json = new Startup.JsonErrorResponse
                             {
                                 Messages = new[] { error.Error.Message },
                                 User = context.User.Identity.Name
@@ -907,20 +879,7 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-        app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-
-                //adding endpoint of health check for the health check ui in UI format
-                endpoints.MapHealthChecks("/health", new HealthCheckOptions
-                {
-                    Predicate = _ => true,
-                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-                });
-
-                //map healthcheck ui endpoing - default is /healthchecks-ui/
-                endpoints.MapHealthChecksUI();
-            }
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); }
         );
 
         #region Consul
@@ -946,12 +905,6 @@ public class Program
         {
             Log.Fatal(ex, "An error occurred while migrating or initializing the database.");
         }
-    }
-
-    private static string GetBasePath()
-    {
-        using var processModule = Process.GetCurrentProcess().MainModule;
-        return Path.GetDirectoryName(processModule?.FileName);
     }
 
     private static IConfiguration GetConfiguration()

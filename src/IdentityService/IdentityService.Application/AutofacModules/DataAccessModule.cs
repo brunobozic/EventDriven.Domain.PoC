@@ -1,8 +1,9 @@
-﻿using Autofac;
+﻿using System.Reflection;
+using Autofac;
 
 namespace IdentityService.Application.AutofacModules;
 
-public class DataAccessModule : Module
+public class DataAccessModule : Autofac.Module
 {
     private readonly string _databaseConnectionString;
 

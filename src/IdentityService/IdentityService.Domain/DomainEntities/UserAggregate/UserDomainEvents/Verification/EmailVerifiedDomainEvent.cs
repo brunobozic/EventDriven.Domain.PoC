@@ -5,6 +5,7 @@ namespace IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.V
 
 public class EmailVerifiedDomainEvent : DomainEventBase
 {
+    public EmailVerifiedDomainEvent() { }
     public EmailVerifiedDomainEvent(string email, Guid id)
     {
         Email = email;
