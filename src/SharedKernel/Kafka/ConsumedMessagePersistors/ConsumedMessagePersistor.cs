@@ -23,7 +23,7 @@ public class ConsumedMessagePersistor : IConsumedMessagePersistor
         catch (Exception ex)
         {
             Log
-                .ForContext("MessageId", readResult.MessageId)
+                .ForContext("MessageId", readResult.GadmMessageId)
                 .Error(
                     "Message of offset: [ {KafkaOffset} ] <{RequestMethod}> **not** persisted, reason: [ " +
                     ex.Message + " ]", ex);
