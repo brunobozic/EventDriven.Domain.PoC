@@ -28,6 +28,32 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     private DbAuditTrailFactory _auditFactory;
 
+    #region ctor
+
+    //public ApplicationDbContext(DbContextOptions options) : base(options)
+    //{
+    //    Log.Information("Entrancy");
+    //}
+
+    //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
+    //{
+    //    if (fromFactory)
+    //    {
+    //        _auditFactory = new DbAuditTrailFactory(this);
+    //    }
+    //}
+
+    //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    //{
+    //    this.Options = options;
+    //}
+    public ApplicationDbContext(DbContextOptions options) : base(options)
+    {
+        Log.Information("Entrancy");
+    }
+
+    #endregion ctor
+
     public DbSet<AuditTrail> AuditTrail { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     public DbSet<InternalCommand> InternalCommands { get; set; }
@@ -302,30 +328,4 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         return changes;
     }
-
-    #region ctor
-
-
-    //public ApplicationDbContext(DbContextOptions options) : base(options)
-    //{
-    //    Log.Information("Entrancy");
-    //}
-
-    //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
-    //{
-    //    if (fromFactory)
-    //    {
-    //        _auditFactory = new DbAuditTrailFactory(this);
-    //    }
-    //}
-
-    //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    //{
-    //    this.Options = options;
-    //}
-    public ApplicationDbContext(DbContextOptions options) : base(options)
-    {
-        Log.Information("Entrancy");
-    }
-    #endregion ctor
 }

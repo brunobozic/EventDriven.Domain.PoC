@@ -42,5 +42,4 @@ public class UnitOfWorkCommandHandlerDecorator<T> : ICommandHandler<T> where T :
 
         return Unit.Value;
     }
-
 }

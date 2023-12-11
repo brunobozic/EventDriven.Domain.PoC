@@ -6,8 +6,8 @@ namespace IdentityService.Api.SwaggerOverrides;
 
 public class RegisterUserExampleValues : IExamplesProvider<RegisterUserRequest>
 {
-    private string pwd = string.Empty;
     private readonly Random random = new();
+    private string pwd = string.Empty;
 
     public RegisterUserRequest GetExamples()
     {

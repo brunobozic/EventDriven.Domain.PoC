@@ -12,8 +12,8 @@ public class ConsumedMessagePersistor : IConsumedMessagePersistor
     public PersistingResult PersistToInbox(ConsumeMessageResult readResult)
     {
         Log
-            .ForContext("GADMMessageId", readResult.GadmMessageId)
-            .Information("Attempting message persistence of offset: [ {KafkaOffset} ] <{GADMRequestMethod}>");
+            .ForContext("MessageId", readResult.GadmMessageId)
+            .Information("Attempting message persistence of offset: [ {KafkaOffset} ] <{RequestMethod}>");
 
         var r = new PersistingResult();
 
@@ -23,9 +23,9 @@ public class ConsumedMessagePersistor : IConsumedMessagePersistor
         catch (Exception ex)
         {
             Log
-                .ForContext("GADMMessageId", readResult.GadmMessageId)
+                .ForContext("MessageId", readResult.MessageId)
                 .Error(
-                    "Message of offset: [ {KafkaOffset} ] <{GADMRequestMethod}> **not** persisted, reason: [ " +
+                    "Message of offset: [ {KafkaOffset} ] <{RequestMethod}> **not** persisted, reason: [ " +
                     ex.Message + " ]", ex);
             r.Success = false;
             r.Message = ex.Message;
@@ -34,21 +34,21 @@ public class ConsumedMessagePersistor : IConsumedMessagePersistor
         if (!r.Success)
         {
             Log
-                .ForContext("GADMMessageId", readResult.GadmMessageId)
-                .Error("Message of offset: [ {KafkaOffset} ] <{GADMRequestMethod}> **not** persisted, reason: [ " +
+                .ForContext("MessageId", readResult.GadmMessageId)
+                .Error("Message of offset: [ {KafkaOffset} ] <{RequestMethod}> **not** persisted, reason: [ " +
                        r.Message + " ]");
 
             // re-read the same message (we have not commited any offsets, but kafka will (in spite of this) proceed reading next message from topic because
             // consumers have an in-memory offset, so we need to "override" this...
 
             Log
-                .ForContext("GADMMessageId", readResult.GadmMessageId)
-                .Warning("Seeking offset: [ {KafkaOffset} ] <{GADMRequestMethod}> re-reading the message.");
+                .ForContext("MessageId", readResult.GadmMessageId)
+                .Warning("Seeking offset: [ {KafkaOffset} ] <{RequestMethod}> re-reading the message.");
         }
 
         Log
-            .ForContext("GADMMessageId", readResult.GadmMessageId)
-            .Information("Message of offset: [ {KafkaOffset} ] <{GADMRequestMethod}> persisted: [ " + r.Message +
+            .ForContext("MessageId", readResult.GadmMessageId)
+            .Information("Message of offset: [ {KafkaOffset} ] <{RequestMethod}> persisted: [ " + r.Message +
                          " ]");
 
         return r;

@@ -123,9 +123,9 @@ public class KafkaPollJobController : IJobController
                         .ForContext("RetryCount", retryCount)
                         .ForContext("Offset", persistResult.Offset)
                         .ForContext("Partition", persistResult.Partition)
-                        .ForContext("GADMMessageId", kafkaMessage.GadmMessageId)
+                        .ForContext("MessageId", kafkaMessage.GadmMessageId)
                         .Warning("Persistor retry count: [ {RetryCount} ] => " +
-                                 "offset: [ {KafkaOffset} ] <{GADMRequestMethod}>" + Environment.NewLine +
+                                 "offset: [ {KafkaOffset} ] <{RequestMethod}>" + Environment.NewLine +
                                  "      ===> Retry reason: " + response.Result.Message + " ]");
                 });
 
@@ -146,9 +146,9 @@ public class KafkaPollJobController : IJobController
                 {
                     Log.ForContext("Offset", kafkaMessage.Offset)
                         .ForContext("Partition", kafkaMessage.Partition)
-                        .ForContext("GADMMessageId", kafkaMessage.GadmMessageId)
+                        .ForContext("MessageId", kafkaMessage.GadmMessageId)
                         .Error(
-                            "Message of offset: [ {Offset} ], partition: [ {Partition} ] <{GADMRequestMethod}> not persisted, reason: [ " +
+                            "Message of offset: [ {Offset} ], partition: [ {Partition} ] <{RequestMethod}> not persisted, reason: [ " +
                             offsetStoreException.Message + " ]", offsetStoreException);
                 }
             else // persistance has failed

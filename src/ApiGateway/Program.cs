@@ -94,8 +94,8 @@ public class Program
             .Enrich.WithAssemblyName()
             .Enrich.WithAssemblyVersion()
             .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-                                              //.Enrich.WithExceptionData()
-                                              //.Enrich.WithExceptionStackTraceHash()
+            //.Enrich.WithExceptionData()
+            //.Enrich.WithExceptionStackTraceHash()
             .Enrich.WithMemoryUsage()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()

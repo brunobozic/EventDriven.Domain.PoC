@@ -364,9 +364,9 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
             .ForContext("Topic", messageConsumingResult.Topic)
             .ForContext("Offset", messageConsumingResult.Offset)
             .ForContext("actualMsg", actualMsg)
-            .ForContext("GADMMessageId", messageConsumingResult.GadmMessageId)
+            .ForContext("MessageId", messageConsumingResult.GadmMessageId)
             .Information(
-                "Message payload: [ {actualMsg} ] <{GADMRequestMethod}> offset: [ {Offset} ] partition: [ {Partition} ]");
+                "Message payload: [ {actualMsg} ] <{RequestMethod}> offset: [ {Offset} ] partition: [ {Partition} ]");
     }
 
     /// <summary>

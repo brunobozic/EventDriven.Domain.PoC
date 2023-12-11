@@ -1,3 +1,8 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Consul;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Data.DatabaseContext;
@@ -9,205 +14,188 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
-namespace EventDriven.Domain.PoC.Api.Rest
-{
+namespace IdentityService.Api;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-    public class Program
+public class Program
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-    {
+{
 #pragma warning disable 1591
-        public static readonly string Namespace = typeof(Program).Namespace;
+    public static readonly string Namespace = typeof(Program).Namespace;
 #pragma warning restore 1591
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        public static readonly string AppName = Namespace;
+    public static readonly string AppName = Namespace;
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-        [Obsolete]
-        public static int Main(string[] args)
+    [Obsolete]
+    public static int Main(string[] args)
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+    {
+        var configuration = GetConfiguration();
+
+        Log.Logger = CreateSerilogLogger(configuration);
+
+        try
         {
-            var configuration = GetConfiguration();
+            Log.Warning("Configuring web host ({ApplicationContext})...", AppName);
 
-            Log.Logger = CreateSerilogLogger(configuration);
+            var host = BuildWebHost(configuration, args);
 
-            try
+            Log.Warning("Applying migrations ({ApplicationContext})...", AppName);
+
+            using (var newScope = host.Services.CreateScope())
             {
-                Log.Warning("Configuring web host ({ApplicationContext})...", AppName);
-
-                var host = BuildWebHost(configuration, args);
-
-                Log.Warning("Applying migrations ({ApplicationContext})...", AppName);
-
-                using (var newScope = host.Services.CreateScope())
-                {
-                    var context = newScope.ServiceProvider.GetService<ApplicationDbContext>();
-                    context.Database.Migrate();
-                    var uow = newScope.ServiceProvider.GetService<IMyUnitOfWork>();
-
-                    try
-                    {
-                        IdentitySeed.SeedUsersAsync(context, uow).Wait();
-                    }
-                    catch (Exception seedEx)
-                    {
-                        Log.Fatal("Error while applying migrations...", seedEx);
-
-                        Debug.WriteLine(seedEx.Message);
-
-                        Console.WriteLine(seedEx.Message);
-
-                        return 1;
-                    }
-                }
-
-                Log.Warning("Starting web host ({ApplicationContext})...", AppName);
+                var context = newScope.ServiceProvider.GetService<ApplicationDbContext>();
+                context.Database.Migrate();
+                var uow = newScope.ServiceProvider.GetService<IMyUnitOfWork>();
 
                 try
                 {
-                    var consulClient = host.Services.GetRequiredService<IConsulClient>();
-
-                    if (configuration.GetValue<bool>("UseConsul"))
-                    {
-                        PopulateConsulWithSettings(consulClient, configuration, "MyConfigurationValues/");
-                    }
+                    IdentitySeed.SeedUsersAsync(context, uow).Wait();
                 }
-                catch (Exception ex)
+                catch (Exception seedEx)
                 {
-                    Log.Fatal("Error while populating Consul configuration KVs...", ex);
+                    Log.Fatal("Error while applying migrations...", seedEx);
 
-                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(seedEx.Message);
 
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(seedEx.Message);
+
+                    return 1;
                 }
+            }
 
-                host.Run();
+            Log.Warning("Starting web host ({ApplicationContext})...", AppName);
 
-                return 0;
+            try
+            {
+                var consulClient = host.Services.GetRequiredService<IConsulClient>();
+
+                if (configuration.GetValue<bool>("UseConsul"))
+                    PopulateConsulWithSettings(consulClient, configuration, "MyConfigurationValues/");
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", AppName);
+                Log.Fatal("Error while populating Consul configuration KVs...", ex);
 
                 Debug.WriteLine(ex.Message);
 
                 Console.WriteLine(ex.Message);
-
-                return 1;
             }
-        }
 
-        private static void PopulateConsulWithSettings(IConsulClient consulClient, IConfiguration config, string keyPrefix)
+            host.Run();
+
+            return 0;
+        }
+        catch (Exception ex)
         {
-            foreach (var section in config.GetChildren())
-            {
-                ProcessSection(consulClient, section, keyPrefix + section.Key);
-            }
-        }
+            Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", AppName);
 
-        private static void ProcessSection(IConsulClient consulClient, IConfigurationSection section, string currentPath)
-        {
-            // If the section has children, it's a complex object
-            if (section.GetChildren().Any())
-            {
-                foreach (var child in section.GetChildren())
-                {
-                    ProcessSection(consulClient, child, $"{currentPath}/{child.Key}");
-                }
-            }
-            else
-            {
-                // It's a key-value pair, so put it in Consul
-                consulClient.KV.Put(new KVPair(currentPath) { Value = System.Text.Encoding.UTF8.GetBytes(section.Value) });
-            }
+            Debug.WriteLine(ex.Message);
+
+            Console.WriteLine(ex.Message);
+
+            return 1;
         }
+    }
+
+    private static void PopulateConsulWithSettings(IConsulClient consulClient, IConfiguration config, string keyPrefix)
+    {
+        foreach (var section in config.GetChildren()) ProcessSection(consulClient, section, keyPrefix + section.Key);
+    }
+
+    private static void ProcessSection(IConsulClient consulClient, IConfigurationSection section, string currentPath)
+    {
+        // If the section has children, it's a complex object
+        if (section.GetChildren().Any())
+            foreach (var child in section.GetChildren())
+                ProcessSection(consulClient, child, $"{currentPath}/{child.Key}");
+        else
+            // It's a key-value pair, so put it in Consul
+            consulClient.KV.Put(new KVPair(currentPath) { Value = Encoding.UTF8.GetBytes(section.Value) });
+    }
 
 #pragma warning disable 1591
 
-        public static IWebHost BuildWebHost(IConfiguration configuration, string[] args)
+    public static IWebHost BuildWebHost(IConfiguration configuration, string[] args)
 #pragma warning restore 1591
-        {
-            return WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(true)
-                .UseStartup<Startup>()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseConfiguration(configuration)
-                //.UseIIS() // <===== For use in "in process" IIS scenarios:
-                //.UseKestrel(opts =>
-                //{
-                //    // Bind directly to a socket handle or Unix socket
-                //    // opts.ListenHandle(123554);
-                //    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
-                //    opts.Listen(IPAddress.Loopback, port: 6000);
-                //    // opts.ListenAnyIP(80);
-                //    opts.ListenLocalhost(6000);
-                //    //opts.ListenLocalhost(6001, opts => opts.UseHttps());
-                //    //opts.ListenLocalhost(6000);
-                //})
-                ////.UseUrls("http://+:6000"/*, "https://+:6001"*/)
-                //.UseUrls("http://localhost:6000"/*, "https://+:6001"*/)
-                //.UseSerilog()
-                .Build();
-        }
+    {
+        return WebHost.CreateDefaultBuilder(args)
+            .CaptureStartupErrors(true)
+            .UseStartup<Startup>()
+            .UseContentRoot(Directory.GetCurrentDirectory())
+            .UseConfiguration(configuration)
+            //.UseIIS() // <===== For use in "in process" IIS scenarios:
+            //.UseKestrel(opts =>
+            //{
+            //    // Bind directly to a socket handle or Unix socket
+            //    // opts.ListenHandle(123554);
+            //    // opts.ListenUnixSocket("/tmp/kestrel-test.sock");
+            //    opts.Listen(IPAddress.Loopback, port: 6000);
+            //    // opts.ListenAnyIP(80);
+            //    opts.ListenLocalhost(6000);
+            //    //opts.ListenLocalhost(6001, opts => opts.UseHttps());
+            //    //opts.ListenLocalhost(6000);
+            //})
+            ////.UseUrls("http://+:6000"/*, "https://+:6001"*/)
+            //.UseUrls("http://localhost:6000"/*, "https://+:6001"*/)
+            //.UseSerilog()
+            .Build();
+    }
 
-        [Obsolete]
-        private static ILogger CreateSerilogLogger(IConfiguration configuration)
-        {
-            var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-            var logstashUrl = configuration["Serilog:LogstashUrl"];
-            var sqlite = configuration["ConnectionStrings:Sqlite"];
-            var mssql = configuration["ConnectionStrings:MSSql"];
-            var appInstanceName = configuration["InstanceName"];
-            var environment = configuration["Environment"];
+    [Obsolete]
+    private static ILogger CreateSerilogLogger(IConfiguration configuration)
+    {
+        var seqServerUrl = configuration["Serilog:SeqServerUrl"];
+        var logstashUrl = configuration["Serilog:LogstashUrl"];
+        var sqlite = configuration["ConnectionStrings:Sqlite"];
+        var mssql = configuration["ConnectionStrings:MSSql"];
+        var appInstanceName = configuration["InstanceName"];
+        var environment = configuration["Environment"];
 
-            // var kafkaProducerForLogging = container.Resolve<IKafkaLoggingProducer>();
+        // var kafkaProducerForLogging = container.Resolve<IKafkaLoggingProducer>();
 
-            return new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration)
-                .Enrich.WithProperty("Application", appInstanceName)
-                .Enrich.WithProperty("Environment", environment)
-                .Enrich.WithAssemblyName()
-                .Enrich.WithAssemblyVersion()
-                .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-                                                  //.Enrich.WithExceptionData()
-                                                  //.Enrich.WithExceptionStackTraceHash()
-                .Enrich.WithMemoryUsage()
-                .Enrich.WithThreadId()
-                .Enrich.WithThreadName()
-                .Enrich.FromLogContext()
-                .Enrich.WithProcessName()
-                .Enrich.WithEnvironmentUserName()
-                .Enrich.WithEnvironment(environment)
-                .Enrich.WithProperty("DebuggerAttached", Debugger.IsAttached)
-                .ReadFrom.ConfigurationSection(configuration.GetSection("Serilog"))
-                //    .WriteTo.Kafka(kafkaProducerForLogging, new EcsTextFormatter()) // this is how we make the sink use a custom text formatter, in this case, we needed the Elastic compatible formatter
-                .WriteTo.Console(theme: AnsiConsoleTheme.Code,
-                    outputTemplate:
-                    "{Timestamp:HH:mm} [{Level}] [{Address}] {Site}: {Message} || CommandType: [{Command_Type}], CommandId: [{Command_Id}], Application: [{Application}], Machine: [{MachineName}], User: [{EnvironmentUserName}], CorrelationId: [{CorrelationId}], DebuggerAttached: [{DebuggerAttached}] {NewLine}")
-                .WriteTo.File(appInstanceName + ".log", rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: null)
-                .CreateLogger();
-        }
+        return new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .Enrich.WithProperty("Application", appInstanceName)
+            .Enrich.WithProperty("Environment", environment)
+            .Enrich.WithAssemblyName()
+            .Enrich.WithAssemblyVersion()
+            .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
+            //.Enrich.WithExceptionData()
+            //.Enrich.WithExceptionStackTraceHash()
+            .Enrich.WithMemoryUsage()
+            .Enrich.WithThreadId()
+            .Enrich.WithThreadName()
+            .Enrich.FromLogContext()
+            .Enrich.WithProcessName()
+            .Enrich.WithEnvironmentUserName()
+            .Enrich.WithEnvironment(environment)
+            .Enrich.WithProperty("DebuggerAttached", Debugger.IsAttached)
+            .ReadFrom.ConfigurationSection(configuration.GetSection("Serilog"))
+            //    .WriteTo.Kafka(kafkaProducerForLogging, new EcsTextFormatter()) // this is how we make the sink use a custom text formatter, in this case, we needed the Elastic compatible formatter
+            .WriteTo.Console(theme: AnsiConsoleTheme.Code,
+                outputTemplate:
+                "{Timestamp:HH:mm} [{Level}] [{Address}] {Site}: {Message} || CommandType: [{Command_Type}], CommandId: [{Command_Id}], Application: [{Application}], Machine: [{MachineName}], User: [{EnvironmentUserName}], CorrelationId: [{CorrelationId}], DebuggerAttached: [{DebuggerAttached}] {NewLine}")
+            .WriteTo.File(appInstanceName + ".log", rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: null)
+            .CreateLogger();
+    }
 
-        private static IConfiguration GetConfiguration()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(
-                    $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", // beware this will default to Production appsettings if no ENV is defined on the OS
-                    true)
-                .AddEnvironmentVariables();
+    private static IConfiguration GetConfiguration()
+    {
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile(
+                $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", // beware this will default to Production appsettings if no ENV is defined on the OS
+                true)
+            .AddEnvironmentVariables();
 
-            var config = builder.Build();
+        var config = builder.Build();
 
-            return builder.Build();
-        }
+        return builder.Build();
     }
 }

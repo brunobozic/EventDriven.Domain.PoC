@@ -1,31 +1,30 @@
-﻿using Autofac.Core.Activators.Reflection;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Reflection;
-using System;
 using System.Linq;
+using System.Reflection;
+using Autofac.Core.Activators.Reflection;
 
-namespace EventDriven.Domain.PoC.Api.Rest
+namespace IdentityService.Api;
+
+public class AllConstructorFinder : IConstructorFinder
 {
-    public class AllConstructorFinder : IConstructorFinder
+    private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache =
+        new();
+
+    public ConstructorInfo[] FindConstructors(Type targetType)
     {
-        private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache =
-            new();
+        var result = Cache.GetOrAdd(targetType,
+            t => t.GetTypeInfo().DeclaredConstructors.ToArray());
 
-        public ConstructorInfo[] FindConstructors(Type targetType)
+        try
         {
-            var result = Cache.GetOrAdd(targetType,
-                t => t.GetTypeInfo().DeclaredConstructors.ToArray());
+            var temp = result.Length > 0 ? result : throw new NoConstructorsFoundException(targetType, this);
 
-            try
-            {
-                var temp = result.Length > 0 ? result : throw new NoConstructorsFoundException(targetType, this);
-
-                return temp;
-            }
-            catch (Exception)
-            {
-                throw new NoConstructorsFoundException(targetType, this);
-            }
+            return temp;
+        }
+        catch (Exception)
+        {
+            throw new NoConstructorsFoundException(targetType, this);
         }
     }
 }
