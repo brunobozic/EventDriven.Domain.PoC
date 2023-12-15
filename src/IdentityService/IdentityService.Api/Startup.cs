@@ -197,7 +197,7 @@ public class Startup
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath); 
-            options.AddFluentValidationRules(); // make fluent validations visible to swagger OpenApi
+  
             options.ExampleFilters();
             // Add the custom operation filter here
             options.OperationFilter<RandomizeRegisterUserExamplesOperationFilter>();
@@ -226,7 +226,17 @@ public class Startup
             options.OperationFilter<UserRegistrationCustomOperationFilter>();
         });
         services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
-
+        // Add FV
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
+        // Add FV Rules to swagger
+        services.AddFluentValidationRulesToSwagger();
+        // [Optional] Configure generation options for your needs. Also can be done with services.Configure<SchemaGenerationOptions>
+        // services.AddFluentValidationRulesToSwagger(options =>
+        // {
+        //     options.SetNotNullableIfMinLengthGreaterThenZero = true;
+        //     options.UseAllOffForMultipleRules = true;
+        // });
         #endregion Swagger
 
         services.Configure<MyConfigurationValues>(Configuration.GetSection("MyConfigurationValues"));

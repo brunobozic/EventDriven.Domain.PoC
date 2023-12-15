@@ -18,8 +18,6 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     ///     Overrides contained within.
     ///     IDisposable.
     /// </summary>
-    /// <param name="messageProcessor"></param>
-    /// <param name="config"></param>
     /// <param name="topicName"></param>
     public KafkaScheduledConsumer(
         ConsumerConfig consumerconfig
@@ -93,8 +91,8 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
         {
             messageConsumingResult = ConsumeMessage();
 
-            // this is the last successfully read offset, that at this point is still not commited
-            // IMPORTANT => last commited offset may or may not be equal to the last offset read from the topic/partition
+            // this is the last successfully read offset, that at this point is still not committed
+            // IMPORTANT => last committed offset may or may not be equal to the last offset read from the topic/partition
             if (!messageConsumingResult.ErrorMessage.ToUpper().Contains("EOF"))
                 _lastOffset = messageConsumingResult.Offset;
 
@@ -164,7 +162,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
 
     /// <summary>
     ///     Returns the latest offset that we wish to track.
-    ///     The returned value will not be equal to last commited offset nor the current consumer tracked offset
+    ///     The returned value will not be equal to last committed offset nor the current consumer tracked offset
     ///     Instead this will return the last offset we declared as our target offset.
     ///     This is due to enabling multiple consecutive message skipping. No logging.
     /// </summary>
@@ -188,7 +186,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
                         sb.AppendFormat("{0}", ",");
                 }
 
-                counter = counter + 1;
+                counter++;
             }
         }
 
@@ -279,7 +277,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
         // each needs to be tracked separately
         // in this case we are setting the offset that we would like to hit as _needsToHitOffset marker
         // this is needed because we might be skipping more than 1 consecutive message, and in this case we must not track
-        // last commited offset nor current offset, instead we need to make sure we are tracking the _needsToHitOffset marker
+        // last committed offset nor current offset, instead we need to make sure we are tracking the _needsToHitOffset marker
         _needsToHitOffset = _lastOffset + 1;
         // messages can belong to different partitions...
         _needsToHitTopicPartition = topicPartition;
@@ -328,10 +326,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     ///     Returns the underlying consumer instance.
     /// </summary>
     /// <returns></returns>
-    public Handle UnderlyingHandle()
-    {
-        return _c != null ? _c.Handle : null;
-    }
+    public Handle UnderlyingHandle() => _c?.Handle;
 
     /// <summary>
     ///     Returns a list of consumer subscriptions.
@@ -339,7 +334,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     /// <returns></returns>
     public List<string> UnderlyingSubscriptions()
     {
-        return _c != null ? _c.Subscription : null;
+        return _c?.Subscription;
     }
 
     #endregion Public methods
@@ -352,13 +347,10 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     /// <param name="messageConsumingResult"></param>
     private static void ParseAndLog(ConsumeMessageResult messageConsumingResult)
     {
-        // here we want to truncate the message so as to avoid flooding the log
+        // here we want to truncate the message to avoid flooding the log
         var msgLength = messageConsumingResult.Message?.Length;
-        var actualMsg = string.Empty;
-        if (msgLength > 40)
-            actualMsg = messageConsumingResult.Message.Substring(0, 40);
-        else
-            actualMsg = messageConsumingResult.Message;
+        string actualMsg;
+        actualMsg = msgLength > 40 ? messageConsumingResult.Message[..40] : messageConsumingResult.Message;
 
         Log.ForContext("Partition", messageConsumingResult.Partition)
             .ForContext("Topic", messageConsumingResult.Topic)
@@ -389,20 +381,18 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     ///     If successful, will also populate various metadata.
     ///     ==> Will not commit offset! You need to take care of that yourself <==
     /// </summary>
-    /// <param name="consumer"></param>
-    /// <param name="consumedMessage"></param>
     /// <returns></returns>
     private ConsumeMessageResult ConsumeMessage()
     {
         var returnValue = new ConsumeMessageResult();
 
         // if we need to hit a certain offset (due to skipping a message for an example), we need to re-seek/re-assign the consumer to that exact offset
-        // else the consumer will begin reading from the last commited offset, which may not be what we need it to do...
+        // else the consumer will begin reading from the last committed offset, which may not be what we need it to do...
         //
         // in this case we are looking for a specific offset that we would like to hit -> the value of this offset is stored as _needsToHitOffset
         //
         // this is needed because we might be skipping more than 1 consecutive message, and in this case we must not track
-        // the last commited offset nor current consumers in-memory tracked offset => instead we need to make sure we are tracking the _needsToHitOffset
+        // the last committed offset nor current consumers in-memory tracked offset => instead we need to make sure we are tracking the _needsToHitOffset
         if (_needsToHitOffset > 0)
         {
             Log.Information("Subscribing to offset: [ " + _needsToHitOffset + " ], partition: [ " +
@@ -418,7 +408,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
         // may throw! caller must handle!
         var consumedMessage = _c.Consume(TimeSpan.FromSeconds(9));
 
-        if (consumedMessage != null && consumedMessage.Message != null)
+        if (consumedMessage is { Message: not null })
         {
             _currentOffset = consumedMessage.Offset.Value;
             _currentPartition = consumedMessage.TopicPartition.Partition.Value;
@@ -432,8 +422,8 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
             }
 
             // returnValue.CurrentTopicPartitionOffset = consumedMessage.TopicPartitionOffset;
-            // if this setting is turned on in consumerconfig
-            if (_config.EnablePartitionEof.Value)
+            // if this setting is turned on in consumer config
+            if (_config.EnablePartitionEof != null && _config.EnablePartitionEof.Value)
                 if (consumedMessage.IsPartitionEOF)
                     return PopulateReturnMessage(returnValue, "EOF");
 
