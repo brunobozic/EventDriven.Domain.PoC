@@ -27,9 +27,13 @@ public class LoggingCommandHandlerDecorator<T> : ICommandHandler<T> where T : IC
         _decorated = decorated;
     }
 
-    public async Task<Unit> Handle(T command, CancellationToken cancellationToken)
+    public async Task Handle(T command, CancellationToken cancellationToken)
     {
-        if (command is IRecurringCommand) return await _decorated.Handle(command, cancellationToken);
+        if (command is IRecurringCommand)
+        {
+            await _decorated.Handle(command, cancellationToken);
+            return;
+        }
 
         using (
             LogContext.Push(
@@ -42,11 +46,11 @@ public class LoggingCommandHandlerDecorator<T> : ICommandHandler<T> where T : IC
                     "Executing command {Command}",
                     command.GetType().Name);
 
-                var result = await _decorated.Handle(command, cancellationToken);
+                await _decorated.Handle(command, cancellationToken);
 
                 _logger.Information("Command {Command} processed successful", command.GetType().Name);
 
-                return result;
+                return;
             }
             catch (Exception exception)
             {

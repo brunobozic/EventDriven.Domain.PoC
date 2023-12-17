@@ -25,7 +25,7 @@ public class UnitOfWorkCommandHandlerDecorator<T> : ICommandHandler<T> where T :
         _context = context;
     }
 
-    public async Task<Unit> Handle(T command, CancellationToken cancellationToken)
+    public async Task Handle(T command, CancellationToken cancellationToken)
     {
         await _decorated.Handle(command, cancellationToken);
 
@@ -40,6 +40,6 @@ public class UnitOfWorkCommandHandlerDecorator<T> : ICommandHandler<T> where T :
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return;
     }
 }

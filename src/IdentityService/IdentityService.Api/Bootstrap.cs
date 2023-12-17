@@ -326,11 +326,11 @@ public class Bootstrap
         containerBuilder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
         containerBuilder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
 
-        containerBuilder.Register<ServiceFactory>(ctx =>
-        {
-            var c = ctx.Resolve<IComponentContext>();
-            return t => c.Resolve(t);
-        });
+        //containerBuilder.Register<ServiceFactory>(ctx =>
+        //{
+        //    var c = ctx.Resolve<IComponentContext>();
+        //    return t => c.Resolve(t);
+        //});
 
         // container.RegisterGeneric(typeof(CommandValidationBehavior<,>)).As(typeof(IPipelineBehavior<,>));
 
