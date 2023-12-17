@@ -13,7 +13,7 @@ namespace IdentityService.Data.Seed;
 
 public static class IdentitySeed
 {
-    public static async Task SeedUsersAsync(ApplicationDbContext myDbContext, IMyUnitOfWork myUnitOfWork)
+    public static async Task<bool> SeedUsersAsync(ApplicationDbContext myDbContext, IMyUnitOfWork myUnitOfWork)
     {
         if (!myDbContext.ApplicationUsers.Any(
                 user => user.UserName == ApplicationWideConstants.SYSTEM_USER_USERNAME))
@@ -279,5 +279,7 @@ public static class IdentitySeed
         }
 
         #endregion Address Types
+
+        return true;
     }
 }

@@ -14,7 +14,7 @@ namespace IdentityService.Api.Controllers.BaseControllerType;
 
 public class BaseController : ControllerBase
 {
-    private readonly IUserService _applicationUserService;
+
 
     /// <summary>
     /// </summary>
@@ -23,14 +23,14 @@ public class BaseController : ControllerBase
     /// <param name="configurationValues"></param>
     /// <param name="memCache"></param>
     /// <param name="contextAccessor"></param>
-    /// <param name="applicationUserService"></param>
+ 
     public BaseController(
         IMyUnitOfWork unitOfWork
         , IMapper mapper
         , IOptions<MyConfigurationValues> configurationValues
         , IMemoryCache memCache
         , IHttpContextAccessor contextAccessor
-        , IUserService applicationUserService
+ 
     )
     {
         ConfigurationValues = configurationValues.Value;
@@ -38,7 +38,7 @@ public class BaseController : ControllerBase
         ContextAccessor = contextAccessor;
         Mapper = mapper;
         MemCache = memCache;
-        _applicationUserService = applicationUserService;
+     
     }
 
     // returns the current authenticated ApplicationUser (null if not logged in)

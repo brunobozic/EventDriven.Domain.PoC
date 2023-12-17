@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedKernel.DomainContracts;
 using URF.Core.Abstractions.Trackable;
 
+
 namespace IdentityService.Application.CommandsAndHandlers.Roles;
 
 public class AssignRoleToUserCommandHandler : ICommandHandler<AssignRoleToUserCommand, ApplicationRoleAssignmentDto>

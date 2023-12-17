@@ -20,7 +20,6 @@ public class RoleAdministrationController : BaseController, IRoleAdministrationC
     #region ctor
 
     public RoleAdministrationController(
-        IUserService applicationUserService,
         IRoleAdministrationService roleAdministrationService,
         IMyUnitOfWork unitOfWork
         , IOptionsSnapshot<MyConfigurationValues> configurationValues
@@ -28,10 +27,8 @@ public class RoleAdministrationController : BaseController, IRoleAdministrationC
         , IMediator mediator
         , IMemoryCache memCache
         , IHttpContextAccessor contextAccessor
-        , ITracer tracer) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor,
-        applicationUserService)
+        , ITracer tracer) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor)
     {
-        _applicationUserService = applicationUserService;
         _roleAdministrationService = roleAdministrationService;
         _configurationValues = configurationValues.Value;
         _contextAccessor = contextAccessor;

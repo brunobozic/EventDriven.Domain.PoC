@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using IdentityService.Data.DatabaseContext;
 using IdentityService.Domain.DomainEntities.Audit;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using Microsoft.EntityFrameworkCore;

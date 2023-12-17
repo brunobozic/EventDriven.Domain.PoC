@@ -22,10 +22,8 @@ public class AddressAdministrationController : BaseController, IAddressAdministr
         IMapper mapper,
         IOptions<MyConfigurationValues> configurationValues,
         IMemoryCache memCache,
-        IHttpContextAccessor contextAccessor,
-        IUserService applicationUserService,
-        IAddressAdministrationService addressAdministrationService
-    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, applicationUserService)
+        IHttpContextAccessor contextAccessor
+    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor)
     {
     }
 

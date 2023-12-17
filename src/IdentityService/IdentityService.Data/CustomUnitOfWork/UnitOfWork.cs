@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
+using IdentityService.Data.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.DomainContracts;
 using URF.Core.EF;
@@ -17,7 +18,6 @@ public class MyUnitOfWork : UnitOfWork, IMyUnitOfWork
         DomainEventsDispatcher = domainEventsDispatcher;
     }
 
-    // ReSharper disable once InconsistentNaming
     private DbContext _context { get; }
 
     public IDomainEventsDispatcher DomainEventsDispatcher { get; }

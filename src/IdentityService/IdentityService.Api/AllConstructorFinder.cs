@@ -18,13 +18,13 @@ public class AllConstructorFinder : IConstructorFinder
 
         try
         {
-            var temp = result.Length > 0 ? result : throw new NoConstructorsFoundException(targetType, this);
+            var temp = result.Length > 0 ? result : throw new NoConstructorsFoundException(targetType);
 
             return temp;
         }
         catch (Exception)
         {
-            throw new NoConstructorsFoundException(targetType, this);
+            throw new NoConstructorsFoundException(targetType);
         }
     }
 }

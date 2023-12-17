@@ -31,7 +31,7 @@ public static class ServiceCollectionExtension
     public static void RegisterRepositories(this IServiceCollection services)
     {
         var models = GetAllModels();
-        services.AddScoped<DbContext, ApplicationDbContext>();
+        // services.AddScoped<DbContext, ApplicationDbContext>();
 
         foreach (var model in models)
         {

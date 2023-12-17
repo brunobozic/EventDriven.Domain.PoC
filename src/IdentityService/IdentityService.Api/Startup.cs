@@ -660,7 +660,7 @@ public class Startup
 
         #region Consul
 
-        app.UseConsul();
+        app.UseConsul(Configuration);
 
         #endregion Consul
     }

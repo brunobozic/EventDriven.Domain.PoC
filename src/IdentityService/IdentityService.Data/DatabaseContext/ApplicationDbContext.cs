@@ -49,9 +49,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     //}
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {
+        _auditFactory = new DbAuditTrailFactory(this);
         Log.Information("Entrancy");
     }
-
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+        _auditFactory = new DbAuditTrailFactory(this);
+        Log.Information("Entrancy");
+    }
     #endregion ctor
 
     public DbSet<AuditTrail> AuditTrail { get; set; }

@@ -9,9 +9,12 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using SharedKernel.HealthChecks.Checks;
 using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
+using ILogger = Serilog.ILogger;
 
 namespace IdentityService.Api.Extensions;
 
@@ -30,103 +33,54 @@ public static class ConsulExtensions
         return services;
     }
 
-    [Obsolete]
-    public static IApplicationBuilder UseConsul(this IApplicationBuilder app)
+    public static IApplicationBuilder UseConsul(this IApplicationBuilder app, IConfiguration configuration)
     {
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
+        var lifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
+        var logger = app.ApplicationServices.GetRequiredService<ILoggerFactory>().CreateLogger("ConsulExtensions");
 
-        var lifetime = app.ApplicationServices.GetRequiredService<IApplicationLifetime>();
+        var serviceId = configuration.GetValue<string>("Consul:ServiceId") ?? "EventDrivenPoC";
+        var serviceName = configuration.GetValue<string>("Consul:ServiceName") ?? "EventDrivenPoC";
+        var serviceAddress = configuration.GetValue<string>("Consul:ServiceAddress") ?? "localhost";
+        var servicePort = configuration.GetValue<int>("Consul:ServicePort");
 
-        if (!(app.Properties["server.Features"] is FeatureCollection features))
-            return app;
-
-        var addresses = features.Get<IServerAddressesFeature>();
-
-        //try
-        //{   // this will fail if run within the IIS server
-        //    var address = addresses.Addresses.First();
-        //    Log.Information($"address={address}");
-        //}
-        //catch (Exception ex)
-        //{
-        //    Log.Error("Consul fail if run within the IIS server", ex);
-        //    throw;
-        //}
-
-        // var uri = new Uri(address);
         var registration = new AgentServiceRegistration
         {
-            ID = "EventDrivenPoC-5001",
-            // service name
-            Name = "EventDrivenPoC",
-            Address = "localhost",
-            Port = 5001,
+            ID = serviceId,
+            Name = serviceName,
+            Address = serviceAddress,
+            Port = servicePort,
             Check = new AgentServiceCheck
             {
-                HTTP = "http://localhost:5001/health", // URL of your health check endpoint
-                Interval = TimeSpan.FromSeconds(30), // Interval for health check
+                HTTP = $"http://{serviceAddress}:{servicePort}/health",
+                Interval = TimeSpan.FromSeconds(30),
                 Timeout = TimeSpan.FromSeconds(5)
             }
         };
 
         Log.Information("Registering with Consul");
+        RegisterServiceWithConsul(consulClient, registration, lifetime);
 
+        return app;
+    }
+
+    private static void RegisterServiceWithConsul(IConsulClient consulClient, AgentServiceRegistration registration, IHostApplicationLifetime lifetime)
+    {
         try
         {
-            consulClient.Agent.ServiceDeregister("EventDrivenPoC-5000").GetAwaiter().GetResult();
             consulClient.Agent.ServiceDeregister(registration.ID).GetAwaiter().GetResult();
-        }
-        catch (Exception deregistrationException)
-        {
-        }
-
-        try
-        {
             consulClient.Agent.ServiceRegister(registration).GetAwaiter().GetResult();
 
             lifetime.ApplicationStopping.Register(() =>
             {
-                Log.Information("Unregistering from Consul");
+                Log.Information("Deregistering from Consul");
                 consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true);
             });
         }
-        catch (HttpRequestException reqEx)
-        {
-            Log.Error("Consul not responding, check to see if it is running", reqEx);
-            throw;
-        }
         catch (Exception ex)
         {
-            Log.Error("Consul fail if run within the IIS server", ex);
+            Log.Error(ex, "Error during Consul registration or deregistration.");
             throw;
         }
-
-        return app;
-    }
-}
-
-public static class ConsulHealthCheckBuilderExtensions
-{
-    private const string NAME = "consul";
-
-    public static IHealthChecksBuilder AddConsul(this IHealthChecksBuilder builder, ConsulOptions setup,
-        string name = default, HealthStatus? failureStatus = default, IEnumerable<string> tags = default,
-        TimeSpan? timeout = default)
-    {
-        builder.Services.AddHttpClient();
-
-        var registrationName = name ?? NAME;
-        return builder.Add(new HealthCheckRegistration(
-            registrationName,
-            sp => CreateHealthCheck(sp, setup, registrationName),
-            failureStatus,
-            tags,
-            timeout));
-    }
-
-    private static ConsulHealthCheck CreateHealthCheck(IServiceProvider sp, ConsulOptions options, string name)
-    {
-        var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-        return new ConsulHealthCheck(options, () => httpClientFactory.CreateClient(name));
     }
 }

@@ -1,11 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Autofac;
+using IdentityService.Application.DomainServices.UserServices;
+using IdentityService.Data.DatabaseContext;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Serilog;
+using SharedKernel.DomainContracts;
 
 namespace IdentityService.Api.Middleware;
 
@@ -64,31 +70,6 @@ public class SerilogMiddleware
         else
             Log.Warning("{0} => {1}\n{2}\n", DateTime.Now.ToLocalTime(), requestUrlString, requestHeadersString);
 
-        //// Create a new scope
-        //var serviceScopeFactory = context.RequestServices.GetService<IServiceScopeFactory>();
-        //using (var scope = serviceScopeFactory.CreateScope())
-        //{
-        //    try
-        //    {
-        //        // Attempt to resolve the ApplicationDbContext
-        //        var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
-
-        //        // Log success or perform further actions
-        //        if (dbContext != null)
-        //        {
-        //            Log.Information("Successfully resolved ApplicationDbContext");
-        //        }
-        //        else
-        //        {
-        //            Log.Warning("Failed to resolve ApplicationDbContext");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception details
-        //        Log.Error(ex, "Exception occurred while resolving ApplicationDbContext");
-        //    }
-        //}
 
         await next(context);
 

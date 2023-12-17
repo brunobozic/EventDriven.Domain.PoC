@@ -73,7 +73,7 @@ public class UserController : BaseController, IUserController
         , IMemoryCache memCache
         , IHttpContextAccessor contextAccessor
         , TracerProvider tracer
-    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, applicationUserService)
+    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor)
     {
         _applicationUserService = applicationUserService;
         _configurationValues = configurationValues.Value;

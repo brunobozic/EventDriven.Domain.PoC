@@ -1,4 +1,7 @@
-﻿using Autofac;
+﻿
+using System.ComponentModel;
+using Autofac;
+using IContainer = Autofac.IContainer;
 
 namespace SharedKernel.DomainContracts;
 
