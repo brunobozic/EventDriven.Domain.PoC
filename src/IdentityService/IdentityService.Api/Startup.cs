@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using DynamicServiceRegistration;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -20,6 +21,7 @@ using IdentityService.Api.QuartzJobs;
 using IdentityService.Api.SwaggerOverrides;
 using IdentityService.Application.AutomapperMaps;
 using IdentityService.Application.DomainServices.EmailServices;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -46,9 +48,6 @@ using Quartz;
 using Quartz.Impl;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using MicroElements.Swashbuckle.FluentValidation;
-using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
-using MicroElements.OpenApi;
 using SharedKernel.Helpers.Configuration;
 using SharedKernel.Helpers.EmailSender;
 using SharedKernel.Helpers.Quartz;
@@ -111,6 +110,10 @@ public class Startup
         var connStr = Configuration.GetConnectionString("Sqlite");
         services.AddOptions();
         services.Configure<ServiceDisvoveryOptions>(Configuration.GetSection("ServiceDiscovery"));
+
+        var assembly = Assembly.GetExecutingAssembly(); // Change this to your assembly
+        //Register services dynamically
+        services.RegisterServicesWithAttributes(assembly);
 
         #region MVC wireup
 
@@ -196,8 +199,8 @@ public class Startup
             //Set the comments path for the swagger json and ui.
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            options.IncludeXmlComments(xmlPath); 
-  
+            options.IncludeXmlComments(xmlPath);
+
             options.ExampleFilters();
             // Add the custom operation filter here
             options.OperationFilter<RandomizeRegisterUserExamplesOperationFilter>();
@@ -237,6 +240,7 @@ public class Startup
         //     options.SetNotNullableIfMinLengthGreaterThenZero = true;
         //     options.UseAllOffForMultipleRules = true;
         // });
+
         #endregion Swagger
 
         services.Configure<MyConfigurationValues>(Configuration.GetSection("MyConfigurationValues"));

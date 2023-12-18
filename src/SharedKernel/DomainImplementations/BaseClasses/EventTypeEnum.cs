@@ -3,5 +3,11 @@
 public enum EventTypeEnum
 {
     Undefined,
-    UserCreatedDomainEvent
+    UserCreatedDomainEvent,
+    VerificationEmailSend,
+    VerificationEmailAcknowledged,
+    UserAccountVerified,
+    VerificationEmailResent,
+    VerificationEmailSendFailure,
+    RoleAssignedToUser
 }

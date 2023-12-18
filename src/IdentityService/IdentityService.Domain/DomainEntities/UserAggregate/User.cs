@@ -812,7 +812,8 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
             roleGiver.Id,
             roleGiver.Email,
             roleGiver.UserName,
-            DateTimeOffset.UtcNow // Use the current UTC time
+            DateTimeOffset.UtcNow, // Use the current UTC time
+            EventTypeEnum.RoleAssignedToUser
         );
 
         // Add the role assigned event to the domain events of the user

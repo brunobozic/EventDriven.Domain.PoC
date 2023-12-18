@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
 using MediatR;
+using Serilog;
 using SharedKernel.DomainContracts;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Handlers;
@@ -18,5 +19,6 @@ public class RoleAssignedToUserDomainEventHandler : INotificationHandler<RoleAss
     public async Task Handle(RoleAssignedToUserNotification notification, CancellationToken cancellationToken)
     {
         // TODO: journal
+        Log.Information("RoleAssignedToUserDomainEventHandler Handle");
     }
 }

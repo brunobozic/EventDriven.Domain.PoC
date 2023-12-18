@@ -52,7 +52,7 @@ public static class ConsulExtensions
             Port = servicePort,
             Check = new AgentServiceCheck
             {
-                HTTP = $"http://{serviceAddress}:{servicePort}/health",
+                HTTP = $"https://{serviceAddress}:{servicePort}/health",
                 Interval = TimeSpan.FromSeconds(30),
                 Timeout = TimeSpan.FromSeconds(5)
             }

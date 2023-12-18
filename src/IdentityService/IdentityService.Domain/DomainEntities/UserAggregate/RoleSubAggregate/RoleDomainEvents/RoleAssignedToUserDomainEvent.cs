@@ -16,6 +16,7 @@ public class RoleAssignedToUserDomainEvent : DomainEventBase
     public Guid UserId;
     public string UserName;
     public DateTimeOffset UtcNow;
+    public EventTypeEnum EventType;
 
     public RoleAssignedToUserDomainEvent(
         Guid userId
@@ -28,7 +29,7 @@ public class RoleAssignedToUserDomainEvent : DomainEventBase
         , string roleGiverEmail
         , string roleGiverUsername
         , DateTimeOffset utcNow
-    )
+        , EventTypeEnum roleAssignedToUserEvent)
     {
         UserId = userId;
         UserName = userName;
@@ -40,5 +41,6 @@ public class RoleAssignedToUserDomainEvent : DomainEventBase
         RoleGiverEmail = roleGiverEmail;
         RoleGiverUsername = roleGiverUsername;
         UtcNow = utcNow;
+        EventType = roleAssignedToUserEvent;
     }
 }
