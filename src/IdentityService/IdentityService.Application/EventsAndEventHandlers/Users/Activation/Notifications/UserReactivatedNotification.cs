@@ -1,22 +1,16 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
-using Newtonsoft.Json;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.Activation.Notifications;
 
-public class UserReactivatedNotification : IntegrationEventBase<UserReactivatedDomainEvent>
+public class UserReactivatedNotification : DomainNotificationBase<UserReactivatedDomainEvent>
 {
-    public UserReactivatedNotification(UserReactivatedDomainEvent integrationEvent) : base(integrationEvent)
+    public UserReactivatedNotification(UserReactivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         UserId = integrationEvent.UserId;
     }
 
-    [JsonConstructor]
-    public UserReactivatedNotification(Guid userId) : base(null)
-    {
-        UserId = userId;
-    }
 
     public Guid UserId { get; }
 }

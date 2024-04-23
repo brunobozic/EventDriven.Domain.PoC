@@ -1,13 +1,12 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
-using Newtonsoft.Json;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Activation.Notifications;
 
-public class RoleActivatedNotification : IntegrationEventBase<RoleActivatedDomainEvent>
+public class RoleActivatedNotification : DomainNotificationBase<RoleActivatedDomainEvent>
 {
-    public RoleActivatedNotification(RoleActivatedDomainEvent integrationEvent) : base(integrationEvent)
+    public RoleActivatedNotification(RoleActivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         RoleId = integrationEvent.RoleId;
         RoleDescription = integrationEvent.Description;
@@ -18,11 +17,6 @@ public class RoleActivatedNotification : IntegrationEventBase<RoleActivatedDomai
         CreatorId = integrationEvent.ActivatorId;
     }
 
-    [JsonConstructor]
-    public RoleActivatedNotification(long roleId) : base(null)
-    {
-        RoleId = roleId;
-    }
 
     public string ActivatorEmail { get; set; }
 

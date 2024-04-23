@@ -1,15 +1,16 @@
-﻿using System.Threading.Tasks;
-using IdentityService.Data.DatabaseContext;
+﻿using IdentityService.Data.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace IdentityService.Data;
 
 public static class DbInitializer
 {
-    public static async Task InitializeAsync(ApplicationDbContext myDbContext)
+    public async static Task InitializeAsync(ApplicationDbContext myDbContext)
     {
         // myDbContext.Database.EnsureCreated();
         await myDbContext.Database.MigrateAsync();
         await myDbContext.SaveChangesAsync();
     }
 }
+

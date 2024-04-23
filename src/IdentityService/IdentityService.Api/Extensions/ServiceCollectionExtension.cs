@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using IdentityService.Data.DatabaseContext;
+﻿using IdentityService.Data.DatabaseContexts;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using TrackableEntities.Common.Core;
+using URF.Core.Abstractions;
 using URF.Core.Abstractions.Trackable;
+using URF.Core.EF;
 using URF.Core.EF.Trackable;
 
 namespace IdentityService.Api.Extensions;
@@ -31,7 +33,9 @@ public static class ServiceCollectionExtension
     public static void RegisterRepositories(this IServiceCollection services)
     {
         var models = GetAllModels();
-        // services.AddScoped<DbContext, ApplicationDbContext>();
+        // services.AddScoped<IMyUnitOfWork, MyUnitOfWork>();
+        services.AddTransient<DbContextOptions, DbContextOptions<ApplicationDbContext>>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         foreach (var model in models)
         {

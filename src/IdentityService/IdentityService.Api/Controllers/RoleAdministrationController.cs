@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using OpenTracing;
 using SharedKernel.Helpers.Configuration;
@@ -21,20 +22,19 @@ public class RoleAdministrationController : BaseController, IRoleAdministrationC
 
     public RoleAdministrationController(
         IRoleAdministrationService roleAdministrationService,
-        IMyUnitOfWork unitOfWork
-        , IOptionsSnapshot<MyConfigurationValues> configurationValues
+        IMyUnitOfWork unitOfWork,
+        IConfiguration configuration,
+        IOptionsSnapshot<MyConfigurationValues> configurationValues
         , IMapper mapper
         , IMediator mediator
         , IMemoryCache memCache
         , IHttpContextAccessor contextAccessor
-        , ITracer tracer) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor)
+        , ITracer tracer) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, configuration)
     {
         _roleAdministrationService = roleAdministrationService;
-        _configurationValues = configurationValues.Value;
-        _contextAccessor = contextAccessor;
-        _mapper = mapper;
         _mediator = mediator;
         _tracer = tracer;
+
     }
 
     #endregion ctor
@@ -49,6 +49,7 @@ public class RoleAdministrationController : BaseController, IRoleAdministrationC
     private readonly IRoleAdministrationService _roleAdministrationService;
 
     private readonly ITracer _tracer;
+    private readonly IConfiguration _configuration;
 
     #endregion Private props
 }

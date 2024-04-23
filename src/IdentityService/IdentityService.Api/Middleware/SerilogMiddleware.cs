@@ -1,17 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Autofac;
-using IdentityService.Application.DomainServices.UserServices;
-using IdentityService.Data.DatabaseContext;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Serilog;
-using SharedKernel.DomainContracts;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.Middleware;
 

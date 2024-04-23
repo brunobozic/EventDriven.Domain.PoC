@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharedKernel.BusinessRules;
+using System;
 using System.Runtime.Serialization;
-using SharedKernel.BusinessRules;
 
 namespace SharedKernel.DomainImplementations.DomainErrors;
 

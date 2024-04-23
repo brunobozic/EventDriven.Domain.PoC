@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Http;
 #else
 #endif
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Elastic.CommonSchema;
 using Framework.Serilog.Sink.Kafka.Http;
 using Serilog.Events;
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Framework.Serilog.Sink.Kafka;
 

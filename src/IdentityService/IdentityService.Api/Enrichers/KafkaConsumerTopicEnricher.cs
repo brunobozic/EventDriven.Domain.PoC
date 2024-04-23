@@ -1,7 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using Framework.Kafka.Core.Contracts;
+﻿using Framework.Kafka.Core.Contracts;
 using Serilog.Core;
 using Serilog.Events;
+using System.Runtime.CompilerServices;
 
 namespace IdentityService.Api.Enrichers;
 

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using IdentityService.Application.ViewModels.ApplicationRoles;
+using IdentityService.Application.ViewModels.ApplicationUsers.Response;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using IdentityService.Application.ViewModels.ApplicationRoles;
-using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers;
 

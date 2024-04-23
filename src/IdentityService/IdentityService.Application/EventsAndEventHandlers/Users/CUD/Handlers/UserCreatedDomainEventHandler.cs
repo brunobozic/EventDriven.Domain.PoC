@@ -1,9 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;
+﻿using IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 using IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using MediatR;
 using SharedKernel.DomainContracts;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.CUD.Handlers;
 

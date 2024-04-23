@@ -1,9 +1,8 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Data.CustomUnitOfWork.Interfaces;
-using IdentityService.Data.DatabaseContext;
+﻿using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.DomainContracts;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.EF;
 
 namespace IdentityService.Data.CustomUnitOfWork;
@@ -11,7 +10,7 @@ namespace IdentityService.Data.CustomUnitOfWork;
 public class MyUnitOfWork : UnitOfWork, IMyUnitOfWork
 {
     public MyUnitOfWork(
-        DbContext context,
+        DbContext context, // don't put ApplicationDbContext in here because SaveChangesAsync will stop saving changes
         IDomainEventsDispatcher domainEventsDispatcher) : base(context)
     {
         _context = context;

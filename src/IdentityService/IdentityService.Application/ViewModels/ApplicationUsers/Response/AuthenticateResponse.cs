@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Response;
 
-public class AuthenticateResponse
+public sealed record AuthenticateResponse
 {
     public int Id { get; set; }
     public string Title { get; set; }

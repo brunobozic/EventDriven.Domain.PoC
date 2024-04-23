@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Autofac;
 using AutoMapper;
 using IdentityService.Api.Attributes;
 using IdentityService.Api.Controllers.BaseControllerType;
@@ -13,8 +9,11 @@ using IdentityService.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo;
 using IdentityService.Application.CommandsAndHandlers.Roles;
 using IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 using IdentityService.Application.CommandsAndHandlers.Users.Email.VerifyEmail;
+using IdentityService.Application.CommandsAndHandlers.Users.RefreshTokenCommand;
 using IdentityService.Application.DomainServices.UserServices;
+using IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using IdentityService.Application.Ports.Input.Contracts;
+using IdentityService.Application.ViewModels;
 using IdentityService.Application.ViewModels.Address;
 using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Application.ViewModels.ApplicationUsers.Request;
@@ -22,16 +21,23 @@ using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
+using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Trace;
 using Serilog;
 using SharedKernel.Helpers.Configuration;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
+using System.Diagnostics;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.Controllers;
 
@@ -41,142 +47,47 @@ namespace IdentityService.Api.Controllers;
 public class UserController : BaseController, IUserController
 {
     private readonly IUserService _applicationUserService;
-
-    private readonly MyConfigurationValues _configurationValues;
-    private readonly IHttpContextAccessor _contextAccessor;
-
-#pragma warning disable IDE0052 // Remove unread private members
-
-    // ReSharper disable once NotAccessedField.Local
-    private readonly IMapper _mapper;
-
-#pragma warning restore IDE0052 // Remove unread private members
     private readonly IMediator _mediator;
     private readonly TracerProvider _tracer;
+    private readonly ILifetimeScope _lifetimeScope;
 
-    /// <summary>
-    /// </summary>
-    /// <param name="applicationUserService"></param>
-    /// <param name="unitOfWork"></param>
-    /// <param name="configurationValues"></param>
-    /// <param name="mapper"></param>
-    /// <param name="mediator"></param>
-    /// <param name="memCache"></param>
-    /// <param name="contextAccessor"></param>
-    /// <param name="tracer"></param>
     public UserController(
-        IUserService applicationUserService,
-        IMyUnitOfWork unitOfWork
+        IUserService applicationUserService
+        , IMyUnitOfWork unitOfWork
+        , IConfiguration configuration
         , IOptionsSnapshot<MyConfigurationValues> configurationValues
         , IMapper mapper
         , IMediator mediator
         , IMemoryCache memCache
         , IHttpContextAccessor contextAccessor
+        , ILifetimeScope lifetimeScope
         , TracerProvider tracer
-    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor)
+    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, configuration)
     {
         _applicationUserService = applicationUserService;
-        _configurationValues = configurationValues.Value;
-        _contextAccessor = contextAccessor;
-        _mapper = mapper;
         _mediator = mediator;
         _tracer = tracer;
+        _lifetimeScope = lifetimeScope;
     }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
-    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     public string FirstName { get; private set; }
-
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
-    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     public string LastName { get; private set; }
-
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
-    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     public string Email { get; private set; }
-
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable 1591
-
-    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     public string UserName { get; private set; }
 
-#pragma warning restore 1591
-
-    /// <summary>
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("refresh-token")]
-    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync()
+    [HttpGet("echo")]
+    public async Task<IActionResult> Echo(string echo, CancellationToken ct)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
-
-        if (string.IsNullOrEmpty(refreshToken))
-            return BadRequest(new { message = "Refresh EmailVerificationToken (Request cookie) is required" });
-
-        var serviceLayerResponse = await _applicationUserService.RefreshTheTokenAsync(refreshToken, IpAddress());
-
-        if (serviceLayerResponse.Success)
+        try
         {
-            SetTokenCookie(serviceLayerResponse.RefreshToken);
-
-            return Ok(serviceLayerResponse.Message);
+            return Ok(echo);
         }
-
-        return BadRequest(serviceLayerResponse.Message);
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="model"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    [Authorize]
-    [HttpPost("revoke-token")]
-    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    public async Task<ActionResult<RevokeTokenResponse>> RevokeTokenAsync(RevokeTokenRequest model,
-        CancellationToken ct)
-    {
-        // accept token from request body or cookie
-        var token = model.Token ?? Request.Cookies["refreshToken"];
-
-        if (string.IsNullOrEmpty(token))
-            return BadRequest("EmailVerificationToken is required");
-
-        //// users can revoke their own tokens and admins can revoke any tokens
-        //if (!applicationUser.OwnsToken(token) && applicationUser.Role != Role.Admin)
-        //    return Unauthorized("Unauthorized");
-
-        var serviceLayerResponse = await _applicationUserService.RevokeTokenAsync(token, IpAddress());
-
-        if (serviceLayerResponse.Success)
-            return Ok(serviceLayerResponse.Message);
-        return BadRequest(serviceLayerResponse.Message);
-    }
-
-    private Tracer GetTracer()
-    {
-        return _tracer.GetTracer("OtPrGrYa");
-    }
-
-    /// <summary>
-    ///     Register a new user. Will create a new user record, will send an email confirmation.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [HttpPost("register")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -189,35 +100,55 @@ public class UserController : BaseController, IUserController
     {
         var greeterActivitySource = new ActivitySource("OtPrGrJa");
         using var activity = greeterActivitySource.StartActivity();
+
+        using (var scope = _lifetimeScope.BeginLifetimeScope())
+        {
+            var handler = scope.Resolve<INotificationHandler<UserCreatedNotification>>();
+            Console.WriteLine(handler.GetType().FullName);
+        }
+
+        using (var scope = _lifetimeScope.BeginLifetimeScope())
+        {
+            var handler = scope.Resolve<INotificationHandler<UserCreatedDomainEvent>>();
+            Console.WriteLine(handler.GetType().FullName);
+        }
+
+
+
+
         try
         {
-            activity?.SetTag("greeting", "Hello World!");
+
             activity?.SetTag("Request.Email", request.Email);
             activity?.SetTag("Request.UserName", request.UserName);
             activity?.SetTag("Request.AcceptTerms", request.AcceptTerms);
-            activity?.SetTag("Environment", _configurationValues.Environment.Trim().ToUpper());
+            activity?.SetTag("Environment", base.ConfigurationValues.Environment.Trim().ToUpper());
             activity?.SetTag("Request origin", Request.Headers["origin"]);
 
-            // ReSharper disable once PossibleNullReferenceException
-            var creator =
-                (User)_contextAccessor.HttpContext
-                    .Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
+            var creator = (User)base.ContextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
 
             var newUserId = Guid.NewGuid();
 
-            var command = new RegisterUserCommand(newUserId, request.Email, request.ConfirmPassword,
-                    request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
-                    request.Oib)
-                { Origin = Request.Headers["origin"] };
+            var command = new RegisterUserCommand(
+                newUserId
+                , request.Email
+                , request.ConfirmPassword
+                , request.DateOfBirth
+                , request.FirstName
+                , request.LastName
+                , request.Password
+                , request.UserName
+                , request.Oib
+                )
+            { Origin = Request.Headers["origin"] };
 
             Guid? creatorId = Guid.Empty;
 
             if (creator == null)
             {
-                if (_configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
-                    _configurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
-                    creatorId = Guid.Parse(ApplicationWideConstants
-                        .SYSTEM_USER); // User ApplicationWideConstants.SYSTEM_USER is a pre-seeded "system" user
+                if (ConfigurationValues.Environment.Trim().ToUpper() == ApplicationConstants.DEVELOPMENT ||
+                    ConfigurationValues.Environment.Trim().ToUpper() == ApplicationConstants.LOCALDEVELOPMENT)
+                    creatorId = Guid.Parse(ApplicationWideConstants.SYSTEM_USER); // User ApplicationWideConstants.SYSTEM_USER is a pre-seeded "system" user
             }
             else
             {
@@ -240,9 +171,7 @@ public class UserController : BaseController, IUserController
             activity?.RecordException(ex);
             activity?.SetTag("Response.Success", false);
             activity?.SetTag("Response.Error", ex.Message);
-            Log.Warning(ex,
-                "User registration failed: {Email}, user with the same username and/or email already exists",
-                request.Email);
+            Log.Warning(ex, "User registration failed: {Email}, user with the same username and/or email already exists", request.Email);
             return BadRequest("User already exists.");
         }
         catch (Exception exc)
@@ -253,6 +182,79 @@ public class UserController : BaseController, IUserController
             Log.Warning(exc, "User registration failed: {Email}", request.Email);
             return StatusCode((int)HttpStatusCode.InternalServerError);
         }
+    }
+
+    [HttpPost("verify-email")]
+    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct)
+    {
+        var command =
+            new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail,
+                    request.UserName)
+            { Origin = Request.Headers["origin"] };
+
+        // using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
+
+        // this might not be true CQRS but I simply need synchronous feedback at this point because I cant rely on the email provided to be valid
+        // so I cant send an email and be certain that the user will receive it
+        var response = await _mediator.Send(command, ct);
+
+        if (response.Success)
+            return Ok(response.Message);
+        return BadRequest(response.Message);
+    }
+
+    [HttpPost("refresh-token")]
+    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync(CancellationToken ct)
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
+
+        if (string.IsNullOrEmpty(refreshToken)) return BadRequest(new { message = "Refresh EmailVerificationToken (Request cookie) is required" });
+
+        var command = new RefreshTokenCommand(refreshToken, Request.Headers["origin"], IpAddress());
+
+        var authenticateResponse = await _mediator.Send(command, ct);
+
+        if (authenticateResponse.Success)
+        {
+            SetTokenCookie(authenticateResponse.RefreshToken);
+
+            return Ok(authenticateResponse.Message);
+        }
+
+        return BadRequest(authenticateResponse.Message);
+    }
+
+    [Authorize]
+    [HttpPost("revoke-token")]
+    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    public async Task<ActionResult<RevokeTokenResponse>> RevokeTokenAsync(RevokeTokenRequest model, CancellationToken ct)
+    {
+        // accept token from request body or cookie
+        var refreshToken = model.Token ?? Request.Cookies["refreshToken"];
+
+        if (string.IsNullOrEmpty(refreshToken))
+            return BadRequest("EmailVerificationToken is required");
+
+        //// users can revoke their own tokens and admins can revoke any tokens
+        //if (!applicationUser.OwnsToken(token) && applicationUser.Role != Role.Admin)
+        //    return Unauthorized("Unauthorized");
+
+        var command = new RevokeTokenCommand(refreshToken, model.UserId, Request.Headers["origin"], IpAddress());
+        var revokeResponse = await _mediator.Send(command, ct);
+
+
+        if (revokeResponse.Success)
+            return Ok(revokeResponse.Message);
+        return BadRequest(revokeResponse.Message);
     }
 
     [HttpPost("login")]
@@ -275,11 +277,6 @@ public class UserController : BaseController, IUserController
         return BadRequest(serviceLayerResponse.Message);
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [MyAuthorize("Admin")]
     [HttpPost("create")]
     [Produces(typeof(ApplicationUserResponse))]
@@ -294,14 +291,11 @@ public class UserController : BaseController, IUserController
         var command = new RegisterUserCommand(newUserId, request.Email, request.ConfirmPassword,
                 request.DateOfBirth, request.FirstName, request.LastName, request.Password, request.UserName,
                 request.Oib)
-            { Origin = Request.Headers["origin"] };
+        { Origin = Request.Headers["origin"] };
 
         command.Origin = Request.Headers["origin"];
 
-        // ReSharper disable once PossibleNullReferenceException
-        var creator =
-            (User)_contextAccessor.HttpContext
-                .Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
+        var creator = (User)ContextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
         if (creator != null) command.CreatorId = creator.Id;
 
         //using var scope = _tracer.BuildSpan("CreateAsync").StartActive(true);
@@ -310,11 +304,13 @@ public class UserController : BaseController, IUserController
         return Created(string.Empty, user);
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
+
+
+    private Tracer GetTracer()
+    {
+        return _tracer.GetTracer("OtPrGrYa");
+    }
+
     [MyAuthorize("Admin")]
     [HttpPost("assign-role-to-user")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -326,10 +322,7 @@ public class UserController : BaseController, IUserController
         var command = new AssignRoleToUserCommand(request.UserIdToAssignTo, request.RoleName)
         {
             Origin = Request.Headers["origin"],
-            // ReSharper disable once PossibleNullReferenceException
-            AssignerUser =
-                (User)_contextAccessor.HttpContext
-                    .Items["ApplicationUser"] // this will work only if the user had gone thru authentication
+            AssignerUser = (User)ContextAccessor.HttpContext.Items["ApplicationUser"] // this will work only if the user had gone thru authentication
         };
 
         //using var scope = _tracer.BuildSpan("AssignRoleToUserAsync").StartActive(true);
@@ -339,11 +332,6 @@ public class UserController : BaseController, IUserController
         return Ok();
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [MyAuthorize("Admin")]
     [HttpPost("remove-role-from-user")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -355,10 +343,7 @@ public class UserController : BaseController, IUserController
         var command = new AssignRoleToUserCommand(request.UserIdToRemoveFrom, request.RoleName)
         {
             Origin = Request.Headers["origin"],
-            // ReSharper disable once PossibleNullReferenceException
-            RemoverUser =
-                (User)_contextAccessor.HttpContext
-                    .Items["ApplicationUser"] // this will work only if the user had gone thru authentication
+            RemoverUser = (User)ContextAccessor.HttpContext.Items["ApplicationUser"] // this will work only if the user had gone thru authentication
         };
 
         //using var scope = _tracer.BuildSpan("RemoveRoleFromUserAsync").StartActive(true);
@@ -368,11 +353,6 @@ public class UserController : BaseController, IUserController
         return Ok();
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [MyAuthorize("Admin")]
     [HttpPost("assign-address")]
     [Produces(typeof(AssignAddressToUserResponse))]
@@ -391,10 +371,7 @@ public class UserController : BaseController, IUserController
             DateTimeOffset.UtcNow.AddMonths(12))
         {
             Origin = Request.Headers["origin"],
-            // ReSharper disable once PossibleNullReferenceException
-            AssignerUser =
-                (User)_contextAccessor.HttpContext
-                    .Items["ApplicationUser"] // this will work only if the user had gone thru authentication
+            AssignerUser = (User)ContextAccessor.HttpContext.Items["ApplicationUser"] // this will work only if the user had gone thru authentication
         };
 
         // using var scope = _tracer.BuildSpan("AssignAddressToUserAsync").StartActive(true);
@@ -403,11 +380,6 @@ public class UserController : BaseController, IUserController
         return Ok("Address assigned to user.");
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [MyAuthorize("Admin")]
     [HttpPost("remove-address-from-user")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -416,10 +388,7 @@ public class UserController : BaseController, IUserController
     public async Task<IActionResult> RemoveAddressFromUserAsync(RemoveAddressFromUserRequest request,
         CancellationToken ct)
     {
-        // ReSharper disable once PossibleNullReferenceException
-        var remover =
-            (User)_contextAccessor.HttpContext
-                .Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
+        var remover = (User)ContextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
 
         var command = new RemoveAddressFromUserCommand(request.UserId, request.RoleId, request.AddressName)
         {
@@ -436,12 +405,6 @@ public class UserController : BaseController, IUserController
         return Ok();
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="command"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [Authorize]
     [HttpPut("update/{id:int}")]
     public async Task<ActionResult<ApplicationUserResponse>> UpdateAsync(int id,
@@ -450,11 +413,6 @@ public class UserController : BaseController, IUserController
         return null;
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [Authorize]
     [HttpDelete("delete/{id:int}")]
     public async Task<ActionResult<ApplicationUserResponse>> DeleteAsync(int id, CancellationToken ct)
@@ -462,11 +420,6 @@ public class UserController : BaseController, IUserController
         return null;
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [Authorize]
     [HttpGet("password-reset/{id:int}")]
     public async Task<ActionResult<ApplicationUserResponse>> PasswordResetAsync(int id, CancellationToken ct)
@@ -474,18 +427,13 @@ public class UserController : BaseController, IUserController
         return null;
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="userEmailAddress"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [Authorize]
     [HttpGet("resend-activation-link/{id:int}")]
     public async Task<ActionResult<bool>> ResendActivationLinkAsync(string userEmailAddress, string userName,
         CancellationToken ct)
     {
         var command = new ResendAccountVerificationEmailCommand(userEmailAddress, userName)
-            { Origin = Request.Headers["origin"] };
+        { Origin = Request.Headers["origin"] };
 
         // using var scope = _tracer.BuildSpan("ResendActivationLinkAsync").StartActive(true);
         var response = await _mediator.Send(command, ct);
@@ -493,37 +441,6 @@ public class UserController : BaseController, IUserController
         return response;
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    [HttpPost("verify-email")]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
-    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct)
-    {
-        var command =
-            new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail,
-                    request.UserName)
-                { Origin = Request.Headers["origin"] };
-
-        // using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);
-
-        // this might not be true CQRS but I simply need synchronous feedback at this point because I cant rely on the email provided to be valid
-        // so I cant send an email and be certain that the user will receive it
-        var response = await _mediator.Send(command, ct);
-
-        if (response.Success)
-            return Ok(response.Message);
-        return BadRequest(response.Message);
-    }
-
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [HttpPost("initiate-forgot-password")]
     public async Task<IActionResult> InitiateForgotPasswordAsync(InitiateForgotPasswordRequest request,
         CancellationToken ct)
@@ -539,11 +456,6 @@ public class UserController : BaseController, IUserController
         return Ok(response);
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     [HttpPost("validate-forgot-password-token")]
     [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -578,7 +490,7 @@ public class UserController : BaseController, IUserController
     {
         if (Request.Headers.ContainsKey("X-Forwarded-For"))
             return Request.Headers["X-Forwarded-For"];
-        // ReSharper disable once PossibleNullReferenceException
+
         return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
     }
 

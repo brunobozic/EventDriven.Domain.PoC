@@ -1,5 +1,5 @@
-﻿using System;
-using SharedKernel.DomainImplementations.BaseClasses;
+﻿using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 

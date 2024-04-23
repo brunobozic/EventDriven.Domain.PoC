@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.CommonServiceLocator;
 using CommonServiceLocator;
@@ -12,22 +7,21 @@ using Framework.Kafka.Core;
 using Framework.Kafka.Core.Contracts;
 using IdentityService.Api.Controllers;
 using IdentityService.Api.QuartzJobs;
+using IdentityService.Application.CommandsAndHandlers.Users.CUD;
 using IdentityService.Application.CQRSBoilerplate.Command;
 using IdentityService.Application.CQRSBoilerplate.Command.Handlers;
 using IdentityService.Application.CQRSBoilerplate.DomainEventDispatchers;
 using IdentityService.Application.CQRSBoilerplate.UnitOfWorkImplementations;
 using IdentityService.Application.DomainServices.UserServices;
-using IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using IdentityService.Application.Ports.Input.Contracts;
 using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Data.CustomUnitOfWork;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
-using IdentityService.Data.DatabaseContext;
+using IdentityService.Data.DatabaseContexts;
 using IdentityService.Data.DomainEventDispatching;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
@@ -42,7 +36,15 @@ using SharedKernel.Helpers.Database;
 using SharedKernel.Kafka.ConsumedMessagePersistors;
 using SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
 using SharedKernel.Kafka.KafkaImplementions;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using URF.Core.Abstractions;
 using URF.Core.Abstractions.Services;
+using URF.Core.EF;
 using URF.Core.Services;
 
 namespace IdentityService.Api;
@@ -52,42 +54,32 @@ internal static class Assemblies
     public static readonly Assembly Application = typeof(InternalCommandBase).Assembly;
 }
 
-/// <summary>
-/// </summary>
 public class Bootstrap
 {
-    /// <summary>
-    /// </summary>
     public static IContainer Container { get; private set; }
 
-    /// <summary>
-    ///     Takes your connection string and your collection of services and cross-wires everything.
-    ///     Returns a fully populated and configured AutoFac container instance.
-    /// </summary>
-    /// <param name="connStr"></param>
-    /// <param name="services"></param>
-    /// <param name="environment"></param>
-    /// <returns></returns>
-    public static IContainer BuildContainer(string connStr, IServiceCollection services,
-        IWebHostEnvironment environment)
+
+    public static IContainer BuildContainer(string connStr, IServiceCollection services, IWebHostEnvironment environment)
     {
         // create a builder
         var containerBuilder = new ContainerBuilder();
+
         // detect assembly name
         var executingAssembly = Assembly.GetExecutingAssembly();
         var path = Assembly.GetEntryAssembly().Location;
+
         // detect process module
         var processModule = Process.GetCurrentProcess().MainModule;
-        // build a .net core native service provider so we can later cross-wire it with AutoFac
-        var builtServiceProvider = services.BuildServiceProvider();
 
-        IExecutionContextAccessor executionContextAccessor =
-            new ExecutionContextAccessor(builtServiceProvider.GetService<IHttpContextAccessor>());
+        //// build a .net core native service provider so we can later cross-wire it with AutoFac
+        //var builtServiceProvider = services.BuildServiceProvider();
+        //IExecutionContextAccessor executionContextAccessor =
+        //    new ExecutionContextAccessor(builtServiceProvider.GetService<IHttpContextAccessor>());
+        // containerBuilder.RegisterInstance(executionContextAccessor);
 
-        // cross-wire services that are detected within the native .net core provider with AutoFac
-        containerBuilder.Populate(services);
 
-        containerBuilder.RegisterInstance(executionContextAccessor);
+        // Assuming your handlers, requests, etc., are in the same assembly as a known handler
+        var mediatrAssembly = typeof(RegisterUserCommandHandler).Assembly;
 
         var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
@@ -96,9 +88,9 @@ public class Bootstrap
             .AddJsonFile(
                 $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
                 false) // beware this will default to Production appsettings if no ENV is defined on the OS                                                                                                                            // .AddJsonFile("appsettings.local.json", true) // load local settings (usually used for local debugging sessions)  ==> this will override all the other previously loaded appsettings, so comment this out in production!
-            //.AddJsonFile("appsettings.local.json", true)
-            //.SetBasePath(new FileInfo(processModule.FileName).DirectoryName) // this might fail on linux
-            //.SetBasePath(GetBasePath()) // this might fail on linux
+                       //.AddJsonFile("appsettings.local.json", true)
+                       //.SetBasePath(new FileInfo(processModule.FileName).DirectoryName) // this might fail on linux
+                       //.SetBasePath(GetBasePath()) // this might fail on linux
             .SetBasePath(environment.ContentRootPath)
             .AddEnvironmentVariables()
             .Build();
@@ -272,7 +264,7 @@ public class Bootstrap
 
         containerBuilder.Register(c =>
             {
-                var dbContextOptionsBuilder = new DbContextOptionsBuilder();
+                var dbContextOptionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
                 dbContextOptionsBuilder.UseSqlite(connStr,
                     x => x.MigrationsAssembly("IdentityService.Data"));
                 dbContextOptionsBuilder
@@ -290,31 +282,21 @@ public class Bootstrap
 
         #region MediatR
 
-        //container.RegisterAssemblyTypes(typeof(ApplicationUserCreatedNotification).GetTypeInfo().Assembly)
-        //    .AsClosedTypesOf(typeof(IIntegrationEvent<>)).InstancePerLifetimeScope()
-        //    .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
-
-        //container.RegisterType<ApplicationUserCreatedEventHandler>()
-        //       .Named<INotificationHandler<ApplicationUserCreatedNotification>>("handler")
-        //       .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
-
-        //container.RegisterDecorator<INotificationHandler<ApplicationUserCreatedNotification>>(
-        //        (c, inner) => new DomainEventsDispatcherNotificationHandlerDecorator<ApplicationUserCreatedNotification>(c.Resolve<IDomainEventsDispatcher>(), inner),
-        //        fromKey: "handler")
-        //    .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
-
-        containerBuilder.RegisterSource(new ScopedContravariantRegistrationSource(
-            typeof(IRequestHandler<,>)
-            , typeof(INotificationHandler<>)
-            // , typeof(IValidator<>)
-        ));
+        containerBuilder.RegisterAssemblyTypes(typeof(IMediator).GetTypeInfo().Assembly)
+             .AsImplementedInterfaces()
+             .InstancePerLifetimeScope();
 
         var mediatrOpenTypes = new[]
         {
+            typeof(ICommandHandler<>),
+            typeof(ICommandHandler<,>),
+            typeof(IQueryHandler<,>),
             typeof(IRequestHandler<,>),
-            typeof(INotificationHandler<>)
+            typeof(INotificationHandler<>),
             // typeof(IValidator<>),
         };
+
+        containerBuilder.RegisterSource(new ScopedContravariantRegistrationSource(mediatrOpenTypes));
 
         foreach (var mediatrOpenType in mediatrOpenTypes)
             containerBuilder
@@ -326,24 +308,21 @@ public class Bootstrap
         containerBuilder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
         containerBuilder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
 
-        //containerBuilder.Register<ServiceFactory>(ctx =>
-        //{
-        //    var c = ctx.Resolve<IComponentContext>();
-        //    return t => c.Resolve(t);
-        //});
+        containerBuilder.RegisterType<DomainEventsDispatcher>()
+                  .As<IDomainEventsDispatcher>()
+                  .InstancePerLifetimeScope();
 
-        // container.RegisterGeneric(typeof(CommandValidationBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+        //containerBuilder.RegisterType<DomainEventsAccessor>()
+        //    .As<IDomainEventsAccessor>()
+        //    .InstancePerLifetimeScope();
 
-        containerBuilder.RegisterType<IntegrationEventDispatcher>()
-            .As<IDomainEventsDispatcher>()
+        containerBuilder.RegisterType<UnitOfWork>()
+            .As<IUnitOfWork>()
             .InstancePerLifetimeScope();
 
-        containerBuilder.RegisterAssemblyTypes(typeof(UserCreatedNotification).GetTypeInfo().Assembly)
-            .AsClosedTypesOf(typeof(IIntegrationEvent<>)).InstancePerDependency();
-
-        containerBuilder.RegisterGenericDecorator(
-            typeof(DomainEventsDispatcherNotificationHandlerDecorator<>),
-            typeof(INotificationHandler<>));
+        containerBuilder.RegisterType<CommandsScheduler>()
+            .As<ICommandsScheduler>()
+            .InstancePerLifetimeScope();
 
         containerBuilder.RegisterGenericDecorator(
             typeof(UnitOfWorkCommandHandlerDecorator<>),
@@ -353,21 +332,21 @@ public class Bootstrap
             typeof(UnitOfWorkCommandHandlerWithResultDecorator<,>),
             typeof(ICommandHandler<,>));
 
-        containerBuilder.RegisterType<CommandsDispatcher>()
-            .As<ICommandsDispatcher>()
-            .InstancePerLifetimeScope();
+        //containerBuilder.RegisterGenericDecorator(
+        //    typeof(ValidationCommandHandlerDecorator<>),
+        //    typeof(ICommandHandler<>));
 
-        containerBuilder.RegisterType<CommandsScheduler>()
-            .As<ICommandsScheduler>()
-            .InstancePerLifetimeScope();
+        //containerBuilder.RegisterGenericDecorator(
+        //    typeof(ValidationCommandHandlerWithResultDecorator<,>),
+        //    typeof(ICommandHandler<,>));
 
         containerBuilder.RegisterGenericDecorator(
             typeof(LoggingCommandHandlerDecorator<>),
-            typeof(ICommandHandler<>));
+            typeof(IRequestHandler<>));
 
-        containerBuilder.RegisterGenericDecorator(
-            typeof(LoggingCommandHandlerWithResultDecorator<,>),
-            typeof(ICommandHandler<,>));
+        //containerBuilder.RegisterGenericDecorator(
+        //    typeof(LoggingCommandHandlerWithResultDecorator<,>),
+        //    typeof(IRequestHandler<,>));
 
         containerBuilder.RegisterGenericDecorator(
             typeof(DomainEventsDispatcherNotificationHandlerDecorator<>),
@@ -391,6 +370,9 @@ public class Bootstrap
 
         #endregion Quartz
 
+        // cross-wire services that are detected within the native .net core provider with AutoFac
+        containerBuilder.Populate(services);
+
         // finally build the container itself
         var builtContainer = containerBuilder.Build();
 
@@ -409,4 +391,6 @@ public class Bootstrap
         using var processModule = Process.GetCurrentProcess().MainModule;
         return Path.GetDirectoryName(processModule?.FileName);
     }
+
+
 }

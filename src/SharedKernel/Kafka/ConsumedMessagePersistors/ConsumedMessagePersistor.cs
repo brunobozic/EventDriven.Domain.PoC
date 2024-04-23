@@ -1,9 +1,9 @@
-﻿using System;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Framework.Kafka.Core.DTOs.MessageProcessor;
 using Serilog;
 using SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
+using System;
 
 namespace SharedKernel.Kafka.ConsumedMessagePersistors;
 

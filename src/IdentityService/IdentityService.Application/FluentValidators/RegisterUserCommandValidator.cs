@@ -1,6 +1,6 @@
-﻿using System;
+﻿using FluentValidation;
+using System;
 using System.Text.RegularExpressions;
-using FluentValidation;
 
 namespace IdentityService.Application.FluentValidators;
 

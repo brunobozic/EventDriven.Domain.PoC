@@ -1,7 +1,7 @@
-﻿using System;
+﻿using SharedKernel.DomainBaseAbstractions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using SharedKernel.DomainBaseAbstractions;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 

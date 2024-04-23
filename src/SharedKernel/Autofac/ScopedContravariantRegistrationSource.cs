@@ -1,26 +1,26 @@
-﻿using System;
+﻿using Autofac.Core;
+using Autofac.Features.Variance;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Autofac.Core;
-using Autofac.Features.Variance;
 
 namespace SharedKernel.Autofac;
-
 public class ScopedContravariantRegistrationSource : IRegistrationSource
 {
-    private readonly IRegistrationSource _source = new ContravariantRegistrationSource();
+    private readonly ContravariantRegistrationSource _source = new();
     private readonly List<Type> _types = new();
 
     public ScopedContravariantRegistrationSource(params Type[] types)
     {
-        if (types == null)
-            throw new ArgumentNullException(nameof(types));
+        ArgumentNullException.ThrowIfNull(types);
+
         if (!types.All(x => x.IsGenericTypeDefinition))
+        {
             throw new ArgumentException("Supplied types should be generic type definitions");
+        }
+
         _types.AddRange(types);
     }
-
-    public bool IsAdapterForIndividualComponents => _source.IsAdapterForIndividualComponents;
 
     public IEnumerable<IComponentRegistration> RegistrationsFor(
         Service service,
@@ -34,7 +34,11 @@ public class ScopedContravariantRegistrationSource : IRegistrationSource
                 .Select(x => x.ServiceType.GetGenericTypeDefinition());
 
             if (defs.Any(_types.Contains))
+            {
                 yield return c;
+            }
         }
     }
+
+    public bool IsAdapterForIndividualComponents => _source.IsAdapterForIndividualComponents;
 }

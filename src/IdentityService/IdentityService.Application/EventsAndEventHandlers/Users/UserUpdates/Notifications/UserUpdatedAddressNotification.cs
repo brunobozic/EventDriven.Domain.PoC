@@ -1,22 +1,17 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
-using Newtonsoft.Json;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.UserUpdates.Notifications;
 
-public class UserUpdatedAddressNotification : IntegrationEventBase<UserUpdatedAddressDomainEvent>
+public class UserUpdatedAddressNotification : DomainNotificationBase<UserUpdatedAddressDomainEvent>
 {
-    public UserUpdatedAddressNotification(UserUpdatedAddressDomainEvent integrationEvent) : base(integrationEvent)
+    public UserUpdatedAddressNotification(UserUpdatedAddressDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         UserId = integrationEvent.UserId;
     }
 
-    [JsonConstructor]
-    public UserUpdatedAddressNotification(Guid userId) : base(null)
-    {
-        UserId = userId;
-    }
+
 
     public Guid UserId { get; }
 }

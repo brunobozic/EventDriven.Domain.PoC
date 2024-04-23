@@ -1,6 +1,6 @@
-﻿using System;
-using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application;
 

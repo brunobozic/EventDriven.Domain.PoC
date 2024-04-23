@@ -1,10 +1,10 @@
+using Elastic.CommonSchema;
 using System;
 using System.Buffers;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Elastic.CommonSchema;
 
 namespace Framework.Serilog.Sink.Kafka.Serialization;
 

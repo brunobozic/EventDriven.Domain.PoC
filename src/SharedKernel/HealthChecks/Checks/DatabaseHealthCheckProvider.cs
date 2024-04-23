@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using SharedKernel.HealthChecks.Base;
+﻿using SharedKernel.HealthChecks.Base;
+using System.Threading.Tasks;
 
 namespace SharedKernel.HealthChecks.Checks;
 

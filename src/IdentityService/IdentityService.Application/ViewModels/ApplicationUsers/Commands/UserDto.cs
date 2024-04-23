@@ -1,10 +1,10 @@
-﻿using System;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
+using System;
 using System.Collections.Generic;
-using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 
-public record UserDto(
+public sealed record UserDto(
     DateTimeOffset? ActiveTo,
     string Email,
     DateTime HasBeenVerified,

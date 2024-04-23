@@ -2,14 +2,14 @@
 // Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 // See the LICENSE file in the project root for more information
 
+using Elastic.CommonSchema;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Elastic.CommonSchema;
-using Serilog.Events;
 using Process = Elastic.CommonSchema.Process;
 using ProcessThread = Elastic.CommonSchema.ProcessThread;
 using Trace = Elastic.CommonSchema.Trace;
@@ -152,11 +152,11 @@ public static class LogEventConverter
                     kvp => PropertyValueToObject(kvp.Value));
 
             case StructureValue ov:
-            {
-                var dict = ov.Properties.ToDictionary(p => p.Name, p => PropertyValueToObject(p.Value));
-                if (ov.TypeTag != null) dict.Add("$type", ov.TypeTag);
-                return dict;
-            }
+                {
+                    var dict = ov.Properties.ToDictionary(p => p.Name, p => PropertyValueToObject(p.Value));
+                    if (ov.TypeTag != null) dict.Add("$type", ov.TypeTag);
+                    return dict;
+                }
             default:
                 return propertyValue;
         }

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace SharedKernel.Kafka.KafkaImplementions;
 
@@ -326,7 +326,10 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     ///     Returns the underlying consumer instance.
     /// </summary>
     /// <returns></returns>
-    public Handle UnderlyingHandle() => _c?.Handle;
+    public Handle UnderlyingHandle()
+    {
+        return _c?.Handle;
+    }
 
     /// <summary>
     ///     Returns a list of consumer subscriptions.

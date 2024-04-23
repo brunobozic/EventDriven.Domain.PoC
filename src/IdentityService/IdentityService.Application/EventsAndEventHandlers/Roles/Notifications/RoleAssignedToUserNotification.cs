@@ -1,11 +1,10 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
-using Newtonsoft.Json;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
 
-public class RoleAssignedToUserNotification : IntegrationEventBase<RoleAssignedToUserDomainEvent>
+public class RoleAssignedToUserNotification : DomainNotificationBase<RoleAssignedToUserDomainEvent>
 {
     public DateTimeOffset DateAssigned;
     public DateTimeOffset? RoleActiveTo;
@@ -18,7 +17,7 @@ public class RoleAssignedToUserNotification : IntegrationEventBase<RoleAssignedT
     public Guid UserId;
     public string UserName;
 
-    public RoleAssignedToUserNotification(RoleAssignedToUserDomainEvent integrationEvent) : base(integrationEvent)
+    public RoleAssignedToUserNotification(RoleAssignedToUserDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         UserId = integrationEvent.UserId;
         UserName = integrationEvent.UserName;
@@ -32,20 +31,6 @@ public class RoleAssignedToUserNotification : IntegrationEventBase<RoleAssignedT
         RoleGiverId = integrationEvent.RoleGiverId;
     }
 
-    [JsonConstructor]
-    public RoleAssignedToUserNotification(Guid userId, string userName, string userEmail, long roleId,
-        string roleName, string roleGiverEmail, string roleGiverUsername, Guid roleGiverId, DateTimeOffset activeTo,
-        DateTimeOffset dateAssigned) : base(null)
-    {
-        UserId = userId;
-        UserName = userName;
-        UserEmail = userEmail;
-        RoleName = roleName;
-        RoleId = roleId;
-        RoleActiveTo = activeTo;
-        DateAssigned = dateAssigned;
-        RoleGiverEmail = roleGiverEmail;
-        RoleGiverUsername = roleGiverUsername;
-        RoleGiverId = roleGiverId;
-    }
+
+
 }

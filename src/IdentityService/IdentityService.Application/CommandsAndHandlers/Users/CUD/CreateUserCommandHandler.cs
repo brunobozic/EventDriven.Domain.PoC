@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using IdentityService.Application.DomainServices.EmailServices;
 using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
@@ -10,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.CUD;

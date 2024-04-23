@@ -1,5 +1,5 @@
-﻿using System;
-using SharedKernel.DomainContracts;
+﻿using SharedKernel.DomainContracts;
+using System;
 
 namespace SharedKernel.DomainImplementations.BaseClasses;
 
@@ -13,4 +13,5 @@ public class DomainEventBase : IDomainEvent
 
     public DateTime OccurredOn { get; }
     public EventTypeEnum TypeOfEvent { get; set; }
+    public Guid Id { get; set; }
 }

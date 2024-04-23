@@ -1,9 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
+﻿using IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
 using MediatR;
 using Serilog;
 using SharedKernel.DomainContracts;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Handlers;
 

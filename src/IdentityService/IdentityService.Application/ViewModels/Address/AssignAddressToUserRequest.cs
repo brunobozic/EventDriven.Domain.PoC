@@ -2,7 +2,7 @@
 
 namespace IdentityService.Application.ViewModels.Address;
 
-public class AssignAddressToUserRequest
+public sealed record AssignAddressToUserRequest
 {
     public DateTimeOffset ActiveFrom { get; set; }
     public DateTimeOffset ActiveTo { get; set; }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Framework.Kafka.Core.DTOs.MessageProcessor;
@@ -10,6 +8,8 @@ using Quartz;
 using Serilog;
 using SharedKernel.Helpers.Configuration;
 using SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
+using System;
+using System.Collections.Generic;
 
 namespace IdentityService.Api.QuartzJobs;
 

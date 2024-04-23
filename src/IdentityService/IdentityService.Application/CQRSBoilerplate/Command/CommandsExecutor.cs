@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using MediatR;
 using SharedKernel.DomainContracts;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.Command;
 

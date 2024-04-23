@@ -1,14 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Threading.Tasks;
-using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
-using IdentityService.Data.DatabaseContext;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
+using IdentityService.Data.DatabaseContexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OpenTelemetry.Trace;
 using SharedKernel.DomainContracts;
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.Command;
 

@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		docker-compose.yml = docker-compose.yml
+		logstash.conf = logstash.conf
 		README.md = README.md
 		UserRegistration.md = UserRegistration.md
 	EndProjectSection
@@ -40,6 +41,20 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "src\ApiGateway\ApiGateway.csproj", "{C0AD2A1F-DBEB-4A27-8C40-5FBB97B87C5B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CombService", "CombService", "{3B8DD18E-AB3A-4D92-A5AF-DF13902C1B7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.API.REST.Test.Integration", "test\IdentityService.API.REST.Test.Integration\IdentityService.API.REST.Test.Integration.csproj", "{BCE1AE94-01CA-4C09-B4EA-0FBD8D096F35}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Devops", "Devops", "{B536A0E1-8A13-4047-BBF2-F719A86675E2}"
+	ProjectSection(SolutionItems) = preProject
+		devops\otel-collector-config.yaml = devops\otel-collector-config.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSSQL", "MSSQL", "{5126CAAE-934D-42D6-9102-6408AF6001FF}"
+	ProjectSection(SolutionItems) = preProject
+		devops\MSSQL\Dockerfile = devops\MSSQL\Dockerfile
+		devops\MSSQL\README.md = devops\MSSQL\README.md
+		devops\MSSQL\start.ps1 = devops\MSSQL\start.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +98,10 @@ Global
 		{C0AD2A1F-DBEB-4A27-8C40-5FBB97B87C5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0AD2A1F-DBEB-4A27-8C40-5FBB97B87C5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0AD2A1F-DBEB-4A27-8C40-5FBB97B87C5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE1AE94-01CA-4C09-B4EA-0FBD8D096F35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE1AE94-01CA-4C09-B4EA-0FBD8D096F35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCE1AE94-01CA-4C09-B4EA-0FBD8D096F35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCE1AE94-01CA-4C09-B4EA-0FBD8D096F35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +116,8 @@ Global
 		{2004CCFD-33EA-46CF-8C34-07F50B50C4AC} = {C2E6047A-DD33-4E2C-9940-2784460C28D7}
 		{23EEA43E-7766-4391-B68B-BE5489DE2BCC} = {839BE303-790F-4980-9719-7C1E97973DFF}
 		{C0AD2A1F-DBEB-4A27-8C40-5FBB97B87C5B} = {B720E026-1F56-4467-AEF3-8FCCBC53C4EA}
+		{BCE1AE94-01CA-4C09-B4EA-0FBD8D096F35} = {400F7176-A563-4C5C-A90D-F0C792778FAF}
+		{5126CAAE-934D-42D6-9102-6408AF6001FF} = {B536A0E1-8A13-4047-BBF2-F719A86675E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E1F615C-DDC0-416C-86E0-979E40B1D5F3}

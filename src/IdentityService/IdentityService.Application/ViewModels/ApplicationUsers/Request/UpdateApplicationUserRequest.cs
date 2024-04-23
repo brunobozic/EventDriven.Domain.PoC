@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharedKernel.Helpers;
+using System;
 using System.ComponentModel.DataAnnotations;
-using SharedKernel.Helpers;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
 

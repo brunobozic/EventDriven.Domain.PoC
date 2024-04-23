@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using DynamicServiceRegistration.ServiceAttributes;
+﻿using AutoMapper;
 using IdentityService.Application.DomainServices.EmailServices;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
@@ -12,11 +7,16 @@ using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SharedKernel.Helpers.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 using URF.Core.Services;
 
 namespace IdentityService.Application.DomainServices.JournalServices;
-[ScopedService]
+
+
 public class JournalService : Service<AccountJournalEntry>, IJournalService
 {
     private readonly MyConfigurationValues _appSettings;

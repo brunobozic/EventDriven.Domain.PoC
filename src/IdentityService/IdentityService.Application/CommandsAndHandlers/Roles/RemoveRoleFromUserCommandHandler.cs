@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Data.CustomUnitOfWork.Interfaces;
+﻿using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.DomainExceptions;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.DomainContracts;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.Roles;

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq.Expressions;
-using IdentityService.Domain.DomainEntities.UserAggregate;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate;
 using SharedKernel.Specifications;
+using System;
+using System.Linq.Expressions;
 
 namespace IdentityService.Domain.ExampleSpecifications;
 

@@ -1,14 +1,14 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.DomainServices.EmailServices;
+﻿using IdentityService.Application.DomainServices.EmailServices;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SharedKernel.DomainContracts;
+using System;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.ForgotPassword.PhaseOne;

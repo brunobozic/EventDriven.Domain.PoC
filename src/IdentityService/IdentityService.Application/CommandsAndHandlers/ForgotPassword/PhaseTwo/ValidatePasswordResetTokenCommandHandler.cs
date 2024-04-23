@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Data.CustomUnitOfWork.Interfaces;
+﻿using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.DomainContracts;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo;

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Data.Audit;
-using IdentityService.Data.DatabaseContext.Interfaces;
+﻿using IdentityService.Data.Audit;
+using IdentityService.Data.DatabaseContexts.Interfaces;
 using IdentityService.Data.Extensions;
+using IdentityService.Domain.DomainEntities;
 using IdentityService.Domain.DomainEntities.Audit;
 using IdentityService.Domain.DomainEntities.OutboxPattern;
 using IdentityService.Domain.DomainEntities.UserAggregate;
@@ -18,8 +12,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
 using SharedKernel.DomainCoreInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace IdentityService.Data.DatabaseContext;
+namespace IdentityService.Data.DatabaseContexts;
 
 public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
@@ -27,37 +28,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     private readonly List<EntityEntry> _list = new();
 
     private DbAuditTrailFactory _auditFactory;
-
-    #region ctor
-
-    //public ApplicationDbContext(DbContextOptions options) : base(options)
-    //{
-    //    Log.Information("Entrancy");
-    //}
-
-    //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
-    //{
-    //    if (fromFactory)
-    //    {
-    //        _auditFactory = new DbAuditTrailFactory(this);
-    //    }
-    //}
-
-    //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    //{
-    //    this.Options = options;
-    //}
-    public ApplicationDbContext(DbContextOptions options) : base(options)
-    {
-        _auditFactory = new DbAuditTrailFactory(this);
-        Log.Information("Entrancy");
-    }
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-        _auditFactory = new DbAuditTrailFactory(this);
-        Log.Information("Entrancy");
-    }
-    #endregion ctor
 
     public DbSet<AuditTrail> AuditTrail { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
@@ -68,14 +38,26 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Address> Addresses { get; set; }
     public DbSet<AddressType> AddressTypes { get; set; }
     public DbContextOptions<ApplicationDbContext> Options { get; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<Resource> Resources { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<CountryCodebook> Countries { get; set; }
+    public DbSet<Tenant> Tenants { get; set; }
 
     public ApplicationDbContext UnderlyingContext()
     {
         return this;
     }
 
+    public DbContextOptions<ApplicationDbContext> GetOptions()
+    {
+        return Options;
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+
+        // optionsBuilder.AddInterceptors(_statisticsCommandInterceptor, _infoMessageInterceptor);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -90,6 +72,16 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         modelBuilder.Entity<AccountJournalEntry>();
         modelBuilder.Entity<Address>();
         modelBuilder.Entity<AddressType>();
+        modelBuilder.Entity<Permission>();
+        modelBuilder.Entity<Resource>();
+        modelBuilder.Entity<RolePermission>();
+
+        #region Codebooks
+
+        modelBuilder.Entity<CountryCodebook>();
+
+        #endregion Codebooks
+
         modelBuilder.SetUpSoftDeletableColumnDefaultValue();
         modelBuilder.DisableCascadeDelete();
         modelBuilder.LoadAllEntityConfigurations();
@@ -101,8 +93,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             "Use only the SaveChangesAsync() because synchronous saving is not supported!");
     }
 
-    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
-        CancellationToken cancellationToken = new())
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new())
     {
         _auditList.Clear();
         _list.Clear();
@@ -282,8 +273,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         //    throw new ModelValidationException(result.ToString(), entityException, allErrors);
         //}
-        catch (DbUpdateConcurrencyException ex
-              ) // This will fire only for entities that have the [RowVersion] property implemented...
+        catch (DbUpdateConcurrencyException ex) // This will fire only for entities that have the [RowVersion] property implemented...
         {
             var entry = ex.Entries.Single();
             var clientValues = entry.Entity;
@@ -333,4 +323,37 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         return changes;
     }
+
+    #region ctor
+
+    //public ApplicationDbContext(DbContextOptions options) : base(options)
+    //{
+    //    Log.Information("Entrancy");
+    //}
+
+    //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
+    //{
+    //    if (fromFactory)
+    //    {
+    //        _auditFactory = new DbAuditTrailFactory(this);
+    //    }
+    //}
+
+    //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    //{
+    //    this.Options = options;
+    //}
+    //public ApplicationDbContext(DbContextOptions options) : base(options)
+    //{
+    //    _auditFactory = new DbAuditTrailFactory(this);
+    //    Log.Information("Entrancy");
+    //}
+
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+        _auditFactory = new DbAuditTrailFactory(this);
+        Log.Information("Entrancy");
+    }
+
+    #endregion ctor
 }

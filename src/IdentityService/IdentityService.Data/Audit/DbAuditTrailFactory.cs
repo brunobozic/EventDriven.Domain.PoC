@@ -1,14 +1,13 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using IdentityService.Data.DatabaseContext;
-using IdentityService.Domain.DomainEntities.Audit;
+﻿using IdentityService.Domain.DomainEntities.Audit;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
 
 namespace IdentityService.Data.Audit;
 
@@ -38,31 +37,31 @@ public class DbAuditTrailFactory
         switch (entry.State)
         {
             case EntityState.Added:
-            {
-                var newValues = new StringBuilder();
-                SetAddedProperties(entry, newValues);
-                audit.NewData = newValues.ToString();
-                audit.Actions = AuditActions.I.ToString();
-                break;
-            }
+                {
+                    var newValues = new StringBuilder();
+                    SetAddedProperties(entry, newValues);
+                    audit.NewData = newValues.ToString();
+                    audit.Actions = AuditActions.I.ToString();
+                    break;
+                }
             case EntityState.Deleted:
-            {
-                var oldValues = new StringBuilder();
-                SetDeletedProperties(entry, oldValues);
-                audit.OldData = oldValues.ToString();
-                audit.Actions = AuditActions.D.ToString();
-                break;
-            }
+                {
+                    var oldValues = new StringBuilder();
+                    SetDeletedProperties(entry, oldValues);
+                    audit.OldData = oldValues.ToString();
+                    audit.Actions = AuditActions.D.ToString();
+                    break;
+                }
             case EntityState.Modified:
-            {
-                var oldValues = new StringBuilder();
-                var newValues = new StringBuilder();
-                SetModifiedProperties(entry, oldValues, newValues);
-                audit.OldData = oldValues.ToString();
-                audit.NewData = newValues.ToString();
-                audit.Actions = AuditActions.U.ToString();
-                break;
-            }
+                {
+                    var oldValues = new StringBuilder();
+                    var newValues = new StringBuilder();
+                    SetModifiedProperties(entry, oldValues, newValues);
+                    audit.OldData = oldValues.ToString();
+                    audit.NewData = newValues.ToString();
+                    audit.Actions = AuditActions.U.ToString();
+                    break;
+                }
 
             case EntityState.Detached:
                 break;

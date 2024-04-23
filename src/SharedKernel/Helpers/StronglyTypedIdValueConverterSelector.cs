@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SharedKernel.DomainImplementations;
-using SharedKernel.DomainImplementations.BaseClasses;
 
 namespace SharedKernel.Helpers;
 

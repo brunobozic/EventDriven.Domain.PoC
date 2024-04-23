@@ -1,7 +1,7 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using SharedKernel.DomainImplementations.BaseClasses;
+﻿using SharedKernel.DomainImplementations.BaseClasses;
 using SharedKernel.Helpers;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 

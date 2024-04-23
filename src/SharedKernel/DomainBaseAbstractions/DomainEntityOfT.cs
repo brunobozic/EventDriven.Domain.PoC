@@ -1,13 +1,13 @@
-﻿using System;
+﻿using SharedKernel.BusinessRules;
+using SharedKernel.DomainContracts;
+using SharedKernel.DomainCoreInterfaces;
+using SharedKernel.DomainImplementations.DomainErrors;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using SharedKernel.BusinessRules;
-using SharedKernel.DomainContracts;
-using SharedKernel.DomainCoreInterfaces;
-using SharedKernel.DomainImplementations.DomainErrors;
 using TrackableEntities.Common.Core;
 
 namespace SharedKernel.DomainBaseAbstractions;
@@ -18,7 +18,7 @@ public abstract class DomainEntity<TK> : IHandlesConcurrency, ISoftDeletable, ID
     [Column("Description", Order = 2)] public string Description { get; set; }
     public TK Id { get; set; }
 
-    [Required] [Column("Name", Order = 1)] public string Name { get; set; }
+    [Required][Column("Name", Order = 1)] public string Name { get; set; }
 
     #region IHandlesConcurrency
 

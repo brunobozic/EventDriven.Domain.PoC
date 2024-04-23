@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Dapper;
+using Framework.Repository.Dapper.Contracts;
+using System;
 using System.Data;
 using System.Linq;
-using Dapper;
-using Framework.Repository.Dapper.Contracts;
 
 namespace Framework.Repository.Dapper.Concrete;
 

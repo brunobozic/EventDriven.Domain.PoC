@@ -1,11 +1,11 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using Newtonsoft.Json;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 
-public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEvent>
+public class UserCreatedNotification : DomainNotificationBase<UserCreatedDomainEvent>
 {
     public string ActivationLink;
     public DateTimeOffset? ActivationLinkGenerated;
@@ -17,7 +17,8 @@ public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEve
     public Guid UserId;
     public string UserName;
 
-    public UserCreatedNotification(UserCreatedDomainEvent integrationEvent) : base(integrationEvent)
+    [JsonConstructor]
+    public UserCreatedNotification(UserCreatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         UserId = integrationEvent.UserId;
         ActivationLink = integrationEvent.ActivationLink;
@@ -27,30 +28,5 @@ public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEve
         ActivationLinkGenerated = integrationEvent.ActivationLinkGenerated;
         Origin = integrationEvent.Origin;
         ResourceId = integrationEvent.UserResourceId;
-    }
-
-    [JsonConstructor]
-    public UserCreatedNotification(
-        Guid userId,
-        string activationLink,
-        string firstName,
-        string lastName,
-        string email,
-        string userName,
-        DateTimeOffset? activationLinkGenerated,
-        Guid resourceId,
-        string Origin
-    ) : base(null)
-    {
-        UserId = userId;
-        ActivationLink = activationLink;
-        FirstName = firstName;
-        LastName = lastName;
-        ActivationLinkGenerated = activationLinkGenerated;
-        ActivationLink = activationLink;
-        Email = email;
-        UserName = userName;
-        Origin = this.Origin;
-        ResourceId = resourceId;
     }
 }

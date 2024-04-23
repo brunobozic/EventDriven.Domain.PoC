@@ -1,7 +1,7 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 
 namespace IdentityService.Data.EntityConfigurations;
 

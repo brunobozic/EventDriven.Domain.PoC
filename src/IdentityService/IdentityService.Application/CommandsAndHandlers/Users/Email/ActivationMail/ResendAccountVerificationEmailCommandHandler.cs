@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using IdentityService.Application.DomainServices.EmailServices;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.DomainExceptions;
@@ -13,6 +9,10 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Configuration;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;

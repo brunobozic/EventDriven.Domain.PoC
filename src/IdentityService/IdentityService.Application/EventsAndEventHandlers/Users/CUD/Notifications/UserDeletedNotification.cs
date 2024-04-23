@@ -1,22 +1,17 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
-using Newtonsoft.Json;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 
-public class UserDeletedNotification : IntegrationEventBase<UserDeletedDomainEvent>
+public class UserDeletedNotification : DomainNotificationBase<UserDeletedDomainEvent>
 {
-    public UserDeletedNotification(UserDeletedDomainEvent integrationEvent) : base(integrationEvent)
+    public UserDeletedNotification(UserDeletedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         UserId = integrationEvent.UserId;
     }
 
-    [JsonConstructor]
-    public UserDeletedNotification(Guid userId) : base(null)
-    {
-        UserId = userId;
-    }
+
 
     public Guid UserId { get; }
 }

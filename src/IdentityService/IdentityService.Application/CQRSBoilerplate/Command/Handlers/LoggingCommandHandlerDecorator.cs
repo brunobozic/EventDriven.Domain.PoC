@@ -1,12 +1,11 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
-using Serilog;
+﻿using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
 using SharedKernel.DomainContracts;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.Command.Handlers;
 
@@ -49,8 +48,6 @@ public class LoggingCommandHandlerDecorator<T> : ICommandHandler<T> where T : IC
                 await _decorated.Handle(command, cancellationToken);
 
                 _logger.Information("Command {Command} processed successful", command.GetType().Name);
-
-                return;
             }
             catch (Exception exception)
             {

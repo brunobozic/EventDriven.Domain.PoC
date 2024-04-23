@@ -1,7 +1,7 @@
-﻿using System;
+﻿using SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using SharedKernel.DomainCoreInterfaces;
 using TrackableEntities.Common.Core;
 
 namespace IdentityService.Domain.DomainEntities.Audit;

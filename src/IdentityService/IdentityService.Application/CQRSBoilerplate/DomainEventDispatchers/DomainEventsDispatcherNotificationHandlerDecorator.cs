@@ -1,10 +1,10 @@
-﻿using System;
+﻿using MediatR;
+using OpenTelemetry.Trace;
+using SharedKernel.DomainContracts;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using OpenTelemetry.Trace;
-using SharedKernel.DomainContracts;
 
 namespace IdentityService.Application.CQRSBoilerplate.DomainEventDispatchers;
 

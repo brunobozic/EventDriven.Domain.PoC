@@ -1,6 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SharedKernel.DomainImplementations.BaseClasses;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 
 namespace SharedKernel.DomainImplementations;
 

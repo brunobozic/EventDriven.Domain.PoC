@@ -22,10 +22,10 @@ internal class MetaDataDictionaryConverter : JsonConverter<IDictionary<string, o
             case JsonTokenType.String when reader.TryGetDateTime(out var datetime): return datetime;
             case JsonTokenType.String: return reader.GetString();
             default:
-            {
-                using var document = JsonDocument.ParseValue(ref reader);
-                return document.RootElement.Clone();
-            }
+                {
+                    using var document = JsonDocument.ParseValue(ref reader);
+                    return document.RootElement.Clone();
+                }
         }
     }
 

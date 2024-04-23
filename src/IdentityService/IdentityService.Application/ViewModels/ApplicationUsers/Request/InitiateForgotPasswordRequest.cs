@@ -2,7 +2,7 @@
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
 
-public class InitiateForgotPasswordRequest
+public sealed record InitiateForgotPasswordRequest
 {
     public string Email { get; set; }
     public Guid UserId { get; set; }

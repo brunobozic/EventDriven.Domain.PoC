@@ -1,6 +1,6 @@
-﻿using System;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
+using System;
 using System.Threading.Tasks;
-using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 using URF.Core.Abstractions.Services;
 
 namespace IdentityService.Application.DomainServices.JournalServices;

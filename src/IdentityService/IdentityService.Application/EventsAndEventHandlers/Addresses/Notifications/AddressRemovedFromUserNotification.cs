@@ -1,13 +1,13 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Addresses.Notifications;
 
-public class AddressRemovedFromUserNotification : IntegrationEventBase<AddressRemovedFromUserDomainEvent>
+public class AddressRemovedFromUserNotification : DomainNotificationBase<AddressRemovedFromUserDomainEvent>
 {
-    public AddressRemovedFromUserNotification(AddressRemovedFromUserDomainEvent integrationEvent) : base(
-        integrationEvent)
+    public AddressRemovedFromUserNotification(AddressRemovedFromUserDomainEvent integrationEvent, Guid id) : base(
+        integrationEvent, id)
     {
         AddressActive = integrationEvent.AddressActive;
         AddressTypeDescription = integrationEvent.AddressTypeDescription;

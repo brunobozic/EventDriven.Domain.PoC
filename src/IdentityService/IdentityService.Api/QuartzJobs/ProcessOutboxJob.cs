@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using IdentityService.Application.CQRSBoilerplate.Command;
+﻿using IdentityService.Application.CQRSBoilerplate.Command;
 using IdentityService.Application.CQRSBoilerplate.OutboxCommands;
 using Quartz;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.QuartzJobs;
 

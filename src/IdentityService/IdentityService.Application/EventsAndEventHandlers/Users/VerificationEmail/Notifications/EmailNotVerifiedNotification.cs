@@ -1,23 +1,17 @@
 ﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.Verification;
-using Newtonsoft.Json;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
 
-public class EmailNotVerifiedNotification : IntegrationEventBase<EmailNotVerifiedDomainEvent>
+public class EmailNotVerifiedNotification : DomainNotificationBase<EmailNotVerifiedDomainEvent>
 {
     public string Email;
 
-    public EmailNotVerifiedNotification(EmailNotVerifiedDomainEvent integrationEvent) : base(integrationEvent)
+    public EmailNotVerifiedNotification(EmailNotVerifiedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         Email = integrationEvent.Email;
     }
 
-    [JsonConstructor]
-    public EmailNotVerifiedNotification(
-        string email
-    ) : base(null)
-    {
-        Email = email;
-    }
+
 }

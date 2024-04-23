@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using Consul;
+﻿using Consul;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using SharedKernel.HealthChecks.Checks;
-using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
-using ILogger = Serilog.ILogger;
+using System;
 
 namespace IdentityService.Api.Extensions;
 
@@ -59,12 +50,14 @@ public static class ConsulExtensions
         };
 
         Log.Information("Registering with Consul");
+
         RegisterServiceWithConsul(consulClient, registration, lifetime);
 
         return app;
     }
 
-    private static void RegisterServiceWithConsul(IConsulClient consulClient, AgentServiceRegistration registration, IHostApplicationLifetime lifetime)
+    private static void RegisterServiceWithConsul(IConsulClient consulClient, AgentServiceRegistration registration,
+        IHostApplicationLifetime lifetime)
     {
         try
         {
@@ -80,7 +73,7 @@ public static class ConsulExtensions
         catch (Exception ex)
         {
             Log.Error(ex, "Error during Consul registration or deregistration.");
-            throw;
+            return;
         }
     }
 }

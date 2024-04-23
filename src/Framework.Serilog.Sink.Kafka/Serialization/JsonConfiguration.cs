@@ -2,11 +2,11 @@
 // Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 // See the LICENSE file in the project root for more information
 
+using Elastic.CommonSchema.Serialization;
 using System;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Elastic.CommonSchema.Serialization;
 
 namespace Framework.Serilog.Sink.Kafka.Serialization;
 

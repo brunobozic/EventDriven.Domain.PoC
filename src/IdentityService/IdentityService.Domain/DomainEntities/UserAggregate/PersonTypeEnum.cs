@@ -1,6 +1,6 @@
-﻿using System.ComponentModel;
+﻿using Newtonsoft.Json.Converters;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json.Converters;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate;
 

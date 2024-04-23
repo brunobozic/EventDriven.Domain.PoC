@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.Primitives;
 using SharedKernel.DomainContracts;
+using System;
 
 namespace IdentityService.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo;
 

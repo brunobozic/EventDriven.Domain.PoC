@@ -1,8 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using IdentityService.Domain.DomainEntities.UserAggregate;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate;
 using SharedKernel.DomainImplementations.BaseClasses;
 using SharedKernel.Helpers;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 
@@ -37,7 +37,7 @@ public class CreateUserCommand : CommandBase<UserDto>
 
     public DateTimeOffset ActiveFrom { get; set; }
     public DateTimeOffset ActiveTo { get; set; }
-    [Required] [Compare("Password")] public string ConfirmPassword { get; set; }
+    [Required][Compare("Password")] public string ConfirmPassword { get; set; }
     public User Creator { get; set; }
     public DateTimeOffset? DateOfBirth { get; set; }
     [EmailAddress] public string Email { get; set; }

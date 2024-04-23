@@ -1,9 +1,4 @@
-﻿using System;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using Framework.Kafka.Core.Contracts;
 using IdentityService.Application.CommandsAndHandlers.Users.CUD;
 using IdentityService.Application.ViewModels.OutboxMessage;
@@ -16,6 +11,11 @@ using Serilog.Core;
 using Serilog.Events;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Database;
+using System;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.OutboxCommands;
 

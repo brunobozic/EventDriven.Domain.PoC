@@ -1,6 +1,6 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.CommandsAndHandlers.Roles;
 

@@ -2,7 +2,7 @@
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
 
-public class ValidatePasswordResetTokenRequest
+public sealed record ValidatePasswordResetTokenRequest
 {
     public Guid UserId { get; set; }
     public string Token { get; set; }

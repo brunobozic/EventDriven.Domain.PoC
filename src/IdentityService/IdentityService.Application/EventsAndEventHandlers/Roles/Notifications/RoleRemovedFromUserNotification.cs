@@ -1,11 +1,10 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
-using Newtonsoft.Json;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
 
-public class RoleRemovedFromUserNotification : IntegrationEventBase<RoleRemovedFromUserDomainEvent>
+public class RoleRemovedFromUserNotification : DomainNotificationBase<RoleRemovedFromUserDomainEvent>
 {
     public DateTimeOffset? DateRemoved;
     public string RemoverEmail;
@@ -17,7 +16,7 @@ public class RoleRemovedFromUserNotification : IntegrationEventBase<RoleRemovedF
     public Guid UserId;
     public string UserName;
 
-    public RoleRemovedFromUserNotification(RoleRemovedFromUserDomainEvent integrationEvent) : base(integrationEvent)
+    public RoleRemovedFromUserNotification(RoleRemovedFromUserDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         RoleId = integrationEvent.RoleId;
         RoleName = integrationEvent.Name;
@@ -30,10 +29,5 @@ public class RoleRemovedFromUserNotification : IntegrationEventBase<RoleRemovedF
         RemoverUserId = integrationEvent.RemoverUserId;
     }
 
-    [JsonConstructor]
-    public RoleRemovedFromUserNotification(Guid userId, long roleId) : base(null)
-    {
-        UserId = userId;
-        RoleId = roleId;
-    }
+
 }

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Serilog;
+﻿using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
 using SharedKernel.DomainContracts;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.Command.Handlers;
 

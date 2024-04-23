@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using IdentityService.Application.ViewModels.ApplicationUsers.Request;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Request;
 using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 using IdentityService.Domain.DomainEntities.UserAggregate;
+using System;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Services;
 
 namespace IdentityService.Application.DomainServices.UserServices;

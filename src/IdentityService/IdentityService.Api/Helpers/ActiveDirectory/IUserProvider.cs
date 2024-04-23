@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Principal;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using SharedKernel.ActiveDirectory;
+using System;
+using System.Collections.Generic;
+using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.Helpers.ActiveDirectory;
 

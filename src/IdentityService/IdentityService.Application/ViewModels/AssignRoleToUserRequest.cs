@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace IdentityService.Api.Controllers;
+namespace IdentityService.Application.ViewModels;
 
-public class AssignRoleToUserRequest
+public sealed record AssignRoleToUserRequest
 {
     public Guid UserIdToAssignTo { get; set; }
 

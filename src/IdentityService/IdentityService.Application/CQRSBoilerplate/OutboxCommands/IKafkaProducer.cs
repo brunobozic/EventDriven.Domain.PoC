@@ -1,6 +1,6 @@
-﻿using System.Threading;
+﻿using SharedKernel.DomainContracts;
+using System.Threading;
 using System.Threading.Tasks;
-using SharedKernel.DomainContracts;
 
 namespace IdentityService.Application.CQRSBoilerplate.OutboxCommands;
 

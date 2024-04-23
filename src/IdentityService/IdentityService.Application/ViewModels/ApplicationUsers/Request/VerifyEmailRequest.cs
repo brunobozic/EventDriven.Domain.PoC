@@ -2,7 +2,7 @@
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
 
-public class VerifyEmailRequest
+public sealed record VerifyEmailRequest
 {
     public string EmailVerificationToken { get; set; }
     public Guid UserId { get; set; }

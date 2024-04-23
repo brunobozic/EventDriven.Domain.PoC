@@ -1,7 +1,7 @@
-﻿using System.Net;
-using Framework.Kafka.Core.KafkaSettings;
+﻿using Framework.Kafka.Core.KafkaSettings;
 using SharedKernel.Helpers.EmailSender;
 using SharedKernel.Kafka.Settings;
+using System.Net;
 
 namespace SharedKernel.Helpers.Configuration;
 

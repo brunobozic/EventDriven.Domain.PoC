@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 using SharedKernel.DomainImplementations.DomainErrors;
+using System;
+using System.Linq;
 
 namespace IdentityService.Api.Filters;
 

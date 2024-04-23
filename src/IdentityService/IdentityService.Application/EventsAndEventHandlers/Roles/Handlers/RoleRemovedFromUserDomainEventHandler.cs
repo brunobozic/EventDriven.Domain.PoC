@@ -1,8 +1,8 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
+﻿using IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
 using MediatR;
 using SharedKernel.DomainContracts;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Handlers;
 

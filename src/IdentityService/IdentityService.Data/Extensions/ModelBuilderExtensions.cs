@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Linq;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using SharedKernel.DomainCoreInterfaces;
 
 namespace IdentityService.Data.Extensions;
 

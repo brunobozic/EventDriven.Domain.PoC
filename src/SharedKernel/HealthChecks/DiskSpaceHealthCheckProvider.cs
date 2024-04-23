@@ -1,7 +1,7 @@
-﻿using System;
+﻿using SharedKernel.HealthChecks.Base;
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using SharedKernel.HealthChecks.Base;
 
 namespace SharedKernel.HealthChecks;
 

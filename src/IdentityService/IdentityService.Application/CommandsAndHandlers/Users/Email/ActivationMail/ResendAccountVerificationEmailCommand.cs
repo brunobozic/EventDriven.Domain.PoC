@@ -1,5 +1,5 @@
-﻿using System;
-using SharedKernel.DomainContracts;
+﻿using SharedKernel.DomainContracts;
+using System;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 

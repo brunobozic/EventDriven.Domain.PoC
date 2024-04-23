@@ -1,9 +1,9 @@
 ﻿namespace IdentityService.Application.ViewModels.ApplicationUsers.Response;
 
-public class RevokeTokenResponse
+public sealed record RevokeTokenResponse
 {
-    public bool Success { get; internal set; }
-    public string Message { get; internal set; }
-    public string InnerMessage { get; internal set; }
-    public string UserFriendlyMessage { get; internal set; }
+    public bool Success { get; set; }
+    public string Message { get; set; }
+    public string InnerMessage { get; set; }
+    public string UserFriendlyMessage { get; set; }
 }

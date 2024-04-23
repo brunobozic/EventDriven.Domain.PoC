@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using SharedKernel.Helpers.Configuration;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using SharedKernel.Helpers.Configuration;
 
 namespace IdentityService.Api.SecurityPolicies;
 

@@ -1,6 +1,6 @@
-﻿using System;
-using SharedKernel.DomainImplementations.BaseClasses;
+﻿using SharedKernel.DomainImplementations.BaseClasses;
 using SharedKernel.Helpers;
+using System;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 

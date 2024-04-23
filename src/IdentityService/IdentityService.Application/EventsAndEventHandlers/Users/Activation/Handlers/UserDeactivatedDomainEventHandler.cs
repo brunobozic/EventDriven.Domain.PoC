@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.DomainServices.JournalServices;
+﻿using IdentityService.Application.DomainServices.JournalServices;
 using IdentityService.Application.EventsAndEventHandlers.Users.Activation.Notifications;
 using MediatR;
 using SharedKernel.DomainContracts;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.Activation.Handlers;
 
@@ -23,14 +23,14 @@ public class UserDeactivatedDomainEventHandler : INotificationHandler<UserDeacti
     public async Task Handle(UserDeactivatedNotification notification, CancellationToken cancellationToken)
     {
         var journalEntry = DateTime.UtcNow + " => Deactivated by [ " +
-                           notification.IntegrationEvent.DeactivatedBy.UserName + " ] : " +
-                           notification.IntegrationEvent.DeactivationReason;
+                           notification.DomainEvent.DeactivatedBy.UserName + " ] : " +
+                           notification.DomainEvent.DeactivationReason;
 
         // delegate the rest of the operation to the journaling service
         try
         {
             var journalEntryMade = await JournalService.CreateAsync(journalEntry,
-                notification.IntegrationEvent.DeactivatedBy.Id, notification.IntegrationEvent.UserId);
+                notification.DomainEvent.DeactivatedBy.Id, notification.DomainEvent.UserId);
         }
         catch (Exception ex)
         {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
@@ -12,6 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SharedKernel.DomainContracts;
 using SharedKernel.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.CUD;
@@ -92,9 +92,9 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, U
             , command.Origin
         );
 
-        UserRepository.Attach(user);
+        //UserRepository.Attach(user);
         UserRepository.Insert(user);
-        UserRepository.ApplyChanges(user);
+        //UserRepository.ApplyChanges(user);
 
         await UnitOfWork.SaveChangesAsync(cancellationToken);
 

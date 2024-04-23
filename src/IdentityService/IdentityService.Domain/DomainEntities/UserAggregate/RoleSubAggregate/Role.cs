@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 
@@ -30,6 +30,7 @@ public class Role : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
     public Guid? DeactivatedById { get; set; }
     public Guid? UndeletedById { get; set; }
     public bool Deleted { get; set; }
+    public ICollection<RolePermission> RolePermissions { get; set; }
 
     #endregion FK
 

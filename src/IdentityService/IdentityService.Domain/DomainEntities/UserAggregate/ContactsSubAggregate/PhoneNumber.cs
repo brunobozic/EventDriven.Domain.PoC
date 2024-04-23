@@ -1,7 +1,7 @@
-﻿using System;
+﻿using SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using SharedKernel.DomainCoreInterfaces;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
 

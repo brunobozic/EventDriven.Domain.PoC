@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using Quartz;
+﻿using Quartz;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.QuartzJobs;
 

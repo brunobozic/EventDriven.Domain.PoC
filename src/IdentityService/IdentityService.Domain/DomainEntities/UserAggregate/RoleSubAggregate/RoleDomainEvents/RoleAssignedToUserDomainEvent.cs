@@ -1,5 +1,5 @@
-﻿using System;
-using SharedKernel.DomainImplementations.BaseClasses;
+﻿using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 
@@ -8,6 +8,7 @@ public class RoleAssignedToUserDomainEvent : DomainEventBase
     public DateTimeOffset? ActiveTo;
     public DateTimeOffset DateAssigned;
     public string Email;
+    public EventTypeEnum EventType;
     public string Name;
     public string RoleGiverEmail;
     public Guid RoleGiverId;
@@ -16,7 +17,6 @@ public class RoleAssignedToUserDomainEvent : DomainEventBase
     public Guid UserId;
     public string UserName;
     public DateTimeOffset UtcNow;
-    public EventTypeEnum EventType;
 
     public RoleAssignedToUserDomainEvent(
         Guid userId

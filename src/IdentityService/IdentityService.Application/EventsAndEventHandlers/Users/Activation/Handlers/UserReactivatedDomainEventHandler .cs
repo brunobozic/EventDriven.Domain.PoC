@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.CommandsAndHandlers.Users.Email;
+﻿using IdentityService.Application.CommandsAndHandlers.Users.Email;
 using IdentityService.Application.EventsAndEventHandlers.Users.Activation.Notifications;
 using MediatR;
 using SharedKernel.DomainContracts;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.Activation.Handlers;
 

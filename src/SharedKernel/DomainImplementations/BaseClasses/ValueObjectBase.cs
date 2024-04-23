@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using SharedKernel.BusinessRules;
+using SharedKernel.DomainImplementations.DomainErrors;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SharedKernel.BusinessRules;
-using SharedKernel.DomainImplementations.DomainErrors;
 
 namespace SharedKernel.DomainImplementations.BaseClasses;
 

@@ -1,5 +1,5 @@
-﻿using System;
-using IdentityService.Application.ViewModels.ApplicationUsers;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers;
+using System;
 
 namespace IdentityService.Application.ViewModels.ApplicationRoles;
 

@@ -2,8 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
-
-public record RegisterUserRequest(
+public sealed record RegisterUserRequest(
     string Email,
     string ConfirmPassword,
     DateTimeOffset? DateOfBirth,

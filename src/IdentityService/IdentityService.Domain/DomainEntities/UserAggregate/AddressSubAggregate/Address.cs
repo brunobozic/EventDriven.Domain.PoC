@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using IdentityService.Domain.DomainEntities.DomainExceptions;
+﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 
@@ -208,7 +208,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         {
             Line1 = line1;
             AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+            { AddressId = Id, UserId = changedBy.Id });
         }
         else
         {
@@ -223,7 +223,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         {
             Line2 = line2;
             AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+            { AddressId = Id, UserId = changedBy.Id });
         }
         else
         {
@@ -238,7 +238,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         {
             FlatNr = flatNumber;
             AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+            { AddressId = Id, UserId = changedBy.Id });
         }
         else
         {
@@ -253,7 +253,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         {
             PostalCode = postalCode;
             AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+            { AddressId = Id, UserId = changedBy.Id });
         }
         else
         {
@@ -268,7 +268,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         {
             HouseNumber = houseNumber;
             AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+            { AddressId = Id, UserId = changedBy.Id });
         }
         else
         {
@@ -283,7 +283,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         {
             HouseNumberSuffix = houseNumberSuffix;
             AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+            { AddressId = Id, UserId = changedBy.Id });
         }
         else
         {
@@ -300,7 +300,7 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
             {
                 AddressType = addressType;
                 AddDomainEvent(new UserUpdatedAddressDomainEvent
-                    { AddressId = Id, UserId = changedBy.Id });
+                { AddressId = Id, UserId = changedBy.Id });
             }
             else
             {

@@ -1,7 +1,7 @@
-﻿using System;
-using IdentityService.Api.Enrichers;
+﻿using IdentityService.Api.Enrichers;
 using Serilog;
 using Serilog.Configuration;
+using System;
 
 namespace IdentityService.Api.Extensions;
 

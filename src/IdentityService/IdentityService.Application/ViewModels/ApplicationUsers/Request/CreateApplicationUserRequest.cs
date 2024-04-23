@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharedKernel.Helpers;
+using System;
 using System.ComponentModel.DataAnnotations;
-using SharedKernel.Helpers;
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
 
@@ -20,7 +20,7 @@ public class CreateApplicationUserRequest
 
     public string Password { get; set; }
 
-    [Required] [Compare("Password")] public string ConfirmPassword { get; set; }
+    [Required][Compare("Password")] public string ConfirmPassword { get; set; }
 
     public DateTimeOffset? DateOfBirth { get; set; }
     public string Origin { get; internal set; }

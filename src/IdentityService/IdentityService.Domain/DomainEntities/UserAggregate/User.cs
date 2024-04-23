@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using IdentityService.Domain.DomainEntities.DomainExceptions;
+﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
 using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
@@ -19,6 +15,10 @@ using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
 using SharedKernel.DomainImplementations.BaseClasses;
 using SharedKernel.Helpers.Random;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using TrackableEntities.Common.Core;
 using BC = BCrypt.Net.BCrypt;
 
@@ -240,7 +240,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         try
         {
             GuardAgainstInactiveOrUnverifiedStatus();
-
+            // TODO: will this even work
             _refreshTokens.Add(refreshToken);
 
             return true;
@@ -264,6 +264,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
                 ValidateRoleState(role);
 
                 var newJoin = UserRole.NewActivatedDraft(this, role, roleGiver);
+                // TODO: will this work?
                 _userRoles.Add(newJoin);
                 UpdateModifiedDate();
                 AddRoleAssignmentEvent(this, role, roleGiver);
@@ -314,7 +315,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
             ValidateActiveAndVerifiedUser();
             address.AssignAddressType(addressType, addressAssigner);
             var userAddress = UserAddress.NewActivatedDraft(this, address, addressAssigner);
-
+            // TODO: will this work?
             _userAddresses.Add(userAddress);
             UpdateModifiedDate();
             AddAddressAssignmentEvent(address, addressType, addressAssigner);

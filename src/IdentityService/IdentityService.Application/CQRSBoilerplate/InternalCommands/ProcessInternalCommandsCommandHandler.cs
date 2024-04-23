@@ -1,14 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using IdentityService.Application.CQRSBoilerplate.Command;
 using MediatR;
 using Newtonsoft.Json;
 using OpenTelemetry.Trace;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Database;
+using System;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.InternalCommands;
 

@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using IdentityService.Application.DomainServices.EmailServices;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
@@ -8,6 +6,8 @@ using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using Microsoft.Extensions.Options;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.PasswordReset;

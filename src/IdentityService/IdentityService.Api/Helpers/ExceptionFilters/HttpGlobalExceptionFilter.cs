@@ -1,11 +1,13 @@
-﻿using System;
-using System.Net;
-using IdentityService.Api.Helpers.ExceptionFilters;
+﻿using IdentityService.Api.Helpers.ExceptionFilters;
 using IdentityService.Domain.DomainEntities.DomainExceptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Serilog;
+using System;
+using System.Net;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
 
@@ -14,7 +16,7 @@ public partial class HttpGlobalExceptionFilter : IExceptionFilter
     private readonly IWebHostEnvironment _env;
     private readonly ILogger _logger;
 
-    public HttpGlobalExceptionFilter(IWebHostEnvironment env, ILogger logger)
+    public HttpGlobalExceptionFilter(IWebHostEnvironment env, ILogger<HttpGlobalExceptionFilter> logger)
     {
         _env = env;
         _logger = logger;
@@ -24,7 +26,7 @@ public partial class HttpGlobalExceptionFilter : IExceptionFilter
     public void OnException(ExceptionContext context)
     {
         Log.Error(context.Exception, context.Exception.InnerException?.Message);
-        _logger.Error(context.Exception, context.Exception.InnerException?.Message);
+        _logger.LogError(context.Exception, context.Exception.InnerException?.Message);
 
         if (context.Exception.GetType() == typeof(DomainException))
         {

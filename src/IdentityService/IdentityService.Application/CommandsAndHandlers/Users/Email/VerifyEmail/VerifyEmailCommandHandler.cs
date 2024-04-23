@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Application.ViewModels.ApplicationUsers.Response;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SharedKernel.DomainContracts;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using URF.Core.Abstractions.Trackable;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.Email.VerifyEmail;

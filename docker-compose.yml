@@ -130,6 +130,52 @@ services:
       - "8600:8600"
       - "8600:8600/udp"
     command: "agent -server -bootstrap-expect 3 -ui -client 0.0.0.0"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.11.2
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.11.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+  
+  setup-kibana:
+    image: curlimages/curl
+    depends_on:
+      - kibana
+    command: >
+      /bin/sh -c "
+        until curl -s http://kibana:5601/api/status | grep -q 200
+        do
+          echo 'Waiting for Kibana...'
+          sleep 5
+        done;
+        echo 'Kibana is up. Setting up index pattern...';
+        curl -X POST 'http://kibana:5601/api/saved_objects/index-pattern/myapp_logs' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
+        {
+          \"attributes\": {
+            \"title\": \"myapp-logs-*\",
+            \"timeFieldName\": \"@timestamp\"
+          }
+        }'
+      "
+
 networks:
   consul-demo:
   jaeger-example:

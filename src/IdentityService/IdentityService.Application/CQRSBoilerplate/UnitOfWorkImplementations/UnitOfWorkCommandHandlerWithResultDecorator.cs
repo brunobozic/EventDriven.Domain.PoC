@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using IdentityService.Data.CustomUnitOfWork.Interfaces;
-using IdentityService.Data.DatabaseContext;
+﻿using IdentityService.Data.CustomUnitOfWork.Interfaces;
+using IdentityService.Data.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.DomainContracts;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate.UnitOfWorkImplementations;
 

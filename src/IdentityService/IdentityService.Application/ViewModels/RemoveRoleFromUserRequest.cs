@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace IdentityService.Api.Controllers;
+namespace IdentityService.Application.ViewModels;
 
-public class RemoveRoleFromUserRequest
+public sealed record RemoveRoleFromUserRequest
 {
     public string RoleName { get; set; }
 

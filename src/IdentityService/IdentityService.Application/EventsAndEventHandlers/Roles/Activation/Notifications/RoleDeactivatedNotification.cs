@@ -1,13 +1,12 @@
-﻿using System;
-using System.Text.Json.Serialization;
-using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Activation.Notifications;
 
-public class RoleDeactivatedNotification : IntegrationEventBase<RoleDeactivatedDomainEvent>
+public class RoleDeactivatedNotification : DomainNotificationBase<RoleDeactivatedDomainEvent>
 {
-    public RoleDeactivatedNotification(RoleDeactivatedDomainEvent integrationEvent) : base(integrationEvent)
+    public RoleDeactivatedNotification(RoleDeactivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         RoleId = integrationEvent.RoleId;
         RoleDescription = integrationEvent.Description;
@@ -18,11 +17,6 @@ public class RoleDeactivatedNotification : IntegrationEventBase<RoleDeactivatedD
         DeactivatorId = integrationEvent.DeactivatedById;
     }
 
-    [JsonConstructor]
-    public RoleDeactivatedNotification(long roleId) : base(null)
-    {
-        RoleId = roleId;
-    }
 
     public string DeactivatorUsername { get; set; }
     public Guid DeactivatorId { get; set; }

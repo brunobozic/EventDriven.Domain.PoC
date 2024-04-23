@@ -1,13 +1,13 @@
-﻿using System;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate;
+using SharedKernel.BusinessRules;
+using SharedKernel.DomainContracts;
+using SharedKernel.DomainImplementations.DomainErrors;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using IdentityService.Domain.DomainEntities.UserAggregate;
-using SharedKernel.BusinessRules;
-using SharedKernel.DomainContracts;
-using SharedKernel.DomainImplementations.DomainErrors;
 using TrackableEntities.Common.Core;
 
 namespace IdentityService.Domain.DomainEntities;

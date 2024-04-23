@@ -1,6 +1,6 @@
 ﻿namespace IdentityService.Application.ViewModels.ApplicationUsers.Request;
 
-public class AuthenticateRequest
+public sealed record AuthenticateRequest
 {
     public string Email { get; set; }
 

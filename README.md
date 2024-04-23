@@ -68,7 +68,7 @@ The ideas behind `Consul`, `Eureka` and `Jaeger` are the following:
     - the spans that happen between the services are being traced and logged via Jaeger
 
 ## Liveness probe 
-- URL: `https://localhost:5001/liveness`
+- URL: `https://localhost:5007/liveness`
     - will emit a simple 200: Healthy 
 
 ## Rudimentary HC endpoint
@@ -76,7 +76,7 @@ The ideas behind `Consul`, `Eureka` and `Jaeger` are the following:
 Basically this is used by load balancers or service discovery subsystem so they know that a service is "alive"
 The data presented via the /hc endpoint can also be used for dashboard purposes (Grafana or Kibana) if one so desires
 
-- URL: `https://localhost:5001/hc`
+- URL: `https://localhost:5007/hc`
 
 The following is the hc UI which is not all that important, its just an UI over the /hc json payload
 Depending on the version of .net core and the version of hc package, there tend to be some incompatibilies, so I usually leave the UI out until it matures 

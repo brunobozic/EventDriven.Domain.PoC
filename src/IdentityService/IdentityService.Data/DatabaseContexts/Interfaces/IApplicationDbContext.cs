@@ -1,4 +1,4 @@
-﻿namespace IdentityService.Data.DatabaseContext.Interfaces;
+﻿namespace IdentityService.Data.DatabaseContexts.Interfaces;
 
 public interface IApplicationDbContext
 {

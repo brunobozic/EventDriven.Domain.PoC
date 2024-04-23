@@ -1,12 +1,12 @@
-﻿using System;
-using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
 using SharedKernel.DomainImplementations.BaseClasses;
+using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Addresses.Notifications;
 
-public class AddressAssignedToUserNotification : IntegrationEventBase<AddressAssignedToUserDomainEvent>
+public class AddressAssignedToUserNotification : DomainNotificationBase<AddressAssignedToUserDomainEvent>
 {
-    public AddressAssignedToUserNotification(AddressAssignedToUserDomainEvent integrationEvent) : base(integrationEvent)
+    public AddressAssignedToUserNotification(AddressAssignedToUserDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
     {
         AddressActive = integrationEvent.AddressActive;
         AddressTypeDescription = integrationEvent.AddressTypeDescription;

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
+using System.Collections.Generic;
 
 namespace IdentityService.Application.DomainServices.JournalServices;
 

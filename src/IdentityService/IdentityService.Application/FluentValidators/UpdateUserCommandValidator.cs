@@ -1,7 +1,7 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using FluentValidation;
+﻿using FluentValidation;
 using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
+using System;
+using System.Text.RegularExpressions;
 
 namespace IdentityService.Application.FluentValidators;
 

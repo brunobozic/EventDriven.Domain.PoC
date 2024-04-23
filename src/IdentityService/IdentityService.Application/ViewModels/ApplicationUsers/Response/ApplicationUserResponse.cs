@@ -2,7 +2,7 @@
 
 namespace IdentityService.Application.ViewModels.ApplicationUsers.Response;
 
-public class ApplicationUserResponse
+public sealed record ApplicationUserResponse
 {
     public bool Success { get; set; }
     public object Message { get; set; }

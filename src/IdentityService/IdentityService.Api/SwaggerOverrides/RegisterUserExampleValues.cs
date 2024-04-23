@@ -1,6 +1,6 @@
-﻿using System;
-using IdentityService.Application.ViewModels.ApplicationUsers.Request;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Request;
 using Swashbuckle.AspNetCore.Filters;
+using System;
 
 namespace IdentityService.Api.SwaggerOverrides;
 

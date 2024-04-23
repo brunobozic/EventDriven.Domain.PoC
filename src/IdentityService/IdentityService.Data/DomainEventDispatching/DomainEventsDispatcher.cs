@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Autofac.Core;
-using IdentityService.Data.DatabaseContext;
+using IdentityService.Data.DatabaseContexts;
 using IdentityService.Domain.DomainEntities;
 using IdentityService.Domain.DomainEntities.OutboxPattern;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SharedKernel.DomainContracts;
+using SharedKernel.DomainImplementations.BaseClasses;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IdentityService.Data.DomainEventDispatching;
 
-public class IntegrationEventDispatcher : IDomainEventsDispatcher
+public class DomainEventsDispatcher : IDomainEventsDispatcher
 {
-    private readonly ApplicationDbContext _context;
+    private ApplicationDbContext _context;
     private readonly IMediator _mediator;
     private readonly ILifetimeScope _scope;
 
-    public IntegrationEventDispatcher(IMediator mediator, ILifetimeScope scope, DbContext context)
+    public DomainEventsDispatcher(IMediator mediator, ILifetimeScope scope, DbContext context)
     {
         _mediator = mediator;
         _scope = scope;
@@ -45,43 +46,46 @@ public class IntegrationEventDispatcher : IDomainEventsDispatcher
 
         var domainEventsWithGuid = domainEntitiesWithGuid.SelectMany(x => x.Entity.DomainEvents).ToList();
 
-        var integrationEvents = new List<IIntegrationEvent<IDomainEvent>>();
+        var integrationEvents = new List<IDomainEventNotification<IDomainEvent>>();
 
         foreach (var intEvent in domainEvents)
         {
-            var integrationEventType = typeof(IIntegrationEvent<>);
-            var integrationEventWithGenericType =
-                integrationEventType.MakeGenericType(intEvent.GetType());
+            var integrationEventType = typeof(IDomainEventNotification<>);
+            var integrationEventWithGenericType = integrationEventType.MakeGenericType(intEvent.GetType());
             var integrationEvent = _scope.ResolveOptional(integrationEventWithGenericType, new List<Parameter>
             {
-                new NamedParameter("integrationEvent", intEvent)
+                new NamedParameter("domainEvent", intEvent),
+                new NamedParameter("id", intEvent.Id)
             });
 
-            if (integrationEvent != null) integrationEvents.Add(integrationEvent as IIntegrationEvent<IDomainEvent>);
+            if (integrationEvent != null)
+                integrationEvents.Add(integrationEvent as IDomainEventNotification<IDomainEvent>);
         }
 
         foreach (var guidEvent in domainEventsWithGuid)
         {
-            var integrationEventType = typeof(IIntegrationEvent<>);
+            var integrationEventType = typeof(IDomainEventNotification<>);
             var integrationEventWithGenericType =
                 integrationEventType.MakeGenericType(guidEvent.GetType());
             var integrationEvent = _scope.ResolveOptional(integrationEventWithGenericType, new List<Parameter>
             {
-                new NamedParameter("integrationEvent", guidEvent)
+                new NamedParameter("domainEvent", guidEvent),
+                new NamedParameter("id", guidEvent.Id)
             });
 
             if (integrationEvent != null)
-                integrationEvents.Add(integrationEvent as IIntegrationEvent<IDomainEvent>);
+                integrationEvents.Add(integrationEvent as IDomainEventNotification<IDomainEvent>);
         }
 
         domainEntities.ForEach(entity => entity.Entity.ClearDomainEvents());
         domainEntitiesWithGuid.ForEach(entity => entity.Entity.ClearDomainEvents());
 
         var tasks = domainEvents.Select(async domainEvent => { await _mediator.Publish(domainEvent); });
+
         var tasksWithGuid = domainEventsWithGuid.Select(async domainEvent => { await _mediator.Publish(domainEvent); });
 
-        await Task.WhenAll(tasks);
         await Task.WhenAll(tasksWithGuid);
+        await Task.WhenAll(tasks);
 
         // 2PC problem is solved by using an outbox table as a queue
         // each and every event that needs to be published so other microservices can react to it
@@ -101,10 +105,10 @@ public class IntegrationEventDispatcher : IDomainEventsDispatcher
 
             var data = JsonConvert.SerializeObject(integrationEvent);
             var outboxMessage = new OutboxMessage(
-                integrationEvent.IntegrationEvent.OccurredOn,
+                integrationEvent.DomainEvent.OccurredOn,
                 type,
                 data,
-                integrationEvent.IntegrationEvent.TypeOfEvent);
+                integrationEvent.DomainEvent.TypeOfEvent);
 
             await _context.OutboxMessages.AddAsync(outboxMessage);
 

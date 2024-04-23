@@ -1,6 +1,6 @@
-﻿using System;
-using IdentityService.Application.ViewModels.ApplicationUsers.Response;
+﻿using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 using SharedKernel.DomainContracts;
+using System;
 
 namespace IdentityService.Application.CommandsAndHandlers.Users.Email.VerifyEmail;
 

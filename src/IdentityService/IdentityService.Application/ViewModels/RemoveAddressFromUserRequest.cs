@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace IdentityService.Api.Controllers;
+namespace IdentityService.Application.ViewModels;
 
-public class RemoveAddressFromUserRequest
+public sealed record RemoveAddressFromUserRequest
 {
     public Guid UserId { get; set; }
 

@@ -73,3 +73,4 @@
 //    //    public bool IsAdapterForIndividualComponents => _source.IsAdapterForIndividualComponents;
 //    //}
 //}
+

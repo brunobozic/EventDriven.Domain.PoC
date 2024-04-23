@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaProducer;
 using Serilog;
+using System;
+using System.Threading.Tasks;
 
 namespace SharedKernel.Kafka.KafkaImplementions;
 

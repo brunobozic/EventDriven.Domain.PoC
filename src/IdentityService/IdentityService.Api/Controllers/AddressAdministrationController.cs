@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using IdentityService.Api.Controllers.BaseControllerType;
-using IdentityService.Application.DomainServices.UserServices;
 using IdentityService.Application.Ports.Input.Contracts;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SharedKernel.Helpers.Configuration;
 
@@ -22,8 +22,9 @@ public class AddressAdministrationController : BaseController, IAddressAdministr
         IMapper mapper,
         IOptions<MyConfigurationValues> configurationValues,
         IMemoryCache memCache,
+        IConfiguration configuration,
         IHttpContextAccessor contextAccessor
-    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor)
+    ) : base(unitOfWork, mapper, configurationValues, memCache, contextAccessor, configuration)
     {
     }
 
