@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.Registration;
 
-public class UserRegisteredNotification : DomainNotificationBase<UserRegisteredDomainEvent>
+public class UserRegisteredNotification : IntegrationEventBase<UserRegisteredDomainEvent>
 {
-    public UserRegisteredNotification(UserRegisteredDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public UserRegisteredNotification(UserRegisteredDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         UserId = integrationEvent.UserId;
         UserName = integrationEvent.UserName;

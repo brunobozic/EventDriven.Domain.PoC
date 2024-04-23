@@ -4,11 +4,11 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.VerificationEmail.Notifications;
 
-public class EmailVerifiedNotification : DomainNotificationBase<EmailVerifiedDomainEvent>
+public class EmailVerifiedNotification : IntegrationEventBase<EmailVerifiedDomainEvent>
 {
     public string Email;
 
-    public EmailVerifiedNotification(EmailVerifiedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public EmailVerifiedNotification(EmailVerifiedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         Email = integrationEvent.Email;
     }

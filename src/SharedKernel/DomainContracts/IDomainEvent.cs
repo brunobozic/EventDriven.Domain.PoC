@@ -8,5 +8,5 @@ public interface IDomainEvent : INotification
 {
     DateTime OccurredOn { get; }
     EventTypeEnum TypeOfEvent { get; set; }
-    Guid Id { get; set; }
+    
 }

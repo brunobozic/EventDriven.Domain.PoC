@@ -2,6 +2,7 @@
 using IdentityService.Application.EventsAndEventHandlers.Addresses.Notifications;
 using MediatR;
 using SharedKernel.DomainContracts;
+using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +14,7 @@ public class AddressRemovedFromUserDomainEventHandler : INotificationHandler<Add
     private readonly ICommandsScheduler _commandsScheduler;
     private readonly IJournalService _journalService;
 
-    public AddressRemovedFromUserDomainEventHandler(ICommandsScheduler commandsScheduler,
-        IJournalService journalService)
+    public AddressRemovedFromUserDomainEventHandler(ICommandsScheduler commandsScheduler, IJournalService journalService)
     {
         _commandsScheduler = commandsScheduler;
         _journalService = journalService;
@@ -22,15 +22,15 @@ public class AddressRemovedFromUserDomainEventHandler : INotificationHandler<Add
 
     public async Task Handle(AddressRemovedFromUserNotification notification, CancellationToken cancellationToken)
     {
-        var journalEntry = DateTime.UtcNow + " => [" + notification.DomainEvent.AddressTypeName +
+        var journalEntry = DateTime.UtcNow + " => [" + notification.IntegrationEvent.AddressTypeName +
                            "] address removed from user. Address removed: [" +
-                           notification.DomainEvent.AddressLine1 + "].";
+                           notification.IntegrationEvent.AddressLine1 + "].";
 
         // delegate the rest of the operation to the journaling service
         try
         {
             var journalEntryMade = await _journalService.CreateAsync(journalEntry,
-                notification.DomainEvent.AddressRemoverId, notification.DomainEvent.UserId);
+                notification.IntegrationEvent.AddressRemoverId, notification.IntegrationEvent.UserId);
         }
         catch (Exception ex)
         {

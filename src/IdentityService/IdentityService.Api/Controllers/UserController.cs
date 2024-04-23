@@ -107,11 +107,11 @@ public class UserController : BaseController, IUserController
             Console.WriteLine(handler.GetType().FullName);
         }
 
-        using (var scope = _lifetimeScope.BeginLifetimeScope())
-        {
-            var handler = scope.Resolve<INotificationHandler<UserCreatedDomainEvent>>();
-            Console.WriteLine(handler.GetType().FullName);
-        }
+        //using (var scope = _lifetimeScope.BeginLifetimeScope())
+        //{
+        //    var handler = scope.Resolve<INotificationHandler<UserCreatedDomainEvent>>();
+        //    Console.WriteLine(handler.GetType().FullName);
+        //}
 
 
 

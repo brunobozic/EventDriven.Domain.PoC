@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Addresses.Notifications;
 
-public class AddressAssignedToUserNotification : DomainNotificationBase<AddressAssignedToUserDomainEvent>
+public class AddressAssignedToUserNotification : IntegrationEventBase<AddressAssignedToUserDomainEvent>
 {
-    public AddressAssignedToUserNotification(AddressAssignedToUserDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public AddressAssignedToUserNotification(AddressAssignedToUserDomainEvent integrationEvent) : base(integrationEvent)
     {
         AddressActive = integrationEvent.AddressActive;
         AddressTypeDescription = integrationEvent.AddressTypeDescription;

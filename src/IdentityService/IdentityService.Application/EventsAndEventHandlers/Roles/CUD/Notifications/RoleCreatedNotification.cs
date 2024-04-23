@@ -4,7 +4,7 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.CUD.Notifications;
 
-public class RoleCreatedNotification : DomainNotificationBase<RoleCreatedDomainEvent>
+public class RoleCreatedNotification : IntegrationEventBase<RoleCreatedDomainEvent>
 {
     public string CreatorEmail;
     public Guid? CreatorId;
@@ -14,7 +14,7 @@ public class RoleCreatedNotification : DomainNotificationBase<RoleCreatedDomainE
     public string Name;
     public Guid RoleId;
 
-    public RoleCreatedNotification(RoleCreatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public RoleCreatedNotification(RoleCreatedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         RoleId = integrationEvent.RoleId;
         Description = integrationEvent.Description;

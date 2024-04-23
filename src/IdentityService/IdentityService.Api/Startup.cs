@@ -1,28 +1,25 @@
-﻿using AspNetCoreRateLimit;
-using Autofac;
+﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Net.Mime;
+using System.Reflection;
+using System.Text;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
-using IdentityService.Api.Controllers;
 using IdentityService.Api.Extensions;
 using IdentityService.Api.Filters;
 using IdentityService.Api.Middleware;
 using IdentityService.Api.QuartzJobs;
 using IdentityService.Api.SwaggerOverrides;
 using IdentityService.Application.AutomapperMaps;
-using IdentityService.Application.CommandsAndHandlers.Users.CUD;
-using IdentityService.Application.CQRSBoilerplate.Command;
-using IdentityService.Application.CQRSBoilerplate.DomainEventDispatchers;
 using IdentityService.Application.DomainServices.EmailServices;
-using IdentityService.Application.DomainServices.UserServices;
-using IdentityService.Data;
-using IdentityService.Data.CustomUnitOfWork;
-using IdentityService.Data.CustomUnitOfWork.Interfaces;
-using IdentityService.Data.DatabaseContexts;
-using IdentityService.Data.DomainEventDispatching;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -31,12 +28,9 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -52,76 +46,81 @@ using OpenTelemetry.Trace;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
-using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.SystemConsole.Themes;
-using SharedKernel.DomainContracts;
-using SharedKernel.DomainImplementations.BaseClasses;
 using SharedKernel.Extensions;
 using SharedKernel.Helpers.Configuration;
-using SharedKernel.Helpers.Database;
 using SharedKernel.Helpers.EmailSender;
 using SharedKernel.Helpers.Quartz;
 using Swashbuckle.AspNetCore.Filters;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Globalization;
-using System.IO;
-using System.Net.Mime;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using static SharedKernel.Helpers.Startup;
 using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 using ILogger = Serilog.ILogger;
 
 namespace IdentityService.Api;
+#pragma warning disable 1591
 
 public class Startup
+#pragma warning restore 1591
 {
+#pragma warning disable 1591
     public static readonly string Namespace = typeof(Program).Namespace;
+#pragma warning restore 1591
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static readonly string AppName = Namespace;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
-    public IWebHostEnvironment Env { get; set; }
+#pragma warning disable 1591
 
-    public IConfiguration Configuration { get; }
-    // Constructor that takes IConfiguration and IWebHostEnvironment
-    public Startup(IConfiguration configuration, IWebHostEnvironment env)
+    public Startup(
+#pragma warning restore 1591
+        IConfiguration configuration
+        , ILoggerFactory loggerFactory
+        , IWebHostEnvironment env
+    )
     {
         Configuration = configuration;
+        LoggerFactory = loggerFactory;
         Env = env;
+        Logger = ConfigureLogger(configuration);
+        LoggerFactory.AddSerilog(Logger);
+        Logger.Information("Logger configured");
     }
+
+#pragma warning disable 1591
+    public IWebHostEnvironment Env { get; set; }
+#pragma warning restore 1591
+#pragma warning disable 1591
+    public ILogger Logger { get; }
+#pragma warning restore 1591
+#pragma warning disable 1591
+    public IConfiguration Configuration { get; }
+#pragma warning restore 1591
+#pragma warning disable 1591
+    public ILoggerFactory LoggerFactory { get; set; }
+#pragma warning restore 1591
     private MapperConfiguration MapperConfiguration { get; set; }
-    public ILifetimeScope LIFETIMESCOPE { get; private set; }
 
-    public void ConfigureServices(IServiceCollection services)
+    // This method gets called by the runtime. Use this method to add services to the container.
+#pragma warning disable 1591
+
+    [Obsolete]
+    public IServiceProvider ConfigureServices(IServiceCollection services)
+#pragma warning restore 1591
     {
-        var connStr = "";
-
-        if (Env.IsEnvironment("DockerDevelopment"))
-            connStr = Configuration.GetConnectionString("MSSqlDocker");
-        else if (Env.IsEnvironment("Docker"))
-            connStr = Configuration.GetConnectionString("Docker");
-        else
-            connStr = Configuration.GetConnectionString("MSSql");
-
-        connStr = Configuration.GetConnectionString("Sqlite");
-
+        var connStr = Configuration.GetConnectionString("Sqlite");
         services.AddOptions();
         services.Configure<ServiceDisvoveryOptions>(Configuration.GetSection("ServiceDiscovery"));
 
-
         var assembly = Assembly.GetExecutingAssembly(); // Change this to your assembly
-
         //Register services dynamically
         services.RegisterServicesWithAttributes(assembly);
 
         #region MVC wireup
 
         services.AddMvc(opt =>
-            {
-                // opt.Filters.Add(typeof(ValidateFilterAttribute));
-            })
+        {
+            // opt.Filters.Add(typeof(ValidateFilterAttribute));
+        })
             .AddFluentValidation(fv =>
             {
                 fv.RegisterValidatorsFromAssembly(
@@ -247,43 +246,6 @@ public class Startup
         services.Configure<MyConfigurationValues>(Configuration.GetSection("MyConfigurationValues"));
         services.AddScoped(cfg => cfg.GetService<IOptionsSnapshot<MyConfigurationValues>>().Value);
 
-        #region DB, Entities, UOW, repos
-
-        services.AddDbContextPool<ApplicationDbContext>((serviceProvider, options) =>
-        {
-            // Configuring the DbContext based on the application's running environment
-            if (Configuration.GetValue<bool>("UseInMemory"))
-            {
-                options.UseInMemoryDatabase(nameof(ApplicationDbContext))
-                       .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-
-                if (Env.IsDevelopment() || Env.IsEnvironment("DockerDevelopment"))
-                {
-                    options.EnableDetailedErrors();
-                    options.EnableSensitiveDataLogging();
-                }
-            }
-            else if (Env.IsEnvironment("Test"))
-            {
-                var connStr = Configuration.GetConnectionString("SqliteTest"); // Ensure you have this in your config
-                options.UseSqlite(connStr, x => x.MigrationsAssembly("IdentityService.Data"));
-            }
-            else
-            {
-                var connStr = Configuration.GetConnectionString("Sqlite");
-                options.UseSqlite(connStr, x => x.MigrationsAssembly("IdentityService.Data"));
-            }
-        }, poolSize: 128); // Pool size is adjustable based on your application's needs
-
-        // Transient registration of ApplicationDbContext to ensure it can be injected specifically if needed
-        services.AddScoped<ApplicationDbContext>();
-
-        // Additional repository and unit of work registrations
-        services.RegisterRepositories();
-        services.AddSingleton<DbContext>(provider => provider.GetService<ApplicationDbContext>());
-
-        #endregion DB, Entities, UOW, repos
-
         #region Authentication
 
         var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
@@ -326,33 +288,9 @@ public class Startup
 
         #endregion Authentication
 
-
-        #region Rate limiting
-
-        services.Configure<IpRateLimitOptions>(options =>
-        {
-            options.EnableEndpointRateLimiting = true;
-            options.StackBlockedRequests = false;
-            options.HttpStatusCode = 429;
-            options.RealIpHeader = "X-Real-IP";
-            options.ClientIdHeader = "X-ClientId";
-            options.GeneralRules = new System.Collections.Generic.List<RateLimitRule>
-            {
-                new RateLimitRule
-                {
-                    Endpoint = "*",
-                    Period = "20s",
-                    Limit = 3
-                }
-            };
-        });
-
-        #endregion Rate limiting
-
-
         #region Service Registration
 
-
+        services.RegisterRepositories();
         services.AddTransient<IValidatorFactory, ServiceProviderValidatorFactory>();
         services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -363,23 +301,6 @@ public class Startup
         services.Configure<MailOptions>(Configuration.GetSection(nameof(MailOptions)));
         services.Configure<JwtIssuerOptions>(Configuration.GetSection(nameof(JwtIssuerOptions)));
 
-        services.AddTransient<IUserService, UserService>();
-
-        #region Mediatr Registration
-
-        // Assuming IdentityService.Application assembly contains your handlers
-        var mediatrAssembly = typeof(RegisterUserCommandHandler).Assembly;
-
-
-
-        #endregion Mediatr Registration
-
-        services.AddScoped<IMyUnitOfWork, MyUnitOfWork>(); // also in Bootstrap.cs
-        services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>(); // also in Bootstrap.cs
-        services.AddScoped<ICommandsScheduler, CommandsScheduler>(); // also in Bootstrap.cs
-        services.AddScoped<ISqlConnectionFactory>(provider => new SqlConnectionFactory(connStr)); // also in Bootstrap.cs
-        services.AddScoped<DbContextOptions, DbContextOptions<ApplicationDbContext>>();
-        services.AddInMemoryRateLimiting();
         #region AD
 
         // Uncomment this when the AD comes into play!
@@ -518,20 +439,7 @@ public class Startup
         // ========================================   /OTEL   =============================================
         // ================================================================================================
         // ================================================================================================
-        // Add and configure MediatR
 
-        var mediatrAssembly2 = typeof(DomainEventsDispatcherNotificationHandlerDecorator<>).Assembly;
-        var mediatrAssembly3 = typeof(DomainEventBase).Assembly;
-        var mediatrAssembly4 = typeof(UserController).Assembly;
-
-        var ass = new Assembly[3];
-        ass[0] = mediatrAssembly2;
-        ass[1] = mediatrAssembly3;
-        ass[2] = mediatrAssembly4;
-        services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblies(ass);
-        });
 
         // ================================================================================================
         // ================================================================================================
@@ -540,7 +448,6 @@ public class Startup
         // ================================================================================================
 
         var builtContainer = Bootstrap.BuildContainer(connStr, services, Env);
-        var serviceProvider = new AutofacServiceProvider(builtContainer);
 
         // ================================================================================================
         // ================================================================================================
@@ -602,48 +509,22 @@ public class Startup
         // ================================================================================================
         // ================================================================================================
 
-        serviceProvider = new AutofacServiceProvider(builtContainer);
+        var serviceProvider = new AutofacServiceProvider(builtContainer);
 
-        return;
+        return serviceProvider;
     }
 
-    public void ConfigureContainer(ContainerBuilder containerBuilder)
-    {
-
-    }
-
-    public class MediatRServiceConfiguration
-    {
-        public List<Assembly> AssembliesToScan { get; } = new List<Assembly>();
-
-        public void AddAssemblyToScan(Assembly assembly)
-        {
-            AssembliesToScan.Add(assembly);
-        }
-
-        public List<Type> PipelineBehaviors { get; } = new List<Type>();
-
-        public void AddPipelineBehavior(Type behaviorType)
-        {
-            PipelineBehaviors.Add(behaviorType);
-        }
-
-        // Additional configuration methods can be added as needed
-    }
-
-    public void Configure(
-        IApplicationBuilder app
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    [Obsolete]
+    public void Configure(IApplicationBuilder app
+#pragma warning restore 1591
         , IWebHostEnvironment env
-        , ApplicationDbContext myDbContext
+        //, ILoggerFactory loggerFactory
+        //, ApplicationDbContext myDbContext
         , IOptions<ServiceDisvoveryOptions> serviceOptions
         , IApplicationLifetime appLife
     )
     {
-        LIFETIMESCOPE = app.ApplicationServices.GetAutofacRoot();
-
-        InitializeModules(LIFETIMESCOPE);
-
-
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -655,7 +536,7 @@ public class Startup
             app.UseHsts();
         }
 
-        _ = DbInitializer.InitializeAsync(myDbContext);
+        //_ = DbInitializer.InitializeAsync(myDbContext);
 
         #region Swagger wireup
 
@@ -702,67 +583,48 @@ public class Startup
 
         #endregion CORS
 
-        app.UseForwardedHeaders(new ForwardedHeadersOptions
-        {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor |
-                       ForwardedHeaders.XForwardedProto
-        });
+        #region Global exception handling
 
-        #region Global exception handler
-
-        var exceptionHandlerOptions = new ExceptionHandlerOptions
-        {
-            ExceptionHandler = async context =>
+        // The idea here is to hijack all exceptions, and decide whether to show the full trace (for developers) or to show a cleaned up
+        // safe, user friendly messages to end users (commonly this is done in Production)
+        app.UseExceptionHandler(
+            builder =>
             {
-                if (context.RequestServices.GetService<IProblemDetailsService>() is { } problemDetailsService)
-                    await ExceptionHandler();
-                return;
-
-                async Task ExceptionHandler()
-                {
-                    var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
-
-                    var statusCode = exceptionHandlerFeature!.Error switch
+                builder.Run(
+                    async context =>
                     {
-                        ApplicationSpecificException => StatusCodes.Status418ImATeapot,
-                        _ => StatusCodes.Status500InternalServerError
-                    };
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        context.Response.ContentType = "application/json";
+                        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                        context.Response.Headers.Add("X-Correlation-Id", context.TraceIdentifier);
 
-                    context.Response.StatusCode = statusCode;
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
 
-                    var problemDetails = new ProblemDetails
-                    {
-                        Title = "A problem has happened",
-                        Detail = exceptionHandlerFeature.Error.Message,
-                        Status = statusCode
-                    };
-
-                    if (env.IsDevelopment())
-                    {
-                        problemDetails.Title = exceptionHandlerFeature.Error.GetType().ToString();
-                        problemDetails.Extensions["exception"] = new
+                        if (error != null)
                         {
-                            Details = exceptionHandlerFeature.Error.ToString(),
-                            context.Request.Headers,
-                            Path = context.Request.Path.ToString(),
-                            Endpoint = exceptionHandlerFeature.Endpoint?.ToString(),
-                            exceptionHandlerFeature.RouteValues
-                        };
-                    }
+                            var json = new JsonErrorResponse
+                            {
+                                Messages = new[] { error.Error.Message },
+                                User = context.User.Identity.Name
+                            };
 
-                    await problemDetailsService.WriteAsync(new ProblemDetailsContext
-                    {
-                        HttpContext = context,
-                        AdditionalMetadata = exceptionHandlerFeature.Endpoint?.Metadata,
-                        ProblemDetails = problemDetails
+                            if (error.Error.Message.Contains("AD User"))
+                                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+                            if (env.EnvironmentName == "Development" || env.EnvironmentName == "LocalDevelopment")
+                                json.DeveloperMessage = error.Error?.StackTrace;
+
+                            var payload = JsonConvert.SerializeObject(json);
+
+                            await context.Response.WriteAsync(payload);
+
+                            Log.Error("{0} for identity: [ {1} ]", error.Error.Message, context.User.Identity.Name);
+                        }
                     });
-                }
-            }
-        };
+            });
 
-        app.UseExceptionHandler(exceptionHandlerOptions);
+        #endregion Global exception handling
 
-        #endregion Global exception handler
         app.UseHttpsRedirection();
         app.UseRouting();
 
@@ -785,19 +647,19 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+
+            //adding endpoint of health check for the health check ui in UI format
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
-                endpoints.MapControllers();
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
 
-                //adding endpoint of health check for the health check ui in UI format
-                endpoints.MapHealthChecks("/health", new HealthCheckOptions
-                {
-                    Predicate = _ => true,
-                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-                });
-
-                //map healthcheck ui endpoing - default is /healthchecks-ui/
-                endpoints.MapHealthChecksUI();
-            }
+            //map healthcheck ui endpoing - default is /healthchecks-ui/
+            endpoints.MapHealthChecksUI();
+        }
         );
 
         #region Consul
@@ -805,11 +667,6 @@ public class Startup
         // app.UseConsul(Configuration);
 
         #endregion Consul
-    }
-
-    private void InitializeModules(ILifetimeScope lIFETIMESCOPE)
-    {
-
     }
 
     private ILogger ConfigureLogger(IConfiguration configuration)
@@ -828,7 +685,8 @@ public class Startup
             .Enrich.WithAssemblyName()
             .Enrich.WithAssemblyVersion()
             .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-            .Enrich.WithExceptionData()
+                                              //.Enrich.WithExceptionData()
+                                              //.Enrich.WithExceptionStackTraceHash()
             .Enrich.WithMemoryUsage()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
@@ -840,12 +698,6 @@ public class Startup
             .WriteTo.Console(theme: AnsiConsoleTheme.Code,
                 outputTemplate:
                 "{Timestamp:HH:mm} [{Level}] [{Address}] {Site}: {Message} || CommandType: [{Command_Type}], CommandId: [{Command_Id}], Application: [{Application}], Machine: [{MachineName}], User: [{EnvironmentUserName}], CorrelationId: [{CorrelationId}], DebuggerAttached: [{DebuggerAttached}] {NewLine}")
-              .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
-              {
-                  AutoRegisterTemplate = true,
-                  AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-                  IndexFormat = "IdentityProvider-logs-{0:yyyy.MM}"
-              })
             .WriteTo.File(appInstanceName + ".log", rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: null)
             .CreateLogger();

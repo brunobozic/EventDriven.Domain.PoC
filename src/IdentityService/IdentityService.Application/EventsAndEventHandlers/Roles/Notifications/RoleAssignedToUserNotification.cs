@@ -4,7 +4,7 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
 
-public class RoleAssignedToUserNotification : DomainNotificationBase<RoleAssignedToUserDomainEvent>
+public class RoleAssignedToUserNotification : IntegrationEventBase<RoleAssignedToUserDomainEvent>
 {
     public DateTimeOffset DateAssigned;
     public DateTimeOffset? RoleActiveTo;
@@ -17,7 +17,7 @@ public class RoleAssignedToUserNotification : DomainNotificationBase<RoleAssigne
     public Guid UserId;
     public string UserName;
 
-    public RoleAssignedToUserNotification(RoleAssignedToUserDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public RoleAssignedToUserNotification(RoleAssignedToUserDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         UserId = integrationEvent.UserId;
         UserName = integrationEvent.UserName;

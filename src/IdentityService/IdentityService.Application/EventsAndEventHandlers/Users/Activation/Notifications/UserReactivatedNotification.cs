@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.Activation.Notifications;
 
-public class UserReactivatedNotification : DomainNotificationBase<UserReactivatedDomainEvent>
+public class UserReactivatedNotification : IntegrationEventBase<UserReactivatedDomainEvent>
 {
-    public UserReactivatedNotification(UserReactivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public UserReactivatedNotification(UserReactivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         UserId = integrationEvent.UserId;
     }

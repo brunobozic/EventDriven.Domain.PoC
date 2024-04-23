@@ -23,15 +23,15 @@ public class AddressAssignedToUserDomainEventHandler : INotificationHandler<Addr
         AddressAssignedToUserNotification notification, CancellationToken cancellationToken)
     {
         // the journal message
-        var journalEntry = DateTime.UtcNow + " => [" + notification.DomainEvent.AddressTypeName +
+        var journalEntry = DateTime.UtcNow + " => [" + notification.AddressTypeName +
                            "] address assigned to user. Address assigned: [" +
-                           notification.DomainEvent.AddressLine1 + "].";
+                           notification.AddressLine1 + "].";
 
         // delegate the rest of the operation to the journaling service
         try
         {
             var journalEntryMade = await _journalService.CreateAsync(journalEntry,
-                notification.DomainEvent.AddressAssignerId, notification.DomainEvent.UserId);
+                notification.IntegrationEvent.AddressAssignerId, notification.IntegrationEvent.UserId);
         }
         catch (Exception ex)
         {
