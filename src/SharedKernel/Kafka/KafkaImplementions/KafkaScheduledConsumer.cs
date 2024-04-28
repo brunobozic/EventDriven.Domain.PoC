@@ -429,6 +429,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
 
             if (consumedMessage.Message != null)
             {
+                Log.Information("{0}", consumedMessage.Message);
             }
         }
         else

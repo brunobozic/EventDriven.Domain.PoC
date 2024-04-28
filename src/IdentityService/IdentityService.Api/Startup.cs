@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Mime;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using DynamicServiceRegistration;
@@ -104,7 +105,7 @@ public class Startup
 #pragma warning disable 1591
 
     [Obsolete]
-    public IServiceProvider ConfigureServices(IServiceCollection services)
+    public  IServiceProvider ConfigureServices(IServiceCollection services)
 #pragma warning restore 1591
     {
         var connStr = Configuration.GetConnectionString("Sqlite");
@@ -192,7 +193,7 @@ public class Startup
                 Description = "EventDriven.Domain.PoC API",
                 //TermsOfService = new Uri(null),
                 Contact = new OpenApiContact
-                    { Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/") }
+                { Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/") }
             });
 
             //options.AddAutoQueryable(); // this does not always work, depending on the assembly version(s)
@@ -417,10 +418,10 @@ public class Startup
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddMeter(greeterMeter.Name)
-            // Metrics provides by ASP.NET Core in .NET 8
-            //.AddMeter("Microsoft.AspNetCore.Hosting")
-            //.AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-            //.AddPrometheusExporter()
+        // Metrics provides by ASP.NET Core in .NET 8
+        //.AddMeter("Microsoft.AspNetCore.Hosting")
+        //.AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+        //.AddPrometheusExporter()
         );
 
         // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
@@ -478,7 +479,7 @@ public class Startup
                 .WithCronSchedule("0/15 * * ? * *")
                 .Build();
 
-        scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
+         scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
 
         var processInternalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().Build();
 
@@ -489,7 +490,7 @@ public class Startup
                 .WithCronSchedule("0/15 * * ? * *")
                 .Build();
 
-        scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
+         scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
         //=======================================
         //=====   Kafka polling consumer   ======
         //=======================================
@@ -502,7 +503,7 @@ public class Startup
                 .WithCronSchedule("0/15 * * ? * *")
                 .Build();
 
-        scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
+         scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
         // ================================================================================================
         // ================================================================================================
         // ======================================      / Quartz       =====================================
@@ -664,7 +665,7 @@ public class Startup
 
         #region Consul
 
-        app.UseConsul(Configuration);
+        // app.UseConsul(Configuration);
 
         #endregion Consul
     }
@@ -685,8 +686,8 @@ public class Startup
             .Enrich.WithAssemblyName()
             .Enrich.WithAssemblyVersion()
             .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-            //.Enrich.WithExceptionData()
-            //.Enrich.WithExceptionStackTraceHash()
+                                              //.Enrich.WithExceptionData()
+                                              //.Enrich.WithExceptionStackTraceHash()
             .Enrich.WithMemoryUsage()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()

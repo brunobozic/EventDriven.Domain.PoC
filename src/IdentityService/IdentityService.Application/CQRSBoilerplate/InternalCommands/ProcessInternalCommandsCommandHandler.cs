@@ -31,7 +31,7 @@ internal class ProcessInternalCommandsCommandHandler : ICommandHandler<ProcessIn
                          WHERE [ProcessedDate] IS NULL";
         var internalCommandsList = (await connection.QueryAsync<InternalCommandDto>(sql)).AsList();
 
-        foreach (var internalCommand in internalCommandsList)
+       foreach (var internalCommand in internalCommandsList)
         {
             var activitySource = new ActivitySource("OtPrGrJa");
             using var activity = activitySource.StartActivity("ProcessInternalCommandsCommandHandler");

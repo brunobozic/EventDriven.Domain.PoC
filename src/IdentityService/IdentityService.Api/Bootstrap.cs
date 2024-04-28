@@ -290,19 +290,11 @@ public class Bootstrap
 
         #region MediatR
 
-        //container.RegisterAssemblyTypes(typeof(ApplicationUserCreatedNotification).GetTypeInfo().Assembly)
-        //    .AsClosedTypesOf(typeof(IIntegrationEvent<>)).InstancePerLifetimeScope()
-        //    .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
+        containerBuilder.RegisterAssemblyTypes(typeof(IMediator).GetTypeInfo().Assembly)
+         .AsImplementedInterfaces()
+         .InstancePerLifetimeScope();
 
-        //container.RegisterType<ApplicationUserCreatedEventHandler>()
-        //       .Named<INotificationHandler<ApplicationUserCreatedNotification>>("handler")
-        //       .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
-
-        //container.RegisterDecorator<INotificationHandler<ApplicationUserCreatedNotification>>(
-        //        (c, inner) => new DomainEventsDispatcherNotificationHandlerDecorator<ApplicationUserCreatedNotification>(c.Resolve<IDomainEventsDispatcher>(), inner),
-        //        fromKey: "handler")
-        //    .PropertiesAutowired(PropertyWiringOptions.AllowCircularDependencies);
-
+    
         containerBuilder.RegisterSource(new ScopedContravariantRegistrationSource(
             typeof(IRequestHandler<,>)
             , typeof(INotificationHandler<>)

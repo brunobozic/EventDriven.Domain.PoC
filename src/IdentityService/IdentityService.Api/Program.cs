@@ -46,46 +46,31 @@ public class Program
 
             Log.Warning("Applying migrations ({ApplicationContext})...", AppName);
 
-            using (var newScope = host.Services.CreateScope())
-            {
-                var context = newScope.ServiceProvider.GetService<ApplicationDbContext>();
-                context.Database.Migrate();
-                var uow = newScope.ServiceProvider.GetService<IMyUnitOfWork>();
+            //using (var newScope = host.Services.CreateScope())
+            //{
+            //    var context = newScope.ServiceProvider.GetService<ApplicationDbContext>();
+            //    context.Database.Migrate();
+            //    var uow = newScope.ServiceProvider.GetService<IMyUnitOfWork>();
 
-                try
-                {
-                    IdentitySeed.SeedUsersAsync(context, uow).Wait();
-                }
-                catch (Exception seedEx)
-                {
-                    Log.Fatal("Error while applying migrations...", seedEx);
+            //    try
+            //    {
+            //        IdentitySeed.SeedUsersAsync(context, uow).Wait();
+            //    }
+            //    catch (Exception seedEx)
+            //    {
+            //        Log.Fatal("Error while applying migrations...", seedEx);
 
-                    Debug.WriteLine(seedEx.Message);
+            //        Debug.WriteLine(seedEx.Message);
 
-                    Console.WriteLine(seedEx.Message);
+            //        Console.WriteLine(seedEx.Message);
 
-                    return 1;
-                }
-            }
+            //        return 1;
+            //    }
+            //}
 
             Log.Warning("Starting web host ({ApplicationContext})...", AppName);
 
-            try
-            {
-                var consulClient = host.Services.GetRequiredService<IConsulClient>();
-
-                if (configuration.GetValue<bool>("UseConsul"))
-                    PopulateConsulWithSettings(consulClient, configuration, "MyConfigurationValues/");
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal("Error while populating Consul configuration KVs...", ex);
-
-                Debug.WriteLine(ex.Message);
-
-                Console.WriteLine(ex.Message);
-            }
-
+        
             host.Run();
 
             return 0;
@@ -102,21 +87,8 @@ public class Program
         }
     }
 
-    private static void PopulateConsulWithSettings(IConsulClient consulClient, IConfiguration config, string keyPrefix)
-    {
-        foreach (var section in config.GetChildren()) ProcessSection(consulClient, section, keyPrefix + section.Key);
-    }
 
-    private static void ProcessSection(IConsulClient consulClient, IConfigurationSection section, string currentPath)
-    {
-        // If the section has children, it's a complex object
-        if (section.GetChildren().Any())
-            foreach (var child in section.GetChildren())
-                ProcessSection(consulClient, child, $"{currentPath}/{child.Key}");
-        else
-            // It's a key-value pair, so put it in Consul
-            consulClient.KV.Put(new KVPair(currentPath) { Value = Encoding.UTF8.GetBytes(section.Value) });
-    }
+
 
 #pragma warning disable 1591
 

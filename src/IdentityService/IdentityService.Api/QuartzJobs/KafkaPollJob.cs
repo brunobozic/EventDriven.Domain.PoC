@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using IdentityService.Application.CQRSBoilerplate.Command;
+using IdentityService.Application.CQRSBoilerplate.InternalCommands;
 using Quartz;
 
 namespace IdentityService.Api.QuartzJobs;
