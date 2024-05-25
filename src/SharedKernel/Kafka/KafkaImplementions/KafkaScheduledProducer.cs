@@ -3,6 +3,7 @@ using Framework.Kafka.Core.Contracts;
 using Framework.Kafka.Core.DTOs.KafkaProducer;
 using Serilog;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SharedKernel.Kafka.KafkaImplementions;
@@ -53,18 +54,25 @@ public class KafkaScheduledProducer : IKafkaScheduledProducer
         return _producer;
     }
 
-    public async Task<bool> WriteMessageAsync(string message)
+    public async Task<bool> WriteMessageAsync(string messageType, string messageData)
     {
-        var successfullDelivery = await _producer.ProduceAsync(_topicName,
-                new Message<string, string> { Key = rand.Next(5).ToString(), Value = message })
-            .ContinueWith(task => task.IsFaulted
-                ? $"error producing message: {task.Exception.Message}"
-                : $"produced to: {task.Result.TopicPartitionOffset}");
+        var headers = new Headers();
+        headers.Add("MessageType", Encoding.UTF8.GetBytes(messageType));
 
-        // block until all in-flight produce requests have completed (successfully
-        // or otherwise) or 10s has elapsed.
+        var message = new Message<string, string>
+        {
+            Key = new Random().Next(5).ToString(),
+            Value = messageData,
+            Headers = headers
+        };
+
+        var result = await _producer.ProduceAsync(_topicName, message).ContinueWith(task =>
+            task.IsFaulted
+                ? $"Error producing message: {task.Exception.Message}"
+                : $"Produced to: {task.Result.TopicPartitionOffset}");
+
         _producer.Flush(TimeSpan.FromSeconds(10));
 
-        return true;
+        return !result.StartsWith("Error");
     }
 }

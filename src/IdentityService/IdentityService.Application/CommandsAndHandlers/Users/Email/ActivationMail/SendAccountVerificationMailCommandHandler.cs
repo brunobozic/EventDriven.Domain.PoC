@@ -65,8 +65,7 @@ public class
     {
         if (string.IsNullOrEmpty(command.FirstName))
             throw new ArgumentNullException(nameof(command.FirstName));
-        if (command.UserId == Guid.Empty)
-            throw new ArgumentNullException(nameof(command.UserId));
+
         if (string.IsNullOrEmpty(command.LastName))
             throw new ArgumentNullException(nameof(command.LastName));
         if (string.IsNullOrEmpty(command.ActivationLink))
@@ -84,7 +83,7 @@ public class
             .SingleOrDefaultAsync(cancellationToken);
 
         if (user == null)
-            throw new DomainException("Application user not found by requested Id of: [ " + command.UserId + " ]");
+            throw new DomainException("Application user not found by requested Id of: [ " + command.UserName + " ]");
 
         return user;
     }
@@ -106,6 +105,6 @@ public class
     private AccountVerificationMailSentDto CreateResultDto(SendAccountVerificationMailCommand command, bool success)
     {
         return new AccountVerificationMailSentDto(true, command.FirstName, command.LastName, command.Email,
-            command.ActivationLink, command.ActivationLinkGenerated, command.UserId);
+            command.ActivationLink, command.ActivationLinkGenerated);
     }
 }

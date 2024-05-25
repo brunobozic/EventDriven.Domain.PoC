@@ -21,7 +21,6 @@ using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
-using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

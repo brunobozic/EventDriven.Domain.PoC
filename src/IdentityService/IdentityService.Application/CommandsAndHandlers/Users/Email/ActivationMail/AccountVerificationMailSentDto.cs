@@ -8,5 +8,4 @@ public record AccountVerificationMailSentDto(
     string LastName,
     string Email,
     string ActivationLink,
-    DateTimeOffset? ActivationLinkGenerated,
-    Guid UserId);
+    DateTimeOffset? ActivationLinkGenerated);

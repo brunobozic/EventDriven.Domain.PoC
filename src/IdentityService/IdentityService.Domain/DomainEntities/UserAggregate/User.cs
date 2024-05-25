@@ -128,7 +128,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         user.AddPasswordHash(password);
         user.AddVerificationToken(RandomStringHelper.RandomTokenString());
 
-        user.AddDomainEvent(new UserCreatedDomainEvent(userId, email, userName, firstName, lastName, oib, dateOfBirth,
+        user.AddDomainEvent(new UserCreatedDomainEvent(email, userName, firstName, lastName, oib, dateOfBirth,
             DateTime.UtcNow, user.EmailVerificationToken, creator?.Id, user.UserResourceId, origin,
             EventTypeEnum.UserCreatedDomainEvent));
         return user;
@@ -152,7 +152,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         user.AddVerificationToken(RandomStringHelper.RandomTokenString());
         user.SetEmailIsVerified();
 
-        user.AddDomainEvent(new UserCreatedDomainEvent(userId, email, userName, firstName, lastName, oib, dateOfBirth,
+        user.AddDomainEvent(new UserCreatedDomainEvent(email, userName, firstName, lastName, oib, dateOfBirth,
             DateTime.UtcNow, user.EmailVerificationToken, activator?.Id, user.UserResourceId, origin,
             EventTypeEnum.UserCreatedDomainEvent));
         return user;
@@ -168,7 +168,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         user.AddPasswordHash(password);
         user.AddVerificationToken(RandomStringHelper.RandomTokenString());
 
-        user.AddDomainEvent(new UserCreatedDomainEvent(userId, email, userName, firstName, lastName, "",
+        user.AddDomainEvent(new UserCreatedDomainEvent(email, userName, firstName, lastName, "",
             DateTimeOffset.MinValue, DateTimeOffset.MinValue, "", creator.Id, user.UserResourceId, origin,
             EventTypeEnum.UserCreatedDomainEvent));
         return user;
