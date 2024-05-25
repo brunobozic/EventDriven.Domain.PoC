@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 
-public class UserDeletedNotification : DomainNotificationBase<UserDeletedDomainEvent>
+public class UserDeletedNotification : IntegrationEventBase<UserDeletedDomainEvent>
 {
-    public UserDeletedNotification(UserDeletedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public UserDeletedNotification(UserDeletedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         UserId = integrationEvent.UserId;
     }

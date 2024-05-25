@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Users.UserUpdates.Notifications;
 
-public class UserUpdatedAddressNotification : DomainNotificationBase<UserUpdatedAddressDomainEvent>
+public class UserUpdatedAddressNotification : IntegrationEventBase<UserUpdatedAddressDomainEvent>
 {
-    public UserUpdatedAddressNotification(UserUpdatedAddressDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public UserUpdatedAddressNotification(UserUpdatedAddressDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         UserId = integrationEvent.UserId;
     }

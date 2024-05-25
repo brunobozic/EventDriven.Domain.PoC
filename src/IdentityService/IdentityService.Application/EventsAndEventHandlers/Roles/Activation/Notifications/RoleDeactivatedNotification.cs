@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Activation.Notifications;
 
-public class RoleDeactivatedNotification : DomainNotificationBase<RoleDeactivatedDomainEvent>
+public class RoleDeactivatedNotification : IntegrationEventBase<RoleDeactivatedDomainEvent>
 {
-    public RoleDeactivatedNotification(RoleDeactivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public RoleDeactivatedNotification(RoleDeactivatedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         RoleId = integrationEvent.RoleId;
         RoleDescription = integrationEvent.Description;

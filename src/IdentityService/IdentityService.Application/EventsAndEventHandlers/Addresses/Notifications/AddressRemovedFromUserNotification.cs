@@ -4,10 +4,10 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Addresses.Notifications;
 
-public class AddressRemovedFromUserNotification : DomainNotificationBase<AddressRemovedFromUserDomainEvent>
+public class AddressRemovedFromUserNotification : IntegrationEventBase<AddressRemovedFromUserDomainEvent>
 {
     public AddressRemovedFromUserNotification(AddressRemovedFromUserDomainEvent integrationEvent, Guid id) : base(
-        integrationEvent, id)
+        integrationEvent)
     {
         AddressActive = integrationEvent.AddressActive;
         AddressTypeDescription = integrationEvent.AddressTypeDescription;

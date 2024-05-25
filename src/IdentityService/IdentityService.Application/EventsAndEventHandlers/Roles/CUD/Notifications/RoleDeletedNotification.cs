@@ -4,9 +4,9 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.CUD.Notifications;
 
-public class RoleDeletedNotification : DomainNotificationBase<RoleDeletedDomainEvent>
+public class RoleDeletedNotification : IntegrationEventBase<RoleDeletedDomainEvent>
 {
-    public RoleDeletedNotification(RoleDeletedDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public RoleDeletedNotification(RoleDeletedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         RoleId = integrationEvent.RoleId;
         DeletedByUserId = integrationEvent.DeletedByUserId;

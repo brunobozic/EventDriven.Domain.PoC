@@ -4,7 +4,7 @@ using System;
 
 namespace IdentityService.Application.EventsAndEventHandlers.Roles.Notifications;
 
-public class RoleRemovedFromUserNotification : DomainNotificationBase<RoleRemovedFromUserDomainEvent>
+public class RoleRemovedFromUserNotification : IntegrationEventBase<RoleRemovedFromUserDomainEvent>
 {
     public DateTimeOffset? DateRemoved;
     public string RemoverEmail;
@@ -16,7 +16,7 @@ public class RoleRemovedFromUserNotification : DomainNotificationBase<RoleRemove
     public Guid UserId;
     public string UserName;
 
-    public RoleRemovedFromUserNotification(RoleRemovedFromUserDomainEvent integrationEvent, Guid id) : base(integrationEvent, id)
+    public RoleRemovedFromUserNotification(RoleRemovedFromUserDomainEvent integrationEvent, Guid id) : base(integrationEvent)
     {
         RoleId = integrationEvent.RoleId;
         RoleName = integrationEvent.Name;

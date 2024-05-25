@@ -23,14 +23,14 @@ public class UserDeactivatedDomainEventHandler : INotificationHandler<UserDeacti
     public async Task Handle(UserDeactivatedNotification notification, CancellationToken cancellationToken)
     {
         var journalEntry = DateTime.UtcNow + " => Deactivated by [ " +
-                           notification.DomainEvent.DeactivatedBy.UserName + " ] : " +
-                           notification.DomainEvent.DeactivationReason;
+                           notification.IntegrationEvent.UserName + " ] : " +
+                           notification.IntegrationEvent.DeactivationReason;
 
         // delegate the rest of the operation to the journaling service
         try
         {
             var journalEntryMade = await JournalService.CreateAsync(journalEntry,
-                notification.DomainEvent.DeactivatedBy.Id, notification.DomainEvent.UserId);
+                notification.IntegrationEvent.DeactivatedBy.Id, notification.UserId);
         }
         catch (Exception ex)
         {
