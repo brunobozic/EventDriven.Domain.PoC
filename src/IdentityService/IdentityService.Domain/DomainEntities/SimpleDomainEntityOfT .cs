@@ -60,8 +60,8 @@ public abstract class SimpleDomainEntityOfT<TK> : ITrackable
     #region Public Props
 
     public DateTimeOffset DateCreated { get; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? DateDeleted { get; }
-    public DateTimeOffset? DateModified { get; }
+    public DateTimeOffset? DateDeleted { get; private set; }
+    public DateTimeOffset? DateModified { get;  set; }
     public bool Deleted { get; } = false;
     public string Description { get; set; }
     public TK Id { get; set; }

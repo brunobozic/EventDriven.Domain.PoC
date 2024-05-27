@@ -1,6 +1,7 @@
 ﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
+using Serilog;
 using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
 using System;
@@ -9,9 +10,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 
-public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
+public sealed class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
 {
-    #region Public properties
+    #region Public Properties
 
     public string Line1 { get; private set; }
     public string Line2 { get; private set; }
@@ -22,75 +23,49 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
     public string UserComment { get; private set; }
     public Guid AddressIdGuid { get; private set; }
 
-    #endregion Public properties
+    #endregion Public Properties
 
-    #region Navigation properties
+    #region Navigation Properties
+
+    private readonly List<UserAddress> _userAddresses = new();
+    public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses.AsReadOnly();
 
     private AddressType AddressType { get; set; }
 
-    public string GetAddressTypeName()
-    {
-        if (AddressType != null && AddressType.EnsureIsActive() && AddressType.Active &&
-            !AddressType.IsDeleted)
-            return AddressType.Name;
-        return "Not available (inactive, deleted, does not exist)";
-    }
+    public string GetAddressTypeName() =>
+        AddressType != null && AddressType.EnsureIsActive() && AddressType.Active && !AddressType.IsDeleted
+            ? AddressType.Name
+            : "Not available (inactive, deleted, does not exist)";
 
     public Town Town { get; }
     public County County { get; }
     public CityBlock CityBlock { get; }
     public Country Country { get; }
 
-    // ReSharper disable once CollectionNeverUpdated.Local
-    private readonly List<UserAddress> _userAddresses;
-
-    public IReadOnlyCollection<UserAddress> UserAddresses => _userAddresses;
-    public Guid? ReactivatedById { get; }
-    public Guid? DeactivatedById { get; }
-
-    // ReSharper disable once IdentifierTypo
-    public Guid? UndeletedById { get; }
+    public Guid? ReactivatedById { get; private set; }
+    public Guid? DeactivatedById { get; private set; }
+    public Guid? UndeletedById { get; private set; }
 
     public long AddressTypeId { get; }
 
-    #endregion Navigation properties
+    #endregion Navigation Properties
 
-    #region ctor
+    #region Constructors
 
-    private Address()
-    {
-        _userAddresses = new List<UserAddress>();
-    }
+    private Address() { }
 
     public static Address NewDraft(
-        string name
-        , string description
-        , string line1
-        , string line2
-        , int? flatNr
-        , string postalCode
-        , int houseNumber
-        , string houseNumberSuffix
-        , string userComment
-        , AddressType addressType
-        , string cityBlockName
-        , string countryName
-        , string countyName
-        , string townName
-        , User creatorUser
-        , DateTimeOffset dateCreated
-    )
+        string name, string description, string line1, string line2, int? flatNr, string postalCode,
+        int houseNumber, string houseNumberSuffix, string userComment, AddressType addressType, string cityBlockName,
+        string countryName, string countyName, string townName, User creatorUser, DateTimeOffset dateCreated)
     {
-        if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description));
-
-        var addressIdGuid = Guid.NewGuid();
+        ValidateParameters(name, description);
 
         var address = new Address
         {
             Name = name.Trim(),
             Description = description.Trim(),
-            AddressIdGuid = addressIdGuid,
+            AddressIdGuid = Guid.NewGuid(),
             Line1 = line1,
             Line2 = line2,
             FlatNr = flatNr,
@@ -101,60 +76,27 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
         };
 
         address.AssignAddressType(addressType, creatorUser);
-
         address.AddDomainEvent(new AddressCreatedDomainEvent(
-            addressIdGuid
-            , line1
-            , line2
-            , flatNr
-            , postalCode
-            , houseNumber
-            , houseNumberSuffix
-            , userComment
-            , addressType
-            , cityBlockName
-            , countryName
-            , townName
-            , countyName
-            , creatorUser.Email
-            , creatorUser.UserName
-            , creatorUser.FullName
-        ));
+            address.AddressIdGuid, line1, line2, flatNr, postalCode, houseNumber, houseNumberSuffix, userComment,
+            addressType, cityBlockName, countryName, townName, countyName, creatorUser.Email, creatorUser.UserName,
+            creatorUser.FullName));
 
         return address;
     }
 
     public static Address NewActiveDraft(
-        string name
-        , string description
-        , string line1
-        , string line2
-        , int? flatNr
-        , string postalCode
-        , int houseNumber
-        , string houseNumberSuffix
-        , string userComment
-        , AddressType addressType
-        , string cityBlockName
-        , string countryName
-        , string townName
-        , string countyName
-        , User creatorUser
-        , DateTimeOffset dateCreated
-        , DateTimeOffset activeFrom
-        , DateTimeOffset activeTo
-    )
+        string name, string description, string line1, string line2, int? flatNr, string postalCode, int houseNumber,
+        string houseNumberSuffix, string userComment, AddressType addressType, string cityBlockName, string countryName,
+        string townName, string countyName, User creatorUser, DateTimeOffset dateCreated, DateTimeOffset activeFrom,
+        DateTimeOffset activeTo)
     {
-        if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description));
-
-        var addressIdGuid = Guid.NewGuid();
+        ValidateParameters(name, description);
 
         var address = new Address
         {
             Name = name.Trim(),
             Description = description.Trim(),
-            AddressIdGuid = addressIdGuid,
+            AddressIdGuid = Guid.NewGuid(),
             Line1 = line1,
             Line2 = line2,
             FlatNr = flatNr,
@@ -164,181 +106,135 @@ public class Address : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
             UserComment = userComment
         };
 
-        if (activeFrom == DateTimeOffset.MinValue) activeFrom = DateTimeOffset.UtcNow;
-
-        if (activeTo == DateTimeOffset.MinValue)
-            activeTo = DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants
-                .DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES);
-
-        address.Activate(activeFrom, activeTo, creatorUser);
-
+        address.Activate(activeFrom == DateTimeOffset.MinValue ? DateTimeOffset.UtcNow : activeFrom,
+            activeTo == DateTimeOffset.MinValue
+                ? DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
+                : activeTo, creatorUser);
         address.AssignCreatedBy(creatorUser);
-
         address.AssignAddressType(addressType, creatorUser);
-
         address.AddDomainEvent(new AddressCreatedDomainEvent(
-            addressIdGuid
-            , line1
-            , line2
-            , flatNr
-            , postalCode
-            , houseNumber
-            , houseNumberSuffix
-            , userComment
-            , addressType
-            , cityBlockName
-            , countryName
-            , townName
-            , countyName
-            , creatorUser.Email
-            , creatorUser.UserName
-            , creatorUser.FullName
-        ));
+            address.AddressIdGuid, line1, line2, flatNr, postalCode, houseNumber, houseNumberSuffix, userComment,
+            addressType, cityBlockName, countryName, townName, countyName, creatorUser.Email, creatorUser.UserName,
+            creatorUser.FullName));
 
         return address;
     }
 
-    #endregion ctor
+    #endregion Constructors
 
-    #region Public methods
+    #region Public Methods
 
     public void SetLine1(string line1, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(SetLine1), () =>
         {
+            EnsureIsActive();
             Line1 = line1;
-            AddDomainEvent(new UserUpdatedAddressDomainEvent
-            { AddressId = Id, UserId = changedBy.Id });
-        }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to change the line 1 property.");
-        }
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
     }
 
     public void SetLine2(string line2, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(SetLine2), () =>
         {
+            EnsureIsActive();
             Line2 = line2;
-            AddDomainEvent(new UserUpdatedAddressDomainEvent
-            { AddressId = Id, UserId = changedBy.Id });
-        }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to change the line 2 property.");
-        }
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
     }
 
     public void SetFlatNr(int flatNumber, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(SetFlatNr), () =>
         {
+            EnsureIsActive();
             FlatNr = flatNumber;
-            AddDomainEvent(new UserUpdatedAddressDomainEvent
-            { AddressId = Id, UserId = changedBy.Id });
-        }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to change the flat number.");
-        }
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
     }
 
     public void SetPostalCode(string postalCode, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(SetPostalCode), () =>
         {
+            EnsureIsActive();
             PostalCode = postalCode;
-            AddDomainEvent(new UserUpdatedAddressDomainEvent
-            { AddressId = Id, UserId = changedBy.Id });
-        }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to change the postal code.");
-        }
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
     }
 
     public void SetHouseNumber(int houseNumber, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(SetHouseNumber), () =>
         {
+            EnsureIsActive();
             HouseNumber = houseNumber;
-            AddDomainEvent(new UserUpdatedAddressDomainEvent
-            { AddressId = Id, UserId = changedBy.Id });
-        }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to change the house number.");
-        }
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
     }
 
     public void SetHouseNumberSuffix(string houseNumberSuffix, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(SetHouseNumberSuffix), () =>
         {
+            EnsureIsActive();
             HouseNumberSuffix = houseNumberSuffix;
-            AddDomainEvent(new UserUpdatedAddressDomainEvent
-            { AddressId = Id, UserId = changedBy.Id });
-        }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to change the house number suffix.");
-        }
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
     }
 
     public void AssignAddressType(AddressType addressType, User changedBy)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(AssignAddressType), () =>
         {
-            if (addressType.EnsureIsActive() && !addressType.IsDeleted && !IsDeactivated())
+            EnsureIsActive();
+            AddressType = addressType;
+            AddDomainEvent(new UserUpdatedAddressDomainEvent { AddressId = Id, UserId = changedBy.Id });
+            return true;
+        }, this);
+    }
+
+    public bool EnsureIsActive() => ActiveTo >= DateTimeOffset.UtcNow;
+    public bool IsDeactivated() => !Active;
+    public bool IsExpired(DateTimeOffset theDate) => ActiveTo < theDate;
+
+    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => throw new NotImplementedException();
+
+    internal bool TheAddressHasBeenDeleted() => IsDeleted;
+
+    #endregion Public Methods
+
+    #region Helper Methods
+
+    private static void ValidateParameters(string name, string description)
+    {
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
+    }
+
+    private static T ExecuteWithLogging<T>(string methodName, Func<T> action, Address address)
+    {
+        using (SerilogHelper.PushMethodSpecificProperties(address, methodName))
+        {
+            try
             {
-                AddressType = addressType;
-                AddDomainEvent(new UserUpdatedAddressDomainEvent
-                { AddressId = Id, UserId = changedBy.Id });
+                Log.Information("{MethodName} called for address {AddressId}", methodName, address.Id);
+                return action();
             }
-            else
+            catch (Exception ex)
             {
-                throw new DomainException(
-                    "The address type is either deactivated, deleted or has expired, unable to assign it.");
+                Log.Error(ex, "Error in {MethodName} for address {AddressId}", methodName, address.Id);
+                throw;
             }
         }
-        else
-        {
-            throw new DomainException(
-                "The address is either deactivated, deleted or has expired, unable to assign an address type to it.");
-        }
     }
 
-    private bool EnsureIsActive()
-    {
-        return ActiveTo >= DateTimeOffset.UtcNow;
-    }
-
-    public virtual bool IsDeactivated()
-    {
-        return !Active;
-    }
-
-    public virtual bool IsExpired(DateTimeOffset theDate)
-    {
-        return ActiveTo < theDate;
-    }
-
-    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal bool TheAddressHasBeenDeleted()
-    {
-        throw new NotImplementedException();
-    }
-
-    #endregion Public methods
+    #endregion Helper Methods
 }

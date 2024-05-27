@@ -1,11 +1,18 @@
-﻿using SharedKernel.DomainCoreInterfaces;
+﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
+using Serilog;
+using SharedKernel.DomainContracts;
+using SharedKernel.DomainCoreInterfaces;
+using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 
-public class UserRole : BasicDomainEntity<long>, IAuditTrail
+public sealed class UserRole : BasicDomainEntity<long>, IAuditTrail
 {
     #region Public Properties
 
@@ -22,22 +29,29 @@ public class UserRole : BasicDomainEntity<long>, IAuditTrail
 
     #region FK
 
-    public Guid UserId { get; }
-    public long RoleId { get; }
-    public Guid? UndeletedById { get; }
-    public Guid? DeactivatedById { get; }
-    public Guid? ReactivatedById { get; }
+    public Guid UserId { get; private set; }
+    public long RoleId { get; private set; }
+    public Guid? UndeletedById { get; private set; }
+    public Guid? DeactivatedById { get; private set; }
+    public Guid? ReactivatedById { get; private set; }
 
     #endregion FK
 
-    #region ctor
+    #region Constructors
+
+    private UserRole() { }
 
     public static UserRole NewDraft(User applicationUser, Role applicationRole, User activator)
     {
-        var userRole = new UserRole { User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid() };
-        userRole.AssignCreatedBy(activator);
+        ValidateParameters(applicationUser, applicationRole);
 
-        // activated by the creator
+        var userRole = new UserRole
+        {
+            User = applicationUser,
+            Role = applicationRole,
+            UserRoleGuid = Guid.NewGuid()
+        };
+        userRole.AssignCreatedBy(activator);
         userRole.Activate(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(1), activator);
 
         return userRole;
@@ -45,49 +59,99 @@ public class UserRole : BasicDomainEntity<long>, IAuditTrail
 
     public static UserRole NewActivatedDraft(User applicationUser, Role applicationRole, User activator)
     {
-        var userRole = new UserRole { User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid() };
-        userRole.AssignCreatedBy(activator);
+        ValidateParameters(applicationUser, applicationRole);
 
-        // activated by the creator
+        var userRole = new UserRole
+        {
+            User = applicationUser,
+            Role = applicationRole,
+            UserRoleGuid = Guid.NewGuid(),
+            ReactivatedById = activator.Id
+        };
+        userRole.AssignCreatedBy(activator);
         userRole.Activate(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(1), activator);
-        userRole.ActivatedById = activator.Id;
 
         return userRole;
     }
 
     public static UserRole NewInactiveDraft(User applicationUser, Role applicationRole, User activator)
     {
-        var userRole = new UserRole { User = applicationUser, Role = applicationRole, UserRoleGuid = Guid.NewGuid() };
+        ValidateParameters(applicationUser, applicationRole);
 
-        // not activated, but still has a creator
+        var userRole = new UserRole
+        {
+            User = applicationUser,
+            Role = applicationRole,
+            UserRoleGuid = Guid.NewGuid()
+        };
         userRole.AssignCreatedBy(activator);
 
         return userRole;
     }
 
-    #endregion ctor
+    #endregion Constructors
 
     #region Public Methods
 
-    private bool EnsureIsActive()
+    public bool IsDeactivated() => !Active;
+
+    public bool IsExpired(DateTimeOffset theDate) => ActiveTo < theDate;
+
+    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => throw new NotImplementedException();
+
+    public async ValueTask<bool> ActivateUserRole(DateTimeOffset from, DateTimeOffset to, User activator)
     {
-        return ActiveTo >= DateTimeOffset.UtcNow;
+        return await ExecuteWithLoggingAsync(nameof(ActivateUserRole), async () =>
+        {
+            EnsureIsActive();
+            Activate(from, to, activator);
+            Log.Information("User role {UserRoleId} activated", Id);
+            return true;
+        });
     }
 
-    public virtual bool IsDeactivated()
+    public async ValueTask<bool> DeactivateUserRole(User deactivator, string reason)
     {
-        return !Active;
-    }
-
-    public virtual bool IsExpired(DateTimeOffset theDate)
-    {
-        return ActiveTo < theDate;
-    }
-
-    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        throw new NotImplementedException();
+        return await ExecuteWithLoggingAsync(nameof(DeactivateUserRole), async () =>
+        {
+            Deactivate(deactivator, reason);
+            Log.Information("User role {UserRoleId} deactivated", Id);
+            return true;
+        });
     }
 
     #endregion Public Methods
+
+    #region Helper Methods
+
+    private static void ValidateParameters(User user, Role role)
+    {
+        ArgumentNullException.ThrowIfNull(user, nameof(user));
+        ArgumentNullException.ThrowIfNull(role, nameof(role));
+    }
+
+    private void EnsureIsActive()
+    {
+        if (!Active || IsExpired(DateTimeOffset.UtcNow) || Role.Deleted)
+            throw new DomainException($"The user role for [ {User.UserName} ] and role [ {Role.Name} ] is either inactive, expired, or deleted.");
+    }
+
+    private async ValueTask<bool> ExecuteWithLoggingAsync(string methodName, Func<Task<bool>> action)
+    {
+        using (SerilogHelper.PushMethodSpecificProperties(this, methodName))
+        {
+            try
+            {
+                Log.Information("{MethodName} called for user role {UserRoleId}", methodName, Id);
+                return await action();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in {MethodName} for user role {UserRoleId}", methodName, Id);
+                throw;
+            }
+        }
+    }
+
+    #endregion Helper Methods
 }

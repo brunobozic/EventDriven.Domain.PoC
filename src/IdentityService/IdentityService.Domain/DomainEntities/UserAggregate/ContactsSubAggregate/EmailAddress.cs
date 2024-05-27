@@ -1,23 +1,28 @@
-﻿using SharedKernel.DomainCoreInterfaces;
-using System;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
+using IdentityService.Domain.DomainEntities;
+using SharedKernel.DomainCoreInterfaces;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-
-namespace IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
+using System;
 
 public class EmailAddress : BasicDomainEntity<long>, IAuditTrail
 {
-    public bool IsActive { get; set; }
+    #region Public Properties
 
-    public string Email { get; set; }
+    public bool IsActive { get; private set; }
+    public string Email { get; private set; }
+    public bool? IsPrimary { get; private set; } = true;
+    public bool? IsConfirmed { get; private set; } = false;
+    public virtual EmailType EmailType { get; private set; }
 
-    public bool? IsPrimary { get; set; } = true;
-    public bool? IsConfirmed { get; set; } = false;
+    #endregion Public Properties
 
-    public virtual EmailType EmailType { get; set; }
+    #region Public Methods
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         throw new NotImplementedException();
     }
+
+    #endregion Public Methods
 }

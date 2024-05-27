@@ -1,170 +1,163 @@
-﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
+using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+using Serilog;
 using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
+using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 
-public class Role : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
+public sealed class Role : BasicDomainEntity<long>, IAuditTrail, IAggregateRoot
 {
-    #region Public Props
+    #region Public Properties
 
-    // public Guid RoleId { get; private set; }
-    public Guid RoleIdGuid { get; set; }
+    public Guid RoleIdGuid { get; private set; }
+    public string Name { get; private set; }
+    public string Description { get; private set; }
 
-    #endregion Public Props
+    #endregion Public Properties
 
-    #region Navigation properties
+    #region Navigation Properties
 
-    private readonly List<UserRole> _userRoles;
+    private readonly List<UserRole> _userRoles = new();
+    public IReadOnlyCollection<UserRole> UserRoles => _userRoles.ToImmutableArray();
 
-    public IReadOnlyCollection<UserRole> UserRoles => _userRoles;
+    private readonly List<RolePermission> _rolePermissions = new();
+    public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.ToImmutableArray();
 
-    #endregion Navigation properties
+    #endregion Navigation Properties
 
     #region FK
 
-    public Guid? ReactivatedById { get; set; }
-    public Guid? DeactivatedById { get; set; }
-    public Guid? UndeletedById { get; set; }
-    public bool Deleted { get; set; }
-    public ICollection<RolePermission> RolePermissions { get; set; }
+    public Guid? ReactivatedById { get; private set; }
+    public Guid? DeactivatedById { get; private set; }
+    public Guid? UndeletedById { get; private set; }
+    public bool Deleted { get; private set; }
 
     #endregion FK
 
-    #region ctor
+    #region Constructors
 
-    private Role()
+    private Role() { }
+
+    public static Role NewDraft(string name, string description, User creatorUser, DateTimeOffset dateCreated)
     {
-        _userRoles = new List<UserRole>();
-    }
-
-    public static Role NewDraft(
-        string name
-        , string description
-        , User creatorUser
-        , DateTimeOffset dateCreated
-    )
-    {
-        if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description));
-
-        var roleIdGuid = Guid.NewGuid();
+        ValidateParameters(name, description);
 
         var role = new Role
         {
             Name = name.Trim(),
             Description = description.Trim(),
-            RoleIdGuid = roleIdGuid
+            RoleIdGuid = Guid.NewGuid()
         };
 
         role.AddDomainEvent(new RoleCreatedDomainEvent(
-            name
-            , description
-            , roleIdGuid
-            , creatorUser.Id
-            , creatorUser.UserName
-            , creatorUser.Email
-            , dateCreated
+            name, description, role.RoleIdGuid, creatorUser.Id, creatorUser.UserName, creatorUser.Email, dateCreated
         ));
 
         return role;
     }
 
-    public static Role NewActiveDraft(
-        string name
-        , string description
-        , DateTimeOffset from
-        , DateTimeOffset to
-        , User creatorUser
-    )
+    public static Role NewActiveDraft(string name, string description, DateTimeOffset from, DateTimeOffset to, User creatorUser)
     {
-        if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description));
-
-        var roleIdGuid = Guid.NewGuid();
+        ValidateParameters(name, description);
 
         var role = new Role
         {
             Name = name.Trim(),
             Description = description.Trim(),
-            RoleIdGuid = roleIdGuid
+            RoleIdGuid = Guid.NewGuid()
         };
 
-        if (creatorUser != null
-           ) // when seeding, the creator user may not yet be inserted - hence this might be null
+        if (creatorUser is not null)
         {
             role.Activate(from, to, creatorUser);
             role.AssignCreatedBy(creatorUser);
-
             role.AddDomainEvent(new RoleCreatedDomainEvent(
-                name
-                , description
-                , roleIdGuid
-                , creatorUser.Id
-                , creatorUser.UserName
-                , creatorUser.Email
-                , DateTimeOffset.UtcNow
+                name, description, role.RoleIdGuid, creatorUser.Id, creatorUser.UserName, creatorUser.Email, DateTimeOffset.UtcNow
             ));
         }
         else
         {
             role.AddDomainEvent(new RoleCreatedDomainEvent(
-                name
-                , description
-                , roleIdGuid
-                , null
-                , "Seed"
-                , "Seed"
-                , DateTimeOffset.UtcNow
+                name, description, role.RoleIdGuid, null, "Seed", "Seed", DateTimeOffset.UtcNow
             ));
         }
 
         return role;
     }
 
-    #endregion ctor
+    #endregion Constructors
 
-    #region Public methods
+    #region Public Methods
 
-#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
+    public void SetDescription(string description) => Description = description;
 
-    public void AssignCreatedBy(User creatorUser)
-#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
+    public bool IsDeactivated() => !Active;
+
+    public bool IsExpired(DateTimeOffset date) => ActiveTo < date;
+
+    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => throw new NotImplementedException();
+
+    public ValueTask<bool> AddPermission(RolePermission permission)
     {
-        base.AssignCreatedBy(creatorUser);
+        return ExecuteWithLoggingAsync(nameof(AddPermission), () =>
+        {
+            EnsureIsActive();
+            _rolePermissions.Add(permission);
+            Log.Information("Permission {PermissionId} added to role {RoleId}", permission.Id, Id);
+            return new ValueTask<bool>(true);
+        });
     }
 
-    public void SetDescription(string description)
+    public ValueTask<bool> RemovePermission(RolePermission permission)
     {
-        Description = description;
+        return ExecuteWithLoggingAsync(nameof(RemovePermission), () =>
+        {
+            EnsureIsActive();
+            _rolePermissions.Remove(permission);
+            Log.Information("Permission {PermissionId} removed from role {RoleId}", permission.Id, Id);
+            return new ValueTask<bool>(true);
+        });
     }
 
-    /// <summary>
-    ///     Returns the activity validity of the entity
-    /// </summary>
-    /// <returns></returns>
-    private bool EnsureIsActive()
+    #endregion Public Methods
+
+    #region Helper Methods
+
+    private static void ValidateParameters(string name, string description)
     {
-        return ActiveTo >= DateTimeOffset.UtcNow;
+        ArgumentNullException.ThrowIfNull(name, nameof(name));
+        ArgumentNullException.ThrowIfNull(description, nameof(description));
     }
 
-    public virtual bool IsDeactivated()
+    private void EnsureIsActive()
     {
-        return !Active;
+        if (!Active || IsExpired(DateTimeOffset.UtcNow) || Deleted)
+            throw new DomainException($"The role [ {Name} ] is either inactive, expired, or deleted.");
     }
 
-    public virtual bool IsExpired(DateTimeOffset theDate)
+    private ValueTask<bool> ExecuteWithLoggingAsync(string methodName, Func<ValueTask<bool>> action)
     {
-        return ActiveTo < theDate;
+        using (SerilogHelper.PushMethodSpecificProperties(this, methodName))
+        {
+            try
+            {
+                Log.Information("{MethodName} called for role {RoleId}", methodName, Id);
+                return action();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in {MethodName} for role {RoleId}", methodName, Id);
+                throw;
+            }
+        }
     }
 
-    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        throw new NotImplementedException();
-    }
-
-    #endregion Public methods
+    #endregion Helper Methods
 }

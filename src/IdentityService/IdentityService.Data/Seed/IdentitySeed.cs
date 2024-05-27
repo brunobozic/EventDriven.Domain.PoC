@@ -818,7 +818,6 @@ public static class IdentitySeed
                 , "Primary address"
                 , creatorUser
                 , DateTimeOffset.UtcNow
-                , DateTimeOffset.UtcNow
                 , DateTimeOffset.Now.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
             );
 
@@ -835,7 +834,6 @@ public static class IdentitySeed
                 , "Secondary address"
                 , creatorUser
                 , DateTimeOffset.UtcNow
-                , DateTimeOffset.UtcNow
                 , DateTimeOffset.Now.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
             );
 
@@ -851,7 +849,6 @@ public static class IdentitySeed
                 AddressTypeEnum.Living.ToDescriptionString()
                 , "Living address"
                 , creatorUser
-                , DateTimeOffset.UtcNow
                 , DateTimeOffset.UtcNow
                 , DateTimeOffset.Now.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_ADDRESSES)
             );
