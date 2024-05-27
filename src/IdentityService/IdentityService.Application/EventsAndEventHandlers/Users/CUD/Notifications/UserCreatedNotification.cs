@@ -1,6 +1,6 @@
 ﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
+using MimeKit;
 using Newtonsoft.Json;
-using SharedKernel.DomainContracts;
 using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 
@@ -15,33 +15,35 @@ public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEve
     public string LastName;
     public string Origin;
     public Guid ResourceId;
-    public Guid UserId;
+    public Guid MessageId;
     public string UserName;
+
     public UserCreatedNotification(UserCreatedDomainEvent integrationEvent) : base(integrationEvent)
     {
-        UserId = integrationEvent.UserId;
         ActivationLink = integrationEvent.ActivationLink;
         FirstName = integrationEvent.FirstName;
         LastName = integrationEvent.LastName;
         Email = integrationEvent.Email;
+        UserName = integrationEvent.UserName;
         ActivationLinkGenerated = integrationEvent.ActivationLinkGenerated;
         Origin = integrationEvent.Origin;
         ResourceId = integrationEvent.UserResourceId;
+        MessageId = integrationEvent.MessageId;
     }
+
     [JsonConstructor]
     public UserCreatedNotification(
-       Guid userId,
        string activationLink,
        string firstName,
        string lastName,
        string email,
        string userName,
        DateTimeOffset? activationLinkGenerated,
+       string Origin,
        Guid resourceId,
-       string Origin
+       Guid messageId
    ) : base(null)
     {
-        UserId = userId;
         ActivationLink = activationLink;
         FirstName = firstName;
         LastName = lastName;
@@ -51,5 +53,6 @@ public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEve
         UserName = userName;
         Origin = this.Origin;
         ResourceId = resourceId;
+        MessageId = messageId;
     }
 }

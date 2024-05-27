@@ -14,13 +14,11 @@ public class UserCreatedDomainEvent : DomainEventBase
     public string LastName;
     public string Oib;
     public string Origin;
-    public Guid UserId;
     public string UserName;
     public Guid UserResourceId;
 
     public UserCreatedDomainEvent(
-        Guid userId
-        , string email
+        string email
         , string userName
         , string firstName
         , string lastName
@@ -38,7 +36,6 @@ public class UserCreatedDomainEvent : DomainEventBase
         UserName = userName;
         FirstName = firstName;
         LastName = lastName;
-        UserId = userId;
         Oib = oib;
         DateOfBirth = dateOfBirth;
         ActivationLinkGenerated = activationLinkGenerated;

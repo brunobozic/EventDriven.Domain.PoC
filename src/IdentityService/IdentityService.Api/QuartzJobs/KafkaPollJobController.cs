@@ -73,17 +73,22 @@ public class KafkaPollJobController : IJobController
                     // seek to the last seen position (offset) to enable re-reading of the same kafkaMessage that had previously failed
                     // if we dont do this, Kafka will try to read the *next* message in line because the consumer instance keeps its own track of which messages
                     // it has seen (irrespective of the comitted offset) and will normally try to read the *next* message in line
-                    if (kafkaMessage.ErrorMessage != "IsPartitionEOF")
+                    if (kafkaMessage.ErrorMessage != "IsPartitionEOF" && !kafkaMessage.ErrorMessage.Contains("was not present in the headers collection"))
                     {
                         RereadTheSame(kafkaMessage);
 
                         Log
                             .ForContext("Retry", retryCount)
                             .ForContext("ErrorMessage", response.Result.ErrorMessage)
-                            .ForContext("Offset", response.Result.Offset)
-                            .ForContext("Partition", response.Result.Partition)
+                            .ForContext("Offset", response.Result.CompleteMessage.Offset)
+                            .ForContext("Partition", response.Result.CompleteMessage.Partition)
                             .Warning(
                                 " => retry count: [ {Retry} ], Offset: [ {Offset} ], partition: [ {Partition} ], Message reading topic: [ {KafkaConsumerTopic} ], retry reason: {ErrorMessage}");
+                    }
+                    else 
+                    {
+                        // skip the messages that dont contain the required header 
+                        SkipProblematic(kafkaMessage);
                     }
                 }
                 else // not enough info to do anything but log
@@ -123,7 +128,7 @@ public class KafkaPollJobController : IJobController
                         .ForContext("RetryCount", retryCount)
                         .ForContext("Offset", persistResult.Offset)
                         .ForContext("Partition", persistResult.Partition)
-                        .ForContext("MessageId", kafkaMessage.GadmMessageId)
+                        .ForContext("MessageId", kafkaMessage.KafkaMessageId)
                         .Warning("Persistor retry count: [ {RetryCount} ] => " +
                                  "offset: [ {KafkaOffset} ] <{RequestMethod}>" + Environment.NewLine +
                                  "      ===> Retry reason: " + response.Result.Message + " ]");
@@ -146,7 +151,7 @@ public class KafkaPollJobController : IJobController
                 {
                     Log.ForContext("Offset", kafkaMessage.Offset)
                         .ForContext("Partition", kafkaMessage.Partition)
-                        .ForContext("MessageId", kafkaMessage.GadmMessageId)
+                        .ForContext("MessageId", kafkaMessage.KafkaMessageId)
                         .Error(
                             "Message of offset: [ {Offset} ], partition: [ {Partition} ] <{RequestMethod}> not persisted, reason: [ " +
                             offsetStoreException.Message + " ]", offsetStoreException);
@@ -251,7 +256,7 @@ public class KafkaPollJobController : IJobController
     {
         var readStatusMessage = "Message processing failed after [ " +
                                 _settings.PollySettings.KafkaConsumerRetryPolicy.RetryTimes +
-                                " ] retry attempts => (Id: [ " + consumedMessage.GadmMessageId +
+                                " ] retry attempts => (Id: [ " + consumedMessage.KafkaMessageId +
                                 " ], Payload: [ " + consumedMessage.Message +
                                 " ]), reason [ " + consumedMessage.ErrorMessage;
 

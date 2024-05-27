@@ -6,7 +6,7 @@ namespace Framework.Kafka.Core.Contracts;
 
 public interface IKafkaScheduledProducer : IDisposable
 {
-    Task<bool> WriteMessageAsync(string message);
+    Task<bool> WriteMessageAsync(string messageType, string message);
 
     Handle UnderlyingHandle();
 

@@ -21,7 +21,6 @@ public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedNot
         await _commandsScheduler.EnqueueAsync(new SendAccountVerificationMailCommand(
             notification.ActivationLink,
             notification.ActivationLinkGenerated,
-            notification.UserId,
             notification.Email,
             notification.UserName,
             notification.FirstName,

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Autofac.Core;
 using IdentityService.Data.DatabaseContexts;
 using IdentityService.Domain.DomainEntities;
@@ -12,9 +7,13 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SharedKernel.DomainContracts;
-using SharedKernel.DomainImplementations.BaseClasses;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace IdentityService.Data.DomainEventDispatching;
+namespace IdentityService.Api;
 
 public class IntegrationEventDispatcher : IDomainEventsDispatcher
 {
@@ -58,7 +57,7 @@ public class IntegrationEventDispatcher : IDomainEventsDispatcher
                 new NamedParameter("integrationEvent", intEvent)
             });
 
-            if (integrationEvent != null) 
+            if (integrationEvent != null)
                 integrationEvents.Add(integrationEvent as IIntegrationEvent<IDomainEvent>);
         }
 

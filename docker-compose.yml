@@ -167,14 +167,15 @@ services:
           sleep 5
         done;
         echo 'Kibana is up. Setting up index pattern...';
-        curl -X POST 'http://kibana:5601/api/saved_objects/index-pattern/myapp_logs' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
+        curl -X POST 'http://kibana:5601/api/saved_objects/index-pattern/identityservice-api-*' -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
         {
           \"attributes\": {
-            \"title\": \"myapp-logs-*\",
+            \"title\": \"identityservice-api-*\",
             \"timeFieldName\": \"@timestamp\"
           }
         }'
       "
+
 
 networks:
   consul-demo:

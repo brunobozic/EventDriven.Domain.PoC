@@ -2,7 +2,6 @@
 using IdentityService.Application.EventsAndEventHandlers.Addresses.Notifications;
 using MediatR;
 using SharedKernel.DomainContracts;
-using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

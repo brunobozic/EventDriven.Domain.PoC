@@ -1,13 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Mime;
-using System.Reflection;
-using System.Text;
-using Autofac.Extensions.DependencyInjection;
+﻿using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using EventDriven.Domain.PoC.Api.Rest.Helpers.ExceptionFilters;
 using FluentValidation;
@@ -46,12 +37,23 @@ using OpenTelemetry.Trace;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.SystemConsole.Themes;
 using SharedKernel.Extensions;
 using SharedKernel.Helpers.Configuration;
 using SharedKernel.Helpers.EmailSender;
 using SharedKernel.Helpers.Quartz;
 using Swashbuckle.AspNetCore.Filters;
+using System;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Net.Mime;
+using System.Reflection;
+using System.Text;
 using static SharedKernel.Helpers.Startup;
 using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 using ILogger = Serilog.ILogger;
@@ -108,6 +110,14 @@ public class Startup
 #pragma warning restore 1591
     {
         var connStr = Configuration.GetConnectionString("Sqlite");
+
+        if (Env.IsEnvironment("DockerDevelopment"))
+            connStr = Configuration.GetConnectionString("MSSqlDocker");
+        else if (Env.IsEnvironment("Docker"))
+            connStr = Configuration.GetConnectionString("Docker");
+        else if (Env.IsEnvironment("Development"))
+            connStr = Configuration.GetConnectionString("Sqlite");
+
         services.AddOptions();
         services.Configure<ServiceDisvoveryOptions>(Configuration.GetSection("ServiceDiscovery"));
 
@@ -671,12 +681,9 @@ public class Startup
 
     private ILogger ConfigureLogger(IConfiguration configuration)
     {
-        var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-        var logstashUrl = configuration["Serilog:LogstashUrl"];
-        var sqlite = configuration["ConnectionStrings:Sqlite"];
-        var mssql = configuration["ConnectionStrings:MSSql"];
         var appInstanceName = configuration["InstanceName"];
         var environment = configuration["Environment"];
+        var elasticsearchUrl = configuration["MyConfigurationValues:ElasticSearchUrl"]; // Ensure you have this in your appsettings.json
 
         return new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
@@ -685,8 +692,8 @@ public class Startup
             .Enrich.WithAssemblyName()
             .Enrich.WithAssemblyVersion()
             .Enrich.WithEnvironmentUserName() // environments are tricky when using a windows service
-                                              //.Enrich.WithExceptionData()
-                                              //.Enrich.WithExceptionStackTraceHash()
+            .Enrich.WithExceptionData()
+            //.Enrich.WithExceptionStackTraceHash()
             .Enrich.WithMemoryUsage()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
@@ -700,6 +707,15 @@ public class Startup
                 "{Timestamp:HH:mm} [{Level}] [{Address}] {Site}: {Message} || CommandType: [{Command_Type}], CommandId: [{Command_Id}], Application: [{Application}], Machine: [{MachineName}], User: [{EnvironmentUserName}], CorrelationId: [{CorrelationId}], DebuggerAttached: [{DebuggerAttached}] {NewLine}")
             .WriteTo.File(appInstanceName + ".log", rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: null)
+           .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticsearchUrl))
+           {
+               AutoRegisterTemplate = true,
+               AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv8, // Make sure this matches your Elasticsearch version
+               IndexFormat = $"{appInstanceName.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
+           })
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
             .CreateLogger();
     }
 }
