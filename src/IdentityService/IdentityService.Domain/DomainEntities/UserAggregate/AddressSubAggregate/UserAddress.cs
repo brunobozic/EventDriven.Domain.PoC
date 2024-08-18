@@ -1,4 +1,5 @@
 ﻿using SharedKernel.DomainCoreInterfaces;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,26 +23,29 @@ public class UserAddress : BasicDomainEntity<long>, IAuditTrail
 
     #region FK
 
-    public Guid UserId { get; }
-    public long AddressId { get; }
-    public Guid? UndeletedById { get; }
-    public Guid? DeactivatedById { get; }
-    public Guid? ReactivatedById { get; }
+    public Guid UserId { get; private set; }
+    public long AddressId { get; private set; }
+    public Guid? UndeletedById { get; private set; }
+    public Guid? DeactivatedById { get; private set; }
+    public Guid? ReactivatedById { get; private set; }
 
     #endregion FK
 
-    #region ctor
+    #region Constructors
+
+    private UserAddress() { }
 
     public static UserAddress NewDraft(User applicationUser, Address address, User creator)
     {
         var userAddress = new UserAddress
-        { User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid() };
-        userAddress.AssignCreatedBy(creator);
+        {
+            User = applicationUser,
+            Address = address,
+            UserRoleGuid = Guid.NewGuid()
+        };
 
-        // activated by the creator
-        userAddress.Activate(DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS),
-            creator);
+        userAddress.AssignCreatedBy(creator);
+        userAddress.Activate(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
 
         return userAddress;
     }
@@ -49,14 +53,15 @@ public class UserAddress : BasicDomainEntity<long>, IAuditTrail
     public static UserAddress NewActivatedDraft(User applicationUser, Address address, User creator)
     {
         var userAddress = new UserAddress
-        { User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid() };
-        userAddress.AssignCreatedBy(creator);
+        {
+            User = applicationUser,
+            Address = address,
+            UserRoleGuid = Guid.NewGuid(),
+            ReactivatedById = creator.Id
+        };
 
-        // activated by the creator
-        userAddress.Activate(DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS),
-            creator);
-        userAddress.ActivatedById = creator.Id;
+        userAddress.AssignCreatedBy(creator);
+        userAddress.Activate(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEFAULT_ACTIVETO_VALUE_FOR_USERADDRESS), creator);
 
         return userAddress;
     }
@@ -64,42 +69,49 @@ public class UserAddress : BasicDomainEntity<long>, IAuditTrail
     public static UserAddress NewInactiveDraft(User applicationUser, Address address, User creator)
     {
         var userAddress = new UserAddress
-        { User = applicationUser, Address = address, UserRoleGuid = Guid.NewGuid() };
+        {
+            User = applicationUser,
+            Address = address,
+            UserRoleGuid = Guid.NewGuid()
+        };
 
-        // not activated, but still has a creator
         userAddress.AssignCreatedBy(creator);
 
         return userAddress;
     }
 
-    #endregion ctor
+    #endregion Constructors
 
     #region Public Methods
 
-    private bool EnsureIsActive()
-    {
-        return ActiveTo >= DateTimeOffset.UtcNow;
-    }
+    public bool EnsureIsActive() => ActiveTo >= DateTimeOffset.UtcNow;
+    public virtual bool IsDeactivated() => !Active;
+    public virtual bool IsExpired(DateTimeOffset theDate) => ActiveTo < theDate;
 
-    public virtual bool IsDeactivated()
-    {
-        return !Active;
-    }
+    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => throw new NotImplementedException();
 
-    public virtual bool IsExpired(DateTimeOffset theDate)
-    {
-        return ActiveTo < theDate;
-    }
-
-    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal bool TheAddressHasBeenDeleted()
-    {
-        throw new NotImplementedException();
-    }
+    internal bool TheAddressHasBeenDeleted() => Address.IsDeleted;
 
     #endregion Public Methods
+
+    #region Helper Methods
+
+    private static T ExecuteWithLogging<T>(string methodName, Func<T> action)
+    {
+        using (Serilog.Context.LogContext.PushProperty("MethodName", methodName))
+        {
+            try
+            {
+                Log.Information("{MethodName} called", methodName);
+                return action();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in {MethodName}", methodName);
+                throw;
+            }
+        }
+    }
+
+    #endregion Helper Methods
 }

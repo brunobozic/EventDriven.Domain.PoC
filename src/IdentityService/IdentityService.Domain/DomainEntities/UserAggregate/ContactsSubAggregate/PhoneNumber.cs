@@ -1,25 +1,29 @@
-﻿using SharedKernel.DomainCoreInterfaces;
-using System;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
+using IdentityService.Domain.DomainEntities;
+using SharedKernel.DomainCoreInterfaces;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-
-namespace IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
+using System;
 
 public class PhoneNumber : BasicDomainEntity<long>, IAuditTrail
 {
-    public bool IsActive { get; set; }
+    #region Public Properties
 
-    public string AreaCode { get; set; }
+    public bool IsActive { get; private set; }
+    public string AreaCode { get; private set; }
+    public string OperatorCode { get; private set; }
+    public string Number { get; private set; }
+    public virtual PhoneNumberType PhoneNumberType { get; private set; }
+    public bool? IsPrimary { get; private set; } = true;
 
-    public string OperatorCode { get; set; }
+    #endregion Public Properties
 
-    public string Number { get; set; }
-
-    public virtual PhoneNumberType PhoneNumberType { get; set; }
-    public bool? IsPrimary { get; set; } = true;
+    #region Public Methods
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         throw new NotImplementedException();
     }
+
+    #endregion Public Methods
 }

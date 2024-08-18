@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Serilog;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 
@@ -20,12 +21,13 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
         }
     }
 
-    public void AttachUser(User user)
+    public AccountJournalEntry AttachUser(User user)
     {
         UserActedUpon = user;
         UserNameActedUpon = user.UserName;
         EmailActedUpon = user.Email;
         UserActedUponId = user.Id;
+        return this;
     }
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -35,7 +37,7 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
 
     #endregion Public Methods
 
-    #region ctor
+    #region Constructors
 
     public AccountJournalEntry(string msg)
     {
@@ -47,14 +49,14 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
     {
     }
 
-    #endregion ctor
+    #endregion Constructors
 
     #region Public Props
 
     public string ActingEmail { get; private set; }
     public string ActingUserName { get; private set; }
     public string EmailActedUpon { get; private set; }
-    public string Message { get; }
+    public string Message { get; private init; }
     public DateTimeOffset? Seen { get; }
     public string UserNameActedUpon { get; private set; }
 
@@ -69,13 +71,7 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
 
     #region FK
 
-    public Guid?
-        ActingUserId
-    {
-        get;
-        private set;
-    } // nullable because of an annoying issue with not having this information when the user is not yet authenticated (registered)
-
+    public Guid? ActingUserId { get; private set; } // nullable because of an annoying issue with not having this information when the user is not yet authenticated (registered)
     public Guid UserActedUponId { get; private set; }
 
     #endregion FK

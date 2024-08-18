@@ -1,5 +1,6 @@
 ﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
 using SharedKernel.DomainCoreInterfaces;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,30 +9,23 @@ namespace IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregat
 
 public class AddressType : BasicDomainEntity<long>, IAuditTrail
 {
-    public bool TheAddressTypeHasBeenDeleted()
-    {
-        return IsDeleted;
-    }
+    public bool TheAddressTypeHasBeenDeleted() => IsDeleted;
 
     #region Public properties
 
-    public Guid? ReactivatedById { get; set; }
-    public Guid? DeactivatedById { get; set; }
-    public Guid? UndeletedById { get; set; }
+    public Guid? ReactivatedById { get; private set; }
+    public Guid? DeactivatedById { get; private set; }
+    public Guid? UndeletedById { get; private set; }
 
     #endregion Public properties
 
-    #region ctor
+    #region Constructors
 
-    public static AddressType NewDraft(
-        string name
-        , string description
-        , User creatorUser
-        , DateTimeOffset dateCreated
-    )
+    private AddressType() { }
+
+    public static AddressType NewDraft(string name, string description, User creatorUser)
     {
-        if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description));
+        ValidateParameters(name, description);
 
         var addressType = new AddressType
         {
@@ -39,20 +33,14 @@ public class AddressType : BasicDomainEntity<long>, IAuditTrail
             Description = description.Trim()
         };
 
+        addressType.AssignCreatedBy(creatorUser);
+
         return addressType;
     }
 
-    public static AddressType NewActiveDraft(
-        string name
-        , string description
-        , User creatorUser
-        , DateTimeOffset dateCreated
-        , DateTimeOffset activeFrom
-        , DateTimeOffset activeTo
-    )
+    public static AddressType NewActiveDraft(string name, string description, User creatorUser, DateTimeOffset activeFrom, DateTimeOffset activeTo)
     {
-        if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description));
+        ValidateParameters(name, description);
 
         var addressType = new AddressType
         {
@@ -66,38 +54,52 @@ public class AddressType : BasicDomainEntity<long>, IAuditTrail
         return addressType;
     }
 
-    #endregion ctor
+    #endregion Constructors
 
     #region Public methods
 
     public void ChangeDescription(string newDescription)
     {
-        if (EnsureIsActive() && !IsDeleted && !IsDeactivated())
+        ExecuteWithLogging(nameof(ChangeDescription), () =>
+        {
+            EnsureIsActive();
             Description = newDescription;
-        else
-            throw new DomainException(
-                "The address type is either deactivated, deleted or has expired, unable to change its description.");
+            return true;
+        });
     }
 
-    public bool EnsureIsActive()
-    {
-        return ActiveTo >= DateTimeOffset.UtcNow;
-    }
+    public bool EnsureIsActive() => ActiveTo >= DateTimeOffset.UtcNow;
+    public virtual bool IsDeactivated() => !Active;
+    public virtual bool IsExpired(DateTimeOffset theDate) => ActiveTo < theDate;
 
-    public virtual bool IsDeactivated()
-    {
-        return !Active;
-    }
-
-    public virtual bool IsExpired(DateTimeOffset theDate)
-    {
-        return ActiveTo < theDate;
-    }
-
-    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        throw new NotImplementedException();
-    }
+    public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => throw new NotImplementedException();
 
     #endregion Public methods
+
+    #region Helper methods
+
+    private static void ValidateParameters(string name, string description)
+    {
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
+    }
+
+    private static T ExecuteWithLogging<T>(string methodName, Func<T> action)
+    {
+        using (Serilog.Context.LogContext.PushProperty("MethodName", methodName))
+        {
+            try
+            {
+                Log.Information("{MethodName} called", methodName);
+                return action();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in {MethodName}", methodName);
+                throw;
+            }
+        }
+    }
+
+    #endregion Helper methods
 }

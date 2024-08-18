@@ -1,4 +1,5 @@
-﻿using SharedKernel.DomainCoreInterfaces;
+﻿
+using SharedKernel.DomainCoreInterfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

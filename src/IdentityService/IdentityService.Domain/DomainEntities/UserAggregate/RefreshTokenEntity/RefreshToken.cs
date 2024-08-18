@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Serilog;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RefreshTokenEntity;
 
-//[Owned]
 public class RefreshToken : SimpleDomainEntityOfT<long>
 {
     #region FK
 
-    public Guid ApplicationUserId { get; set; }
+    public Guid ApplicationUserId { get; private set; }
 
     #endregion FK
 
@@ -22,60 +22,49 @@ public class RefreshToken : SimpleDomainEntityOfT<long>
 
     #endregion Public Methods
 
-    #region ctor
+    #region Constructors
 
-    private RefreshToken()
-    {
-    }
+    private RefreshToken() { }
 
-    private RefreshToken(string token, string revokedByIp)
+    private RefreshToken(string token, string createdByIp)
     {
         Token = token;
         Expires = DateTime.UtcNow.AddDays(7);
         Created = DateTime.UtcNow;
-        RevokedByIp = revokedByIp;
+        CreatedByIp = createdByIp;
     }
 
-    public RefreshToken(string token, string createdByIp, DateTime validUntil)
+    public static RefreshToken NewRefreshTokenDraft(string token, string createdByIp)
     {
-        Token = token;
-        Expires = validUntil;
-        Created = DateTime.UtcNow;
-        RevokedByIp = createdByIp;
+        return new RefreshToken(token, createdByIp);
     }
 
-    public static RefreshToken NewRefreshTokenDraft(string token, string revokedByIp)
+    internal void SetRevoked(string ipAddress)
     {
-        var newtoken = new RefreshToken(token, revokedByIp);
-        return newtoken;
+        this.RevokedByIp= ipAddress;
+        this.DateModified = DateTime.UtcNow;
     }
 
-    #endregion ctor
+    #endregion Constructors
 
     #region Navigation Properties
 
-    public virtual User ApplicationUser { get; set; }
+    public virtual User ApplicationUser { get; private set; }
 
-    public string CreatedByIp { get; set; }
-    public string RevokedByIp { get; set; }
+    public string CreatedByIp { get; private set; }
+    public string RevokedByIp { get; private set; }
 
     #endregion Navigation Properties
 
     #region Public properties
 
-    public string Token { get; set; }
-    public DateTime Expires { get; set; }
+    public string Token { get; private set; }
+    public DateTime Expires { get; private set; }
     public bool IsExpired => DateTime.UtcNow >= Expires;
-    public DateTime Created { get; set; }
-
-    public DateTime? Revoked { get; set; }
-
-    public string ReplacedByToken { get; set; }
+    public DateTime Created { get; private set; }
+    public DateTime? Revoked { get; private set; }
+    public string ReplacedByToken { get; private set; }
     public bool IsActive => Revoked == null && !IsExpired;
-
-    public string V { get; }
-    public string IpAddress { get; }
-    public DateTime DateTime { get; }
 
     #endregion Public properties
 }
