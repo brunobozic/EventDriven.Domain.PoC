@@ -5,7 +5,7 @@ namespace Framework.Kafka.Core.DTOs.KafkaConsumer;
 public class ConsumeMessageResult
 {
     public string Message { get; set; }
-    public string GadmMessageId { get; set; }
+    public string KafkaMessageId { get; set; }
     public long Offset { get; set; }
     public int Partition { get; set; }
     public string Topic { get; set; }
@@ -22,4 +22,5 @@ public class ConsumeMessageResult
     public string ErrorType { get; set; }
     public ConsumeResult<string, string> CompleteMessage { get; set; }
     public int CurrentPartition { get; set; }
+    public string MessageType { get; set; }
 }

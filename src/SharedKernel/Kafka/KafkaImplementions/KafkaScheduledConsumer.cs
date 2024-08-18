@@ -142,11 +142,14 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
                 Offset = _currentOffset,
                 Partition = _currentPartition
             };
+
+            return messageConsumingResult;
         }
 
         if (!messageConsumingResult.ErrorMessage.ToUpper().Contains("EOF"))
             _lastOffset = messageConsumingResult.Offset;
 
+        messageConsumingResult.Success = true;
         return messageConsumingResult;
     }
 
@@ -269,7 +272,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     {
         Log.ForContext("Partition", topicPartition.Partition.Value)
             .ForContext("Topic", topicPartition.Topic)
-            .ForContext("Offset", _lastOffset)
+            .ForContext("Offset", recordOffset)
             .Warning(
                 "Message at offset: [ {Offset} ], partition: [ {Partition} ], topic: [ {Topic} ] is to be skipped");
 
@@ -282,7 +285,9 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
         // messages can belong to different partitions...
         _needsToHitTopicPartition = topicPartition;
 
-        var targetOffset = new TopicPartitionOffset(_needsToHitTopicPartition, _needsToHitOffset);
+        if (recordOffset == -1001) { recordOffset = 0; }
+
+        var targetOffset = new TopicPartitionOffset(_needsToHitTopicPartition, recordOffset);
 
         try
         {
@@ -302,7 +307,7 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
 
         Log.ForContext("Partition", targetOffset.Partition.Value)
             .ForContext("Topic", targetOffset.Topic)
-            .ForContext("Offset", _lastOffset)
+            .ForContext("Offset", recordOffset)
             .Warning("Message at offset: [ {Offset} ], partition: [ {Partition} ], topic: [ {Topic} ] was skipped");
 
         // resetting this to 0 otherwise it will keep seeking to this position when theres no need!
@@ -351,15 +356,15 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
     private static void ParseAndLog(ConsumeMessageResult messageConsumingResult)
     {
         // here we want to truncate the message to avoid flooding the log
-        var msgLength = messageConsumingResult.Message?.Length;
+        var msgLength = messageConsumingResult.CompleteMessage?.Value.Length;
         string actualMsg;
-        actualMsg = msgLength > 40 ? messageConsumingResult.Message[..40] : messageConsumingResult.Message;
+        actualMsg = msgLength > 40 ? messageConsumingResult.CompleteMessage?.Value[..40] : messageConsumingResult.CompleteMessage?.Value;
 
-        Log.ForContext("Partition", messageConsumingResult.Partition)
-            .ForContext("Topic", messageConsumingResult.Topic)
-            .ForContext("Offset", messageConsumingResult.Offset)
+        Log.ForContext("Partition", messageConsumingResult.CompleteMessage?.Partition)
+            .ForContext("Topic", messageConsumingResult.CompleteMessage?.Topic)
+            .ForContext("Offset", messageConsumingResult.CompleteMessage?.Offset)
             .ForContext("actualMsg", actualMsg)
-            .ForContext("MessageId", messageConsumingResult.GadmMessageId)
+            .ForContext("MessageId", messageConsumingResult.CompleteMessage?.Value)
             .Information(
                 "Message payload: [ {actualMsg} ] <{RequestMethod}> offset: [ {Offset} ] partition: [ {Partition} ]");
     }
@@ -422,6 +427,16 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
 
             foreach (var headerKey in consumedMessage.Message.Headers)
             {
+                Log.Information("Header: {0}", headerKey);
+            }
+
+            var messageType = Encoding.UTF8.GetString(consumedMessage.Message.Headers.GetLastBytes("MessageType"));
+
+            var type = Type.GetType(messageType);
+
+            if (type != null)
+            {
+                returnValue.MessageType = messageType;
             }
 
             // returnValue.CurrentTopicPartitionOffset = consumedMessage.TopicPartitionOffset;
@@ -432,6 +447,8 @@ public class KafkaScheduledConsumer : IKafkaScheduledConsumer
 
             if (consumedMessage.Message != null)
             {
+                returnValue.Success = true;
+                Log.Information("{0}", consumedMessage.Message.Value);
             }
         }
         else

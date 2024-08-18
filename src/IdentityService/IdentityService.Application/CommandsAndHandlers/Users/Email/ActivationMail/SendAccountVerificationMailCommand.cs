@@ -10,15 +10,12 @@ public class SendAccountVerificationMailCommand : CommandBase<AccountVerificatio
     public string Email;
     public string FirstName;
     public string LastName;
-
     public string Origin;
-    public Guid UserId;
     public string UserName;
 
     public SendAccountVerificationMailCommand(
         string activationLink,
         DateTimeOffset? activationLinkGenerated,
-        Guid userId,
         string email,
         string userName,
         string firstName,
@@ -28,7 +25,6 @@ public class SendAccountVerificationMailCommand : CommandBase<AccountVerificatio
     {
         ActivationLink = activationLink;
         ActivationLinkGenerated = activationLinkGenerated;
-        UserId = userId;
         Email = email;
         FirstName = firstName;
         UserName = userName;

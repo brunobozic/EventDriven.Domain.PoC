@@ -11,6 +11,7 @@ using IdentityService.Api.QuartzJobs;
 using IdentityService.Application.CQRSBoilerplate.Command;
 using IdentityService.Application.CQRSBoilerplate.Command.Handlers;
 using IdentityService.Application.CQRSBoilerplate.DomainEventDispatchers;
+using IdentityService.Application.CQRSBoilerplate.OutboxCommands;
 using IdentityService.Application.CQRSBoilerplate.UnitOfWorkImplementations;
 using IdentityService.Application.DomainServices.UserServices;
 using IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
@@ -19,7 +20,6 @@ using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Data.CustomUnitOfWork;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Data.DatabaseContexts;
-using IdentityService.Data.DomainEventDispatching;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.AspNetCore.Hosting;
@@ -40,7 +40,6 @@ using SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
 using SharedKernel.Kafka.KafkaImplementions;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using URF.Core.Abstractions.Services;
@@ -348,6 +347,10 @@ public class Bootstrap
 
         containerBuilder.RegisterType<CommandsDispatcher>()
             .As<ICommandsDispatcher>()
+        .InstancePerLifetimeScope();
+
+        containerBuilder.RegisterType<IntegrationEventPersistor>()
+            .As<IIntegrationEventPersistor>()
             .InstancePerLifetimeScope();
 
         containerBuilder.RegisterType<CommandsScheduler>()
@@ -397,9 +400,4 @@ public class Bootstrap
         return builtContainer;
     }
 
-    private static string GetBasePath()
-    {
-        using var processModule = Process.GetCurrentProcess().MainModule;
-        return Path.GetDirectoryName(processModule?.FileName);
-    }
 }

@@ -56,8 +56,12 @@ This is the easiest way to begin debugging.
 
 The project that is a home for EF context is the `Repository.EF`, therefore the migrations are started using these commands
 
-- `dotnet ef migrations add Initial --project EventDriven.Domain.PoC.Repository.EF`
-- `dotnet ef database update --project EventDriven.Domain.PoC.Repository.EF`
+- `dotnet ef migrations add Initital --project ./IdentityService.Data/IdentityService.Data.csproj`
+- `dotnet ef database update --project ./IdentityService.Data/IdentityService.Data.csproj`
+
+Or, from the Package Manager console you would run:
+
+- `Update-Database -StartupProject IdentityService.Data`
 
 # Jaeger and consul (service discovery)
 

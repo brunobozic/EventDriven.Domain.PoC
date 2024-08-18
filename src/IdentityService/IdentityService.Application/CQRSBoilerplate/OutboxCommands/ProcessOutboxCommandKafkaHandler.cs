@@ -74,7 +74,7 @@ internal class ProcessOutboxCommandKafkaHandler : ICommandHandler<ProcessOutboxC
                         {
                             #region Publish the integration event to Kafka
 
-                            var success = await _kafkaProducer.WriteMessageAsync(message.Data);
+                            var success = await _kafkaProducer.WriteMessageAsync(message.Type, message.Data);
 
                             #endregion Publish the integration event to Kafka
 

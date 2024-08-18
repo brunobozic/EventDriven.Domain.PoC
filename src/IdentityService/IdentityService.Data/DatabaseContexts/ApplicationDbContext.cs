@@ -3,6 +3,7 @@ using IdentityService.Data.DatabaseContexts.Interfaces;
 using IdentityService.Data.Extensions;
 using IdentityService.Domain.DomainEntities;
 using IdentityService.Domain.DomainEntities.Audit;
+using IdentityService.Domain.DomainEntities.Inbox;
 using IdentityService.Domain.DomainEntities.OutboxPattern;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
@@ -31,6 +32,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<AuditTrail> AuditTrail { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
+    public DbSet<InboxMessage> InboxMessages { get; set; }
     public DbSet<InternalCommand> InternalCommands { get; set; }
     public DbSet<User> ApplicationUsers { get; set; }
     public DbSet<Role> ApplicationRoles { get; set; }
@@ -56,7 +58,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlite("Filename=Db.sqlite;");
+        }
         // optionsBuilder.AddInterceptors(_statisticsCommandInterceptor, _infoMessageInterceptor);
     }
 
@@ -85,6 +90,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         modelBuilder.SetUpSoftDeletableColumnDefaultValue();
         modelBuilder.DisableCascadeDelete();
         modelBuilder.LoadAllEntityConfigurations();
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
     }
 
     public override int SaveChanges()
@@ -326,10 +334,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     #region ctor
 
-    //public ApplicationDbContext(DbContextOptions options) : base(options)
-    //{
-    //    Log.Information("Entrancy");
-    //}
+    public ApplicationDbContext(DbContextOptions options) : base(options)
+    {
+        Log.Information("Entrancy");
+    }
 
     //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
     //{

@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SharedKernel.DomainContracts;
-using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,7 +54,7 @@ public class IntegrationEventDispatcher : IDomainEventsDispatcher
             var integrationEvent = _scope.ResolveOptional(integrationEventWithGenericType, new List<Parameter>
             {
                 new NamedParameter("domainEvent", intEvent)
-               
+
             });
 
             if (integrationEvent != null)
@@ -70,7 +69,7 @@ public class IntegrationEventDispatcher : IDomainEventsDispatcher
             var integrationEvent = _scope.ResolveOptional(integrationEventWithGenericType, new List<Parameter>
             {
                 new NamedParameter("domainEvent", guidEvent)
-                
+
             });
 
             if (integrationEvent != null)
