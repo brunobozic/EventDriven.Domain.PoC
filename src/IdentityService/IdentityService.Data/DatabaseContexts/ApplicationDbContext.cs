@@ -334,29 +334,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     #region ctor
 
-    public ApplicationDbContext(DbContextOptions options) : base(options)
-    {
-        Log.Information("Entrancy");
-    }
-
-    //public ApplicationDbContext(DbContextOptions options, bool fromFactory) : base(options)
-    //{
-    //    if (fromFactory)
-    //    {
-    //        _auditFactory = new DbAuditTrailFactory(this);
-    //    }
-    //}
-
-    //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    //{
-    //    this.Options = options;
-    //}
-    //public ApplicationDbContext(DbContextOptions options) : base(options)
-    //{
-    //    _auditFactory = new DbAuditTrailFactory(this);
-    //    Log.Information("Entrancy");
-    //}
-
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
         _auditFactory = new DbAuditTrailFactory(this);

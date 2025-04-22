@@ -197,9 +197,9 @@ public class Startup
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "EventDriven.Domain.PoC API",
+                Title = "IdentityService API",
                 Version = "v1",
-                Description = "EventDriven.Domain.PoC API",
+                Description = "IdentityService API",
                 //TermsOfService = new Uri(null),
                 Contact = new OpenApiContact
                 { Name = "bruno.bozic", Email = "bruno.bozic@gmail.com", Url = new Uri("https://dev.local/") }
@@ -300,6 +300,8 @@ public class Startup
 
         #region Service Registration
 
+        services.AddScoped<DatabaseInitializer>();
+
         services.RegisterRepositories();
         services.AddTransient<IValidatorFactory, ServiceProviderValidatorFactory>();
         services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -321,38 +323,39 @@ public class Startup
         #endregion Service Registration
 
         #region Consul
-
-        services.AddConsulConfig(Configuration);
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        if (environment != "Test")
+            services.AddConsulConfig(Configuration);
 
         #endregion Consul
 
         #region HealthCheck
 
-        services.AddHealthChecks()
-            .AddCheck("self", () => HealthCheckResult.Healthy())
-            // .AddConsul(consulOptions, AppName, HealthStatus.Unhealthy, null, TimeSpan.FromSeconds(30))
-            // //.AddSqlServer(Configuration.GetConnectionString("MSSql"),
-            // //   name: "EventDriven.Domain.PoC-check",
-            // //   tags: new[] { "EventDriven.Domain.PoC" })
-            // //.AddSqlite(connStr,
-            // //    name: "sql-check",
-            // //    tags: new[] { "EventDriven.Domain.PoC.Repository.EF" })
-            // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 10_000), "Check primary disk - warning", HealthStatus.Degraded)
-            // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 2_000), "Check primary disk - error", HealthStatus.Unhealthy)
-            // .AddProcessAllocatedMemoryHealthCheck(512) // 512 MB max allocated memory
-            // .AddProcessHealthCheck("ProcessName", p => p.Length > 0) // check if process is running;
-            // .AddFileWritePermissionsCheck(Env.WebRootPath)
-            // .AddUrlGroup(new Uri("https://localhost:5001/swagger"), name: "base URL", failureStatus: HealthStatus.Degraded)
-            ;
+        //services.AddHealthChecks()
+        //    .AddCheck("self", () => HealthCheckResult.Healthy())
+        //    // .AddConsul(consulOptions, AppName, HealthStatus.Unhealthy, null, TimeSpan.FromSeconds(30))
+        //    // //.AddSqlServer(Configuration.GetConnectionString("MSSql"),
+        //    // //   name: "EventDriven.Domain.PoC-check",
+        //    // //   tags: new[] { "EventDriven.Domain.PoC" })
+        //    // //.AddSqlite(connStr,
+        //    // //    name: "sql-check",
+        //    // //    tags: new[] { "EventDriven.Domain.PoC.Repository.EF" })
+        //    // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 10_000), "Check primary disk - warning", HealthStatus.Degraded)
+        //    // .AddDiskStorageHealthCheck(x => x.AddDrive("C:\\", 2_000), "Check primary disk - error", HealthStatus.Unhealthy)
+        //    // .AddProcessAllocatedMemoryHealthCheck(512) // 512 MB max allocated memory
+        //    // .AddProcessHealthCheck("ProcessName", p => p.Length > 0) // check if process is running;
+        //    // .AddFileWritePermissionsCheck(Env.WebRootPath)
+        //    // .AddUrlGroup(new Uri("https://localhost:5001/swagger"), name: "base URL", failureStatus: HealthStatus.Degraded)
+        //    ;
 
-        //adding healthchecks UI
-        services.AddHealthChecksUI(opt =>
-        {
-            opt.SetEvaluationTimeInSeconds(15); //time in seconds between check
-            opt.MaximumHistoryEntriesPerEndpoint(60); //maximum history of checks
-            opt.SetApiMaxActiveRequests(1); //api requests concurrency
-            opt.AddHealthCheckEndpoint("api", "/health"); //map health check api
-        }).AddSqliteStorage(connStr);
+        ////adding healthchecks UI
+        //services.AddHealthChecksUI(opt =>
+        //{
+        //    opt.SetEvaluationTimeInSeconds(15); //time in seconds between check
+        //    opt.MaximumHistoryEntriesPerEndpoint(60); //maximum history of checks
+        //    opt.SetApiMaxActiveRequests(1); //api requests concurrency
+        //    opt.AddHealthCheckEndpoint("api", "/health"); //map health check api
+        //}).AddSqliteStorage(connStr);
 
         #endregion HealthCheck
 
@@ -410,40 +413,43 @@ public class Startup
         // ========================================   OTEL   ==============================================
         // ================================================================================================
         // ================================================================================================
-        var greeterMeter = new Meter("OtPrGrYa", "1.0.0");
-
-        // Custom ActivitySource for the application
-        var greeterActivitySource = new ActivitySource("OtPrGrJa");
-        var tracingOtlpEndpoint = "http://localhost:4317";
-        var otel = services.AddOpenTelemetry();
-
-        // Configure OpenTelemetry Resources with the application name
-        otel.ConfigureResource(resource => resource
-            .AddService("OtPrGrJa"));
-
-        // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
-        otel.WithMetrics(metrics => metrics
-                // Metrics provider from OpenTelemetry
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddMeter(greeterMeter.Name)
-        // Metrics provides by ASP.NET Core in .NET 8
-        //.AddMeter("Microsoft.AspNetCore.Hosting")
-        //.AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-        //.AddPrometheusExporter()
-        );
-
-        // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
-        otel.WithTracing(tracing =>
+        if (environment != "Test")
         {
-            tracing.AddAspNetCoreInstrumentation();
-            tracing.AddHttpClientInstrumentation();
-            tracing.AddSource(greeterActivitySource.Name);
-            if (!string.IsNullOrEmpty(tracingOtlpEndpoint))
-                tracing.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint); });
-            else
-                tracing.AddConsoleExporter();
-        });
+            var greeterMeter = new Meter("OtPrGrYa", "1.0.0");
+
+            // Custom ActivitySource for the application
+            var greeterActivitySource = new ActivitySource("OtPrGrJa");
+            var tracingOtlpEndpoint = "http://localhost:4317";
+            var otel = services.AddOpenTelemetry();
+
+            // Configure OpenTelemetry Resources with the application name
+            otel.ConfigureResource(resource => resource
+                .AddService("OtPrGrJa"));
+
+            // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
+            otel.WithMetrics(metrics => metrics
+                    // Metrics provider from OpenTelemetry
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddMeter(greeterMeter.Name)
+            // Metrics provides by ASP.NET Core in .NET 8
+            //.AddMeter("Microsoft.AspNetCore.Hosting")
+            //.AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+            //.AddPrometheusExporter()
+            );
+
+            // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
+            otel.WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation();
+                tracing.AddHttpClientInstrumentation();
+                tracing.AddSource(greeterActivitySource.Name);
+                if (!string.IsNullOrEmpty(tracingOtlpEndpoint))
+                    tracing.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint); });
+                else
+                    tracing.AddConsoleExporter();
+            });
+        }
         // ================================================================================================
         // ================================================================================================
         // ========================================   /OTEL   =============================================
@@ -471,54 +477,55 @@ public class Startup
         // ================================================================================================
         // ================================================================================================
 
+        if (environment != "Test")
+        {
+            //var schedulerFactory = new StdSchedulerFactory();
+            //var scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
 
-        var schedulerFactory = new StdSchedulerFactory();
-        var scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
+            //scheduler.JobFactory = new JobFactory(builtContainer);
 
-        scheduler.JobFactory = new JobFactory(builtContainer);
+            //scheduler.Start().GetAwaiter().GetResult();
 
-        scheduler.Start().GetAwaiter().GetResult();
+            //var processOutboxJob = JobBuilder.Create<ProcessOutboxJob>().Build();
 
-        var processOutboxJob = JobBuilder.Create<ProcessOutboxJob>().Build();
+            //var trigger =
+            //    TriggerBuilder
+            //        .Create()
+            //        .StartNow()
+            //        .WithCronSchedule("0/15 * * ? * *")
+            //        .Build();
 
-        var trigger =
-            TriggerBuilder
-                .Create()
-                .StartNow()
-                .WithCronSchedule("0/15 * * ? * *")
-                .Build();
+            //scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
 
-        scheduler.ScheduleJob(processOutboxJob, trigger).GetAwaiter().GetResult();
+            //var processInternalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().Build();
 
-        var processInternalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().Build();
+            //var triggerCommandsProcessing =
+            //    TriggerBuilder
+            //        .Create()
+            //        .StartNow()
+            //        .WithCronSchedule("0/15 * * ? * *")
+            //        .Build();
 
-        var triggerCommandsProcessing =
-            TriggerBuilder
-                .Create()
-                .StartNow()
-                .WithCronSchedule("0/15 * * ? * *")
-                .Build();
+            //scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
+            ////=======================================
+            ////=====   Kafka polling consumer   ======
+            ////=======================================
+            //var processKafkaPollJob = JobBuilder.Create<KafkaPollJob>().Build();
 
-        scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
-        //=======================================
-        //=====   Kafka polling consumer   ======
-        //=======================================
-        var processKafkaPollJob = JobBuilder.Create<KafkaPollJob>().Build();
+            //var triggerKafkaPollJob =
+            //    TriggerBuilder
+            //        .Create()
+            //        .StartNow()
+            //        .WithCronSchedule("0/15 * * ? * *")
+            //        .Build();
 
-        var triggerKafkaPollJob =
-            TriggerBuilder
-                .Create()
-                .StartNow()
-                .WithCronSchedule("0/15 * * ? * *")
-                .Build();
-
-        scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
-        // ================================================================================================
-        // ================================================================================================
-        // ======================================      / Quartz       =====================================
-        // ================================================================================================
-        // ================================================================================================
-
+            //scheduler.ScheduleJob(processKafkaPollJob, triggerKafkaPollJob).GetAwaiter().GetResult();
+            // ================================================================================================
+            // ================================================================================================
+            // ======================================      / Quartz       =====================================
+            // ================================================================================================
+            // ================================================================================================
+        }
         var serviceProvider = new AutofacServiceProvider(builtContainer);
 
         return serviceProvider;
@@ -562,16 +569,16 @@ public class Startup
 
         #region HealthCheck
 
-        app.UseHealthChecks("/hc", new HealthCheckOptions
-        {
-            Predicate = _ => true,
-            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        });
+        //app.UseHealthChecks("/hc", new HealthCheckOptions
+        //{
+        //    Predicate = _ => true,
+        //    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        //});
 
-        app.UseHealthChecks("/liveness", new HealthCheckOptions
-        {
-            Predicate = r => r.Name.Contains("self")
-        });
+        //app.UseHealthChecks("/liveness", new HealthCheckOptions
+        //{
+        //    Predicate = r => r.Name.Contains("self")
+        //});
 
         #endregion HealthCheck
 
@@ -653,29 +660,32 @@ public class Startup
         app.UseMiddleware<JwtMiddleware>();
 
         #endregion Middlewares
-
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-
-            //adding endpoint of health check for the health check ui in UI format
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions
+            if (environment != "Test")
             {
-                Predicate = _ => true,
-                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+                ////adding endpoint of health check for the health check ui in UI format
+                //endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                //{
+                //    Predicate = _ => true,
+                //    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                //});
 
-            //map healthcheck ui endpoing - default is /healthchecks-ui/
-            endpoints.MapHealthChecksUI();
+                ////map healthcheck ui endpoing - default is /healthchecks-ui/
+                //endpoints.MapHealthChecksUI();
+            }
         }
         );
 
         #region Consul
-
-        // app.UseConsul(Configuration);
-
+        if (environment != "Test")
+        {
+            // app.UseConsul(Configuration);
+        }
         #endregion Consul
     }
 

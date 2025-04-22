@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using SharedKernel.DomainContracts;
+﻿using SharedKernel.DomainContracts;
 using System;
 
 namespace SharedKernel.DomainImplementations.BaseClasses;
@@ -15,5 +14,5 @@ public class DomainEventBase : IDomainEvent
 
     public DateTime OccurredOn { get; }
     public EventTypeEnum TypeOfEvent { get; set; }
-    public Guid MessageId { get;  set; }
+    public Guid MessageId { get; set; }
 }

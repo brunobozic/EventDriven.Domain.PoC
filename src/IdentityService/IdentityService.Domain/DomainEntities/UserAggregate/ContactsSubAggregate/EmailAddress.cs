@@ -1,9 +1,9 @@
-﻿using IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
-using IdentityService.Domain.DomainEntities;
+﻿using IdentityService.Domain.DomainEntities;
+using IdentityService.Domain.DomainEntities.UserAggregate.ContactsSubAggregate;
 using SharedKernel.DomainCoreInterfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System;
 
 public class EmailAddress : BasicDomainEntity<long>, IAuditTrail
 {

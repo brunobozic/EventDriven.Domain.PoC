@@ -7,7 +7,7 @@ namespace IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 public sealed record UserDto(
     DateTimeOffset? ActiveTo,
     string Email,
-    DateTimeOffset HasBeenVerified,
+    DateTimeOffset? HasBeenVerified,
     Guid? Id,
     string Status,
     string UserName,

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace IdentityService.Application.CQRSBoilerplate.OutboxCommands;
+namespace SharedKernel;
 
 public class AllPropertiesContractResolver : DefaultContractResolver
 {
@@ -15,7 +15,7 @@ public class AllPropertiesContractResolver : DefaultContractResolver
                 BindingFlags.Public |
                 BindingFlags.NonPublic |
                 BindingFlags.Instance)
-            .Select(p => this.CreateProperty(p, memberSerialization))
+            .Select(p => CreateProperty(p, memberSerialization))
             .ToList();
 
         properties.ForEach(p =>

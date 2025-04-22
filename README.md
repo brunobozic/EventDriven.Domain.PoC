@@ -11,7 +11,7 @@
 - since the app uses other components (Kafka being the most important one) you must have these components listening on appropriate ports
     - the easiest way to achieve this is to run `docker-compose up` on the provided `docker-compose.yml` file 
     - this will bring up the entire stack 
-    - after the stack is "up" you may use the provided `Dockerfile` file (provided within the project directory of `EventDriven.Domain.PoC.Api.Rest`) to begin debugging
+    - after the stack is "up" you may use the provided `Dockerfile` file (provided within the project directory of `IdentityService.Api`) to begin debugging
         - please note that, if you begin your debugging session in this way, your API is located within a docker container that is *NOT* on the internal network as it is specified
           within the `docker-compose` file, so there will be slight differences in which kafka port must be used by the API
           - if the app container is located within a docker network that is proscribed within the `docker-compose` file, you will be using `kafka:9092`
@@ -47,21 +47,20 @@
       "registry-mirrors": []
   }
   </code>
-2) from Visual Studio 2022, select `EventDriven.Domain.PoC.Api.Rest` as your "entrypoint" (starting) project and hit debug
+2) from Visual Studio 2022, select `IdentityService.Api` as your "entrypoint" (starting) project and hit debug
    this will bring up the application, that will obviously be located outside the docker network, ergo the proper url to use for communicating with kafka is `localhost:29092`
 
 This is the easiest way to begin debugging.
 
 # EF migrations
 
-The project that is a home for EF context is the `Repository.EF`, therefore the migrations are started using these commands
+The project that is a home for EF context is the `IdentityService.Data`, therefore the migrations are started using these commands
 
-- `dotnet ef migrations add Initital --project ./IdentityService.Data/IdentityService.Data.csproj`
-- `dotnet ef database update --project ./IdentityService.Data/IdentityService.Data.csproj`
+- `dotnet ef database update --project src/IdentityService/IdentityService.Data/IdentityService.Data.csproj --startup-project src/IdentityService/IdentityService.Api/IdentityService.Api.csproj`
 
 Or, from the Package Manager console you would run:
 
-- `Update-Database -StartupProject IdentityService.Data`
+- `Update-Database -StartupProject IdentityService.Api`
 
 # Jaeger and consul (service discovery)
 

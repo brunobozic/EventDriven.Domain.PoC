@@ -65,6 +65,8 @@ public abstract class JournalEntityOfT<TK> : ITrackable
     public DateTimeOffset DateCreated { get; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? DateDeleted { get; }
     public bool Deleted { get; } = false;
+
+    [Key]
     public TK JournalId { get; set; }
 
     #endregion Public Props

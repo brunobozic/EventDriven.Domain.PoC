@@ -47,8 +47,7 @@ public class
 
         try
         {
-            _emailService.Send(user.Email, "Sign-up Verification API - Verify Account", emailContent,
-                "admin.poc@gmail.com");
+            _emailService.Send(user.Email, "Sign-up Verification API - Verify Account", emailContent, "admin.poc@gmail.com");
             user.SetAccountActivationMailResent();
             // Uncomment the next line if you decide to save changes in the unit of work
             // await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -70,7 +69,6 @@ public class
             throw new ArgumentNullException(nameof(command.LastName));
         if (string.IsNullOrEmpty(command.ActivationLink))
             throw new ArgumentNullException(nameof(command.ActivationLink));
-        // Add any additional validation as needed
     }
 
     private async Task<User> FindUserAsync(SendAccountVerificationMailCommand command,

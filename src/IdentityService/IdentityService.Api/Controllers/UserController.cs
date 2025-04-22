@@ -4,14 +4,14 @@ using IdentityService.Api.Attributes;
 using IdentityService.Api.Controllers.BaseControllerType;
 using IdentityService.Application;
 using IdentityService.Application.CommandsAndHandlers.Addresses;
-using IdentityService.Application.CommandsAndHandlers.ForgotPassword.PhaseOne;
-using IdentityService.Application.CommandsAndHandlers.ForgotPassword.PhaseTwo;
 using IdentityService.Application.CommandsAndHandlers.Roles;
+using IdentityService.Application.CommandsAndHandlers.Users;
 using IdentityService.Application.CommandsAndHandlers.Users.Email.ActivationMail;
 using IdentityService.Application.CommandsAndHandlers.Users.Email.VerifyEmail;
+using IdentityService.Application.CommandsAndHandlers.Users.ForgotPassword.PhaseOne;
+using IdentityService.Application.CommandsAndHandlers.Users.ForgotPassword.PhaseTwo;
 using IdentityService.Application.CommandsAndHandlers.Users.RefreshTokenCommand;
 using IdentityService.Application.DomainServices.UserServices;
-using IdentityService.Application.EventsAndEventHandlers.Users.CUD.Notifications;
 using IdentityService.Application.Ports.Input.Contracts;
 using IdentityService.Application.ViewModels;
 using IdentityService.Application.ViewModels.Address;
@@ -21,6 +21,7 @@ using IdentityService.Application.ViewModels.ApplicationUsers.Response;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
+using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -123,7 +124,7 @@ public class UserController : BaseController, IUserController
             activity?.SetTag("Environment", base.ConfigurationValues.Environment.Trim().ToUpper());
             activity?.SetTag("Request origin", Request.Headers["origin"]);
 
-            var creator = (User)base.ContextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
+            var creator = (User)ContextAccessor.HttpContext.Items["ApplicationUser"]; // this will work only if the user had gone thru authentication
 
             var newUserId = Guid.NewGuid();
 
@@ -188,8 +189,7 @@ public class UserController : BaseController, IUserController
     public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct)
     {
         var command =
-            new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail,
-                    request.UserName)
+            new VerifyEmailCommand(request.EmailVerificationToken, request.UserId, request.UserEmail, request.UserName)
             { Origin = Request.Headers["origin"] };
 
         // using var scope = _tracer.BuildSpan("VerifyEmailAsync").StartActive(true);

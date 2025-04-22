@@ -1,5 +1,5 @@
-﻿using SharedKernel.DomainCoreInterfaces;
-using Serilog;
+﻿using Serilog;
+using SharedKernel.DomainCoreInterfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -5,12 +5,12 @@ using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.Ad
 using IdentityService.Domain.DomainEntities.UserAggregate.RefreshTokenEntity;
 using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleDomainEvents;
+using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.EmailSending;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.PasswordReset;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.Verification;
 using Serilog;
-using Serilog.Context;
 using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
 using SharedKernel.DomainImplementations.BaseClasses;
@@ -74,7 +74,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
     public string UserName { get; private init; }
     public Guid UserResourceId { get; }
     public DateTimeOffset? VerificationTokenExpirationDate { get; private set; }
-    public DateTimeOffset Verified { get; private set; }
+    public DateTimeOffset? Verified { get; private set; }
     public Guid? ReactivatedById { get; set; }
     public Guid? DeactivatedById { get; set; }
     public Guid? UndeletedById { get; set; }
@@ -84,24 +84,28 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
     #region Factory methods
 
     private static User CreateUserInstance(Guid userId, string email, string userName, string firstName, string lastName, string oib, DateTimeOffset? dateOfBirth, RegistrationStatusEnum status, bool isSeed) =>
-        new()
-        {
-            Id = userId,
-            Email = email.Trim(),
-            UserName = userName,
-            NormalizedEmail = email.Trim().ToUpper(),
-            NormalizedUserName = userName.Trim().ToUpper(),
-            FirstName = firstName.Trim(),
-            LastName = lastName.Trim(),
-            FullName = $"{lastName.Trim()} {firstName.Trim()}",
-            TwoFactorEnabled = false,
-            _status = status,
-            DateCreated = DateTime.UtcNow,
-            TrackingState = TrackingState.Added,
-            Oib = oib,
-            DateOfBirth = dateOfBirth,
-            IsSeed = isSeed
-        };
+      new()
+      {
+          Id = userId,
+          Email = email.Trim(),
+          UserName = userName,
+          NormalizedEmail = email.Trim().ToUpper(),
+          NormalizedUserName = userName.Trim().ToUpper(),
+          FirstName = firstName.Trim(),
+          LastName = lastName.Trim(),
+          FullName = $"{lastName.Trim()} {firstName.Trim()}",
+          TwoFactorEnabled = false,
+          _status = status,
+          DateCreated = DateTime.UtcNow,
+          TrackingState = TrackingState.Added,
+          Oib = oib,
+          DateOfBirth = dateOfBirth,
+          IsSeed = isSeed,
+          Verified = isSeed ? DateTimeOffset.UtcNow : null, // Mark seed users as verified
+          ActiveFrom = isSeed ? DateTimeOffset.UtcNow : (DateTimeOffset?)null,
+          ActiveTo = isSeed ? DateTimeOffset.UtcNow.AddYears(10) : (DateTimeOffset?)null,
+      };
+
 
     public static User NewActiveWithPassword(Guid userId, string email, string userName, string firstName, string lastName, string oib, DateTimeOffset? dateOfBirth, DateTimeOffset activeFrom, DateTimeOffset activeTo, string password, User creator, string origin)
     {
@@ -115,11 +119,26 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         user.AddPasswordHash(password);
         user.AddVerificationToken(RandomStringHelper.RandomTokenString());
         user.AddDomainEvent(new UserCreatedDomainEvent(userId, email, userName, firstName, lastName, oib, dateOfBirth, DateTime.UtcNow, user.EmailVerificationToken, creator?.Id, user.UserResourceId, origin, EventTypeEnum.UserCreatedDomainEvent));
+        // we are automatically activating the entity, for now
+        user.AddDomainEvent(new UserActivatedDomainEvent(userId, email, userName, oib, creator?.Id, creator?.UserName, "Regular process", origin, EventTypeEnum.UserActivatedDomainEvent));
 
         return user;
     }
 
-    public static User NewActiveWithPasswordAndEmailVerified(Guid userId, string email, string userName, string firstName, string lastName, string oib, DateTimeOffset? dateOfBirth, DateTimeOffset activeFrom, DateTimeOffset activeTo, string password, User activator, string origin, bool isSeed)
+    public static User NewActiveWithPasswordAndEmailVerified(
+     Guid userId,
+     string email,
+     string userName,
+     string firstName,
+     string lastName,
+     string oib,
+     DateTimeOffset? dateOfBirth,
+     DateTimeOffset activeFrom,
+     DateTimeOffset activeTo,
+     string password,
+     User activator,
+     string origin,
+     bool isSeed)
     {
         ValidateUserParameters(email, userName, firstName, lastName, oib, dateOfBirth, password);
 
@@ -127,14 +146,62 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         activeTo = activeTo == DateTimeOffset.MinValue ? DateTimeOffset.UtcNow.AddYears(NumYearsDefaultActivity) : activeTo;
 
         var user = CreateUserInstance(userId, email, userName, firstName, lastName, oib, dateOfBirth, RegistrationStatusEnum.Verified, isSeed);
+
+        if (isSeed && activator == null)
+        {
+            // Use the factory method to create a SeedUser
+            activator = CreateUserInstance(
+                Guid.NewGuid(),
+                "seed@system.local",
+                "SeedUser",
+                "System",
+                "Seeder",
+                "00000000000", // Placeholder OIB
+                null,
+                RegistrationStatusEnum.Verified,
+                true);
+        }
+
         user.Activate(activeFrom, activeTo, activator);
         user.AddPasswordHash(password);
         user.AddVerificationToken(RandomStringHelper.RandomTokenString());
         user.SetEmailIsVerified();
-        user.AddDomainEvent(new UserCreatedDomainEvent(userId, email, userName, firstName, lastName, oib, dateOfBirth, DateTime.UtcNow, user.EmailVerificationToken, activator?.Id, user.UserResourceId, origin, EventTypeEnum.UserCreatedDomainEvent));
+
+        // Add domain events
+        if (!isSeed) // Avoid firing events for seed users
+        {
+            user.AddDomainEvent(new UserCreatedDomainEvent(
+                userId,
+                email,
+                userName,
+                firstName,
+                lastName,
+                oib,
+                dateOfBirth,
+                DateTime.UtcNow,
+                user.EmailVerificationToken,
+                activator?.Id,
+                user.UserResourceId,
+                origin,
+                EventTypeEnum.UserCreatedDomainEvent
+            ));
+
+            user.AddDomainEvent(new UserActivatedDomainEvent(
+                userId,
+                email,
+                userName,
+                oib,
+                activator?.Id ?? Guid.NewGuid(),
+                activator?.UserName ?? "SeedUser",
+                "Regular process",
+                origin,
+                EventTypeEnum.UserActivatedDomainEvent
+            ));
+        }
 
         return user;
     }
+
 
     public static User NewDraft(Guid userId, string email, string userName, string firstName, string lastName, string password, string role, User creator, string origin)
     {
@@ -168,8 +235,9 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         ExecuteWithLogging(nameof(Activate), () =>
         {
             GuardAgainstInactiveStatus();
-            Activate(from, to, activatedBy);
-            LogJournalEntry("User activated.");
+            this.ActiveFrom = from;
+            this.ActiveTo = to;
+            LogJournalEntry($"User activated by [ {activatedBy?.FullName ?? "Seed"} ].");
             return true;
         }, this);
 
@@ -198,7 +266,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
             _userRoles.Add(UserRole.NewActivatedDraft(this, role, roleGiver));
             UpdateModifiedDate();
             AddRoleAssignmentEvent(this, role, roleGiver);
-            LogJournalEntry($"Role [ {role.Name} ] added to User by [{roleGiver.FullName}]");
+            LogJournalEntry($"Role [ {role.Name} ] added to User by [ {roleGiver.FullName} ]");
             return true;
         }, this);
 
@@ -314,7 +382,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
             if (refreshTokenDomain != null)
             {
                 refreshTokenDomain.SetRevoked(ipAddress);
-             
+
                 LogJournalEntry($"Token revoked by [ {revokerUser?.FullName} ].");
                 return true;
             }
@@ -341,7 +409,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
             _accountActivationMailsSendAttempts++;
             _status = RegistrationStatusEnum.VerificationEmailResent;
             LogJournalEntry("Account activation code re-sent.");
-            Log.Information("Account activation mail resent for user {UserId} to {Email}", Id, Email);
+            Log.Information("Account activation mail resent for user [ {UserId} ] to [ {Email} ]", Id, Email);
             return true;
         }, this);
     }
@@ -351,11 +419,12 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         {
             if (IsActive() && !IsDeleted && VerificationTokenHasNotExpired())
             {
-                Verified = DateTime.UtcNow;
+                Verified = DateTimeOffset.UtcNow;
                 EmailVerificationToken = null;
                 VerificationTokenExpirationDate = null;
                 _status = RegistrationStatusEnum.Verified;
-                AddDomainEvent(new EmailVerifiedDomainEvent(Email, UserName, Id, Verified));
+                AddDomainEvent(new EmailVerifiedDomainEvent(Email, UserName, Id, string.Empty, EventTypeEnum.VerificationEmailAcknowledged));
+                LogJournalEntry("Email verified.");
                 Log.Information("Email verified for user {UserId}", Id);
                 return "OK";
             }
@@ -377,8 +446,8 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
                 LastVerificationFailureDate = DateTime.UtcNow;
                 _status = RegistrationStatusEnum.VerificationFailed;
             }
-            AddDomainEvent(new EmailNotVerifiedDomainEvent(Email, UserName, Id, LatestVerificationFailureMessage));
-            Log.Warning("Failed to verify email for user {Id}. Reason: {friendlyErrorResponse}. Current registration status: {GetCurrentRegistrationStatus}", Id, string.Join(", ", friendlyErrorResponse), GetCurrentRegistrationStatus());
+            AddDomainEvent(new EmailVerifiedDomainEvent(Email, UserName, Id, string.Empty, EventTypeEnum.VerificationEmailAcknowledged));
+            Log.Warning("Failed to verify email for user [ {Id} ] ({Username}/{email}). Reason: {friendlyErrorResponse}. Current registration status: {GetCurrentRegistrationStatus}", Id, UserName, Email, string.Join(", ", friendlyErrorResponse), GetCurrentRegistrationStatus());
             return string.Join(", ", friendlyErrorResponse);
         }, this);
 
@@ -389,7 +458,7 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         {
             if (string.IsNullOrEmpty(tokenReceivedByEmail) || string.IsNullOrEmpty(newPassword))
                 throw new DomainException($"The token or new password must not be null. Unable to confirm password reset for user {UserName} / {Email}. Current registration status: {GetCurrentRegistrationStatus()}");
-            Log.Information("Verifying password reset token for user {Id}. Current registration status: {GetCurrentRegistrationStatus()}", Id, GetCurrentRegistrationStatus());
+            Log.Information("Verifying password reset token for user [ {Id} ] ({Username}/{email}). Current registration status: [ {GetCurrentRegistrationStatus()} ]", Id, UserName, Email, GetCurrentRegistrationStatus());
             return ResetToken.Trim() == tokenReceivedByEmail.Trim() && UpdatePasswordThenRemoveResetToken(newPassword);
         }, this);
 
@@ -424,7 +493,6 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
     private void LogJournalEntry(string message) =>
         _journalEntries.Add(new AccountJournalEntry($"{DateTime.UtcNow} => {message}")
         {
-            JournalId = Guid.NewGuid(),
             TrackingState = TrackingState.Added
         }.AttachUser(this));
 
@@ -455,12 +523,12 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
         {
             try
             {
-                Log.Information("{MethodName} called for user {UserId}", methodName, user.Id);
+                Log.Information("{MethodName} called for user [ {UserId} ], [ {UserName} / {Email} ]", methodName, user.Id, user.UserName, user.Email);
                 return action();
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in {MethodName} for user {UserId}", methodName, user.Id);
+                Log.Error(ex, "Error in {MethodName} for user [ {UserId} ], [ {UserName} / {Email} ]", methodName, user.Id, user.UserName, user.Email);
                 throw;
             }
         }
@@ -503,9 +571,9 @@ public class User : BasicDomainEntity<Guid>, IAuditTrail, IAggregateRoot
             throw new DomainException($"The user [ {UserName} / {Email} ] cannot perform this action. Current status: {GetCurrentRegistrationStatus()}");
     }
 
-    private bool IsVerified() => Verified != DateTime.MinValue;
+    private bool IsVerified() => Verified != null;
 
-    private bool IsActive() => ActiveTo == null || ActiveTo >= DateTimeOffset.UtcNow;
+    public bool IsActive() => ActiveTo == null || ActiveTo >= DateTimeOffset.UtcNow;
 
     private bool VerificationTokenHasNotExpired() => !string.IsNullOrEmpty(ResetToken) && ResetTokenExpires <= DateTime.UtcNow;
 

@@ -13,6 +13,6 @@ public class IntegrationEventBase<T> : IIntegrationEvent<T> where T : IDomainEve
     }
 
     public EventTypeEnum EventType { get; set; }
-    public Guid Id { get; }
+    public Guid Id { get; set; }
     [JsonIgnore] public T IntegrationEvent { get; }
 }

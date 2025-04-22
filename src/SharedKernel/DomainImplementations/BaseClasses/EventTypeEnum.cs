@@ -9,5 +9,6 @@ public enum EventTypeEnum
     UserAccountVerified,
     VerificationEmailResent,
     VerificationEmailSendFailure,
-    RoleAssignedToUser
+    RoleAssignedToUser,
+    UserActivatedDomainEvent
 }

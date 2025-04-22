@@ -4,29 +4,27 @@ using Newtonsoft.Json;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Database;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace IdentityService.Application.CQRSBoilerplate;
 
-    internal class ProcessInboxCommandHandler : ICommandHandler<ProcessInboxCommand>
+internal class ProcessInboxCommandHandler : ICommandHandler<ProcessInboxCommand>
+{
+    private readonly IMediator _mediator;
+    private readonly ISqlConnectionFactory _sqlConnectionFactory;
+
+    public ProcessInboxCommandHandler(IMediator mediator, ISqlConnectionFactory sqlConnectionFactory)
     {
-        private readonly IMediator _mediator;
-        private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        _mediator = mediator;
+        _sqlConnectionFactory = sqlConnectionFactory;
+    }
 
-        public ProcessInboxCommandHandler(IMediator mediator, ISqlConnectionFactory sqlConnectionFactory)
-        {
-            _mediator = mediator;
-            _sqlConnectionFactory = sqlConnectionFactory;
-        }
-
-        public async Task Handle(ProcessInboxCommand command, CancellationToken cancellationToken)
-        {
-            var connection = this._sqlConnectionFactory.GetOpenConnection();
-            const string sql = $"""
+    public async Task Handle(ProcessInboxCommand command, CancellationToken cancellationToken)
+    {
+        var connection = this._sqlConnectionFactory.GetOpenConnection();
+        const string sql = $"""
                                SELECT 
                                    [InboxMessage].[Id] AS [{nameof(InboxMessageDto.Id)}], 
                                    [InboxMessage].[Type] AS [{nameof(InboxMessageDto.Type)}], 
@@ -36,38 +34,38 @@ namespace IdentityService.Application.CQRSBoilerplate;
                                ORDER BY [InboxMessage].[OccurredOn]
                                """;
 
-            var messages = await connection.QueryAsync<InboxMessageDto>(sql);
+        var messages = await connection.QueryAsync<InboxMessageDto>(sql);
 
-            const string sqlUpdateProcessedDate = """
+        const string sqlUpdateProcessedDate = """
                                                   UPDATE [administration].[InboxMessages] 
                                                   SET [ProcessedDate] = @Date 
                                                   WHERE [Id] = @Id
                                                   """;
 
-            foreach (var message in messages)
+        foreach (var message in messages)
+        {
+            var messageAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .SingleOrDefault(assembly => message.Type.Contains(assembly.GetName().Name));
+
+            Type type = messageAssembly.GetType(message.Type);
+            var request = JsonConvert.DeserializeObject(message.Data, type);
+
+            try
             {
-                var messageAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                    .SingleOrDefault(assembly => message.Type.Contains(assembly.GetName().Name));
-
-                Type type = messageAssembly.GetType(message.Type);
-                var request = JsonConvert.DeserializeObject(message.Data, type);
-
-                try
-                {
-                    await _mediator.Publish((INotification)request, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
-
-                await connection.ExecuteScalarAsync(sqlUpdateProcessedDate, new
-                {
-                    Date = DateTime.UtcNow,
-                    message.Id
-                });
+                await _mediator.Publish((INotification)request, cancellationToken);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            await connection.ExecuteScalarAsync(sqlUpdateProcessedDate, new
+            {
+                Date = DateTime.UtcNow,
+                message.Id
+            });
         }
     }
+}
 

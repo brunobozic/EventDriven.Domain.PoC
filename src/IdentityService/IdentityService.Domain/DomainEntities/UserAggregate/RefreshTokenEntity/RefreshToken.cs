@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Serilog;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RefreshTokenEntity;
 
@@ -41,7 +40,7 @@ public class RefreshToken : SimpleDomainEntityOfT<long>
 
     internal void SetRevoked(string ipAddress)
     {
-        this.RevokedByIp= ipAddress;
+        this.RevokedByIp = ipAddress;
         this.DateModified = DateTime.UtcNow;
     }
 

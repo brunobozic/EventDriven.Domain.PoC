@@ -1,4 +1,4 @@
-﻿using IdentityService.Domain.DomainEntities;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

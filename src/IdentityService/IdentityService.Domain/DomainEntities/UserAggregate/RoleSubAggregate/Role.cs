@@ -3,7 +3,6 @@ using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate.RoleD
 using Serilog;
 using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
-using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

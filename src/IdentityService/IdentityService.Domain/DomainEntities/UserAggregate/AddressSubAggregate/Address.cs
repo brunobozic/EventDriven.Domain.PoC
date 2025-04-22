@@ -1,5 +1,4 @@
-﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
-using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.AddressDomainEvents;
 using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
 using Serilog;
 using SharedKernel.DomainContracts;

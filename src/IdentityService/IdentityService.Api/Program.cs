@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -43,32 +44,17 @@ public class Program
 
             var host = BuildWebHost(configuration, args);
 
-            Log.Warning("Applying migrations ({ApplicationContext})...", AppName);
-
-            using (var newScope = host.Services.CreateScope())
+            using (var scope = host.Services.CreateScope())
             {
-                var context = newScope.ServiceProvider.GetService<ApplicationDbContext>();
-                context.Database.Migrate();
-                var uow = newScope.ServiceProvider.GetService<IMyUnitOfWork>();
-
-                try
+                var environment = scope.ServiceProvider.GetRequiredService<IHostEnvironment>();
+                if (environment.IsDevelopment()) // Seeding only in Development
                 {
-                    IdentitySeed.SeedUsersAsync(context, uow).Wait();
-                }
-                catch (Exception seedEx)
-                {
-                    Log.Fatal("Error while applying migrations...", seedEx);
-
-                    Debug.WriteLine(seedEx.Message);
-
-                    Console.WriteLine(seedEx.Message);
-
-                    return 1;
+                    var databaseInitializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+                    databaseInitializer.MigrateAndSeed();
                 }
             }
 
             Log.Warning("Starting web host ({ApplicationContext})...", AppName);
-
 
             host.Run();
 
@@ -85,9 +71,6 @@ public class Program
             return 1;
         }
     }
-
-
-
 
 #pragma warning disable 1591
 
@@ -146,12 +129,12 @@ public class Program
                 "{Timestamp:HH:mm} [{Level}] [{Address}] {Site}: {Message} || CommandType: [{Command_Type}], CommandId: [{Command_Id}], Application: [{Application}], Machine: [{MachineName}], User: [{EnvironmentUserName}], CorrelationId: [{CorrelationId}], DebuggerAttached: [{DebuggerAttached}] {NewLine}")
             .WriteTo.File(appInstanceName + ".log", rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: null)
-           .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticsearchUrl))
-           {
-               AutoRegisterTemplate = true,
-               AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7, // Make sure this matches your Elasticsearch version
-               IndexFormat = $"{appInstanceName.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
-           })
+               .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticsearchUrl))
+               {
+                   AutoRegisterTemplate = true,
+                   AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7, // Make sure this matches your Elasticsearch version
+                   IndexFormat = $"{appInstanceName.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
+               })
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)

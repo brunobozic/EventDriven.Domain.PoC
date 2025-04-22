@@ -14,7 +14,7 @@ public class RoleCreatedNotification : IntegrationEventBase<RoleCreatedDomainEve
     public string Name;
     public Guid RoleId;
 
-    public RoleCreatedNotification(RoleCreatedDomainEvent integrationEvent, Guid id) : base(integrationEvent)
+    public RoleCreatedNotification(RoleCreatedDomainEvent integrationEvent) : base(integrationEvent)
     {
         RoleId = integrationEvent.RoleId;
         Description = integrationEvent.Description;

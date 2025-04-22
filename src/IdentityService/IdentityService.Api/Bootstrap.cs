@@ -20,6 +20,7 @@ using IdentityService.Application.ViewModels.ApplicationUsers.Commands;
 using IdentityService.Data.CustomUnitOfWork;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Data.DatabaseContexts;
+using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.Activation;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.AspNetCore.Hosting;
@@ -47,7 +48,7 @@ using URF.Core.Services;
 
 namespace IdentityService.Api;
 
-internal static class Assemblies
+public static class Assemblies
 {
     public static readonly Assembly Application = typeof(InternalCommandBase).Assembly;
 }
@@ -71,6 +72,8 @@ public class Bootstrap
     public static IContainer BuildContainer(string connStr, IServiceCollection services,
         IWebHostEnvironment environment)
     {
+        var environmentEnv = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
         // create a builder
         var containerBuilder = new ContainerBuilder();
         // detect assembly name
@@ -110,6 +113,8 @@ public class Bootstrap
         containerBuilder.RegisterType<MyConfigurationValues>().As<IMyConfigurationValues>().SingleInstance();
         containerBuilder.RegisterType<MyConfigurationValues>().SingleInstance();
         containerBuilder.RegisterInstance(settings);
+        containerBuilder.RegisterType<UserActivatedDomainEvent>();
+
 
         #region Kafka
 
@@ -183,32 +188,35 @@ public class Bootstrap
         containerBuilder.RegisterInstance(kafkaConsumerConfig).As<ConsumerConfig>().SingleInstance();
         containerBuilder.RegisterInstance(kafkaProducerConfig).As<ProducerConfig>().SingleInstance();
 
-        containerBuilder.RegisterType<KafkaScheduledConsumer>().As<IKafkaScheduledConsumer>()
+        if (environment.EnvironmentName != "Test")
+        {
+            containerBuilder.RegisterType<KafkaScheduledConsumer>().As<IKafkaScheduledConsumer>()
             .UsingConstructor(typeof(ConsumerConfig), typeof(string))
             .WithParameters(new[] { new NamedParameter("topicName", settings.KafkaConsumerSettings.KafkaTopic) })
             .SingleInstance();
 
-        containerBuilder.RegisterType<KafkaScheduledProducer>().As<IKafkaScheduledProducer>()
-            .UsingConstructor(typeof(ProducerConfig), typeof(string))
-            .WithParameters(new[] { new NamedParameter("topicName", settings.KafkaLoggingProducerSettings.KafkaTopic) })
-            .SingleInstance();
+            containerBuilder.RegisterType<KafkaScheduledProducer>().As<IKafkaScheduledProducer>()
+                .UsingConstructor(typeof(ProducerConfig), typeof(string))
+                .WithParameters(new[] { new NamedParameter("topicName", settings.KafkaLoggingProducerSettings.KafkaTopic) })
+                .SingleInstance();
 
-        containerBuilder.RegisterType<KafkaLoggingProducer>().As<IKafkaLoggingProducer>()
-            .UsingConstructor(typeof(MyConfigurationValues), typeof(string))
-            .WithParameters(new[]
-                { new NamedParameter("topicName", settings.KafkaLoggingProducerSettings.KafkaTopic) })
-            .SingleInstance();
+            containerBuilder.RegisterType<KafkaLoggingProducer>().As<IKafkaLoggingProducer>()
+                .UsingConstructor(typeof(MyConfigurationValues), typeof(string))
+                .WithParameters(new[]
+                    { new NamedParameter("topicName", settings.KafkaLoggingProducerSettings.KafkaTopic) })
+                .SingleInstance();
 
-        containerBuilder.RegisterType<ConsumedMessagePersistor>().As<IConsumedMessagePersistor>()
-            //.UsingConstructor(typeof(ProducerConfig), typeof(string))
-            //.WithParameters(new[] { new NamedParameter("topicName", "my-new-topic") })
-            .SingleInstance();
+            containerBuilder.RegisterType<ConsumedMessagePersistor>().As<IConsumedMessagePersistor>()
+                //.UsingConstructor(typeof(ProducerConfig), typeof(string))
+                //.WithParameters(new[] { new NamedParameter("topicName", "my-new-topic") })
+                .SingleInstance();
 
-        containerBuilder.RegisterType<KafkaPollJobController>()
-            .As<IJobController>()
-            .UsingConstructor(typeof(MyConfigurationValues), typeof(IKafkaScheduledConsumer),
-                typeof(IConsumedMessagePersistor)
-            );
+            containerBuilder.RegisterType<KafkaPollJobController>()
+                .As<IJobController>()
+                .UsingConstructor(typeof(MyConfigurationValues), typeof(IKafkaScheduledConsumer),
+                    typeof(IConsumedMessagePersistor)
+                );
+        }
 
         #endregion Kafka
 

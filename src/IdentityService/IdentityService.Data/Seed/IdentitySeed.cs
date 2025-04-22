@@ -1,10 +1,10 @@
 ﻿using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Data.DatabaseContexts;
-using IdentityService.Domain.DomainEntities;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using SharedKernel.Extensions;
 using System;
 using System.Collections.Generic;
@@ -601,14 +601,16 @@ public static class IdentitySeed
         if (!myDbContext.ApplicationUsers.Any(
                 user => user.UserName == ApplicationWideConstants.SYSTEM_USER_USERNAME))
         {
-            var newUser = User.NewActiveWithPasswordAndEmailVerified(
+            try
+            {
+                var newUser = User.NewActiveWithPasswordAndEmailVerified(
                 Guid.Parse(ApplicationWideConstants.SYSTEM_USER)
                 , ApplicationWideConstants.USER_EMAIL
                 , ApplicationWideConstants.SYSTEM_USER_USERNAME
                 , ApplicationWideConstants.SYSTEM_USER_NAME
                 , ApplicationWideConstants.SYSTEM_USER_SURNAME
                 , ApplicationWideConstants.SYSTEM_USER_OIB
-                , DateTimeOffset.UtcNow.AddYears(-200)
+                , DateTimeOffset.UtcNow.AddYears(-50)
                 , DateTimeOffset.UtcNow
                 , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.SYSTEM_USER_ACTIVE_TO_ADD_YEARS)
                 , ApplicationWideConstants.SYSTEM_USER_PASSWORD
@@ -617,9 +619,25 @@ public static class IdentitySeed
                 , true
             );
 
-            var result = await myDbContext.ApplicationUsers.AddAsync(newUser);
+                // Check if user already exists in the context
+                var existingUser = await myDbContext.ApplicationUsers.FindAsync(newUser.Id);
+                if (existingUser != null)
+                {
+                    // Update the existing user
+                    myDbContext.Entry(existingUser).CurrentValues.SetValues(newUser);
+                }
+                else
+                {
+                    var result = await myDbContext.ApplicationUsers.AddAsync(newUser);
+                }
 
-            await myUnitOfWork.SaveChangesAsync();
+                await myUnitOfWork.SaveChangesAsync();
+            }
+            catch (Exception debug)
+            {
+                Log.Error("{debug}", debug);
+                throw;
+            }
         }
 
         var creatorUser =
@@ -673,138 +691,146 @@ public static class IdentitySeed
 
         #region Administrators, adding roles
 
-        if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "BrunoBozic"))
+        try
         {
-            var newUser = User.NewActiveWithPasswordAndEmailVerified(
-                Guid.NewGuid()
-                , ApplicationWideConstants.USER_EMAIL
-                , "BrunoBozic"
-                , "Bruno"
-                , "Bozic"
-                , "1111113"
-                , DateTimeOffset.UtcNow.AddYears(-41)
-                , DateTimeOffset.UtcNow
-                , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
-                , ApplicationWideConstants.SEED_PASSWORD
-                , creatorUser
-                , ""
-                , false
-            );
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "BrunoBozic"))
+            {
+                var newUser = User.NewActiveWithPasswordAndEmailVerified(
+                    Guid.NewGuid()
+                    , ApplicationWideConstants.USER_EMAIL
+                    , "BrunoBozic"
+                    , "Bruno"
+                    , "Bozic"
+                    , "1111113"
+                    , DateTimeOffset.UtcNow.AddYears(-41)
+                    , DateTimeOffset.UtcNow
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , ApplicationWideConstants.SEED_PASSWORD
+                    , creatorUser
+                    , ""
+                    , false
+                );
 
-            var applicationRole = myDbContext.ApplicationRoles
-                .Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                .Select(u => u).FirstOrDefault();
+                var applicationRole = myDbContext.ApplicationRoles
+                    .Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
+                    .Select(u => u).FirstOrDefault();
 
-            await myDbContext.ApplicationUsers.AddAsync(newUser);
+                await myDbContext.ApplicationUsers.AddAsync(newUser);
 
-            await myUnitOfWork.SaveChangesAsync();
+                await myUnitOfWork.SaveChangesAsync();
 
-            var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "BrunoBozic")
-                .FirstOrDefaultAsync();
+                var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "BrunoBozic")
+                    .FirstOrDefaultAsync();
 
-            usr.AddRole(applicationRole, creatorUser);
+                usr.AddRole(applicationRole, creatorUser);
 
-            await myUnitOfWork.SaveChangesAsync();
+                await myUnitOfWork.SaveChangesAsync();
+            }
+
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin2"))
+            {
+                var newUser2 = User.NewActiveWithPasswordAndEmailVerified(
+                    Guid.NewGuid()
+                    , ApplicationWideConstants.UserEmail2
+                    , "testadmin2" // Username
+                    , "Bruno"
+                    , "Bozic"
+                    , "22222222" // OIB
+                    , DateTimeOffset.UtcNow.AddYears(-41)
+                    , DateTimeOffset.UtcNow
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , ApplicationWideConstants.SEED_PASSWORD
+                    , creatorUser
+                    , ""
+                    , false
+                );
+
+                var applicationRole2 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
+                    .Select(u => u).FirstOrDefault();
+
+                await myDbContext.ApplicationUsers.AddAsync(newUser2);
+
+                await myUnitOfWork.SaveChangesAsync();
+
+                var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin2")
+                    .FirstOrDefaultAsync();
+
+                usr.AddRole(applicationRole2, creatorUser);
+
+                await myUnitOfWork.SaveChangesAsync();
+            }
+
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin3"))
+            {
+                var newUser3 = User.NewActiveWithPasswordAndEmailVerified(
+                    Guid.NewGuid()
+                    , ApplicationWideConstants.UserEmail3
+                    , "testadmin3"
+                    , "Test"
+                    , "Admin3"
+                    , "3333333" // OIB
+                    , DateTimeOffset.UtcNow.AddYears(-41)
+                    , DateTimeOffset.UtcNow
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , ApplicationWideConstants.SEED_PASSWORD
+                    , creatorUser
+                    , ""
+                    , false
+                );
+
+                var applicationRole3 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
+                    .Select(u => u).FirstOrDefault();
+
+                await myDbContext.ApplicationUsers.AddAsync(newUser3);
+
+                await myUnitOfWork.SaveChangesAsync();
+
+                var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin3")
+                    .FirstOrDefaultAsync();
+
+                usr.AddRole(applicationRole3, creatorUser);
+
+                await myUnitOfWork.SaveChangesAsync();
+            }
+
+            if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin4"))
+            {
+                var newUser4 = User.NewActiveWithPasswordAndEmailVerified(
+                    Guid.NewGuid()
+                    , ApplicationWideConstants.UserEmail4
+                    , "testadmin4"
+                    , "Test"
+                    , "Admin4"
+                    , "44444444" // OIB
+                    , DateTimeOffset.UtcNow.AddYears(-41)
+                    , DateTimeOffset.UtcNow
+                    , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
+                    , ApplicationWideConstants.SEED_PASSWORD
+                    , creatorUser
+                    , ""
+                    , false
+                );
+
+                var applicationRole4 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
+                    .Select(u => u).FirstOrDefault();
+
+                await myDbContext.ApplicationUsers.AddAsync(newUser4);
+
+                await myUnitOfWork.SaveChangesAsync();
+
+                var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin4")
+                    .FirstOrDefaultAsync();
+
+                usr.AddRole(applicationRole4, creatorUser);
+
+                await myUnitOfWork.SaveChangesAsync();
+            }
+        }
+        catch (Exception debugExc)
+        {
+            throw;
         }
 
-        if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin2"))
-        {
-            var newUser2 = User.NewActiveWithPasswordAndEmailVerified(
-                Guid.NewGuid()
-                , ApplicationWideConstants.UserEmail2
-                , "testadmin2" // Username
-                , "Bruno"
-                , "Bozic"
-                , "22222222" // OIB
-                , DateTimeOffset.UtcNow.AddYears(-41)
-                , DateTimeOffset.UtcNow
-                , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
-                , ApplicationWideConstants.SEED_PASSWORD
-                , creatorUser
-                , ""
-                , false
-            );
-
-            var applicationRole2 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                .Select(u => u).FirstOrDefault();
-
-            await myDbContext.ApplicationUsers.AddAsync(newUser2);
-
-            await myUnitOfWork.SaveChangesAsync();
-
-            var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin2")
-                .FirstOrDefaultAsync();
-
-            usr.AddRole(applicationRole2, creatorUser);
-
-            await myUnitOfWork.SaveChangesAsync();
-        }
-
-        if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin3"))
-        {
-            var newUser3 = User.NewActiveWithPasswordAndEmailVerified(
-                Guid.NewGuid()
-                , ApplicationWideConstants.UserEmail3
-                , "testadmin3"
-                , "Test"
-                , "Admin3"
-                , "3333333" // OIB
-                , DateTimeOffset.UtcNow.AddYears(-41)
-                , DateTimeOffset.UtcNow
-                , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
-                , ApplicationWideConstants.SEED_PASSWORD
-                , creatorUser
-                , ""
-                , false
-            );
-
-            var applicationRole3 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                .Select(u => u).FirstOrDefault();
-
-            await myDbContext.ApplicationUsers.AddAsync(newUser3);
-
-            await myUnitOfWork.SaveChangesAsync();
-
-            var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin3")
-                .FirstOrDefaultAsync();
-
-            usr.AddRole(applicationRole3, creatorUser);
-
-            await myUnitOfWork.SaveChangesAsync();
-        }
-
-        if (!myDbContext.ApplicationUsers.Any(user => user.UserName == "testadmin4"))
-        {
-            var newUser4 = User.NewActiveWithPasswordAndEmailVerified(
-                Guid.NewGuid()
-                , ApplicationWideConstants.UserEmail4
-                , "testadmin4"
-                , "Test"
-                , "Admin4"
-                , "44444444" // OIB
-                , DateTimeOffset.UtcNow.AddYears(-41)
-                , DateTimeOffset.UtcNow
-                , DateTimeOffset.UtcNow.AddYears(ApplicationWideConstants.DEMO_USER_ACTIVE_TO_ADD_YEARS)
-                , ApplicationWideConstants.SEED_PASSWORD
-                , creatorUser
-                , ""
-                , false
-            );
-
-            var applicationRole4 = myDbContext.ApplicationRoles.Where(r => r.Name.ToUpper() == "ADMINISTRATOR")
-                .Select(u => u).FirstOrDefault();
-
-            await myDbContext.ApplicationUsers.AddAsync(newUser4);
-
-            await myUnitOfWork.SaveChangesAsync();
-
-            var usr = await myDbContext.ApplicationUsers.AsQueryable().Where(u => u.UserName == "testadmin4")
-                .FirstOrDefaultAsync();
-
-            usr.AddRole(applicationRole4, creatorUser);
-
-            await myUnitOfWork.SaveChangesAsync();
-        }
 
         #endregion Administrators, adding roles
 
@@ -859,6 +885,37 @@ public static class IdentitySeed
         }
 
         #endregion Address Types
+
+        #region Contact Types
+
+        #endregion Contact Types
+
+        #region Email types
+
+        #endregion Email Types
+
+        #region Phone number types
+
+        #endregion Phone number Types
+
+        #region RBAC
+
+        #region Resources
+        #endregion Resources
+
+        #region Permissions
+        #endregion Permission
+
+        #endregion RBAC
+
+        #region Country
+
+        #endregion Country
+
+        #region Towns
+
+        #endregion Towns
+
 
         return true;
     }

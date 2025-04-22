@@ -5,7 +5,7 @@ using IdentityService.Api.Extensions;
 using IdentityService.Application.DomainServices.CountryService;
 using IdentityService.Application.ViewModels;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
-using IdentityService.Domain.DomainEntities;
+using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

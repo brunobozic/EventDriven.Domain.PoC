@@ -50,10 +50,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(refreshToken => refreshToken.ApplicationUserId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasMany(user => user.JournalEntries)
-            .WithOne(journalEntry => journalEntry.UserActedUpon)
-            .HasForeignKey(journalEntry => journalEntry.JournalId)
-            .OnDelete(DeleteBehavior.SetNull);
+        //builder.HasMany(user => user.JournalEntries)
+        //    .WithOne(journalEntry => journalEntry.UserActedUpon)
+        //    .HasForeignKey(journalEntry => journalEntry.JournalId)
+        //    .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(user => user.UserRoles)
             .WithOne(userRole => userRole.User)

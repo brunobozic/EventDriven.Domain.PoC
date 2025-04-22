@@ -22,17 +22,17 @@ public class UserActivatedDomainEventHandler : INotificationHandler<UserActivate
     public async Task Handle(UserActivatedNotification notification, CancellationToken cancellationToken)
     {
         // the journal message
-        var journalEntry = DateTime.UtcNow + " => Activated by [ " + notification.IntegrationEvent.ActivatedByUsername +
-                           " ] .";
+        var journalEntry = DateTime.UtcNow + " => Activated by [ " + notification.IntegrationEvent.ActivatedByUsername + " ] .";
 
         // delegate the rest of the operation to the journaling service
         try
         {
             var journalEntryMade = await journalService.CreateAsync(journalEntry,
-                notification.IntegrationEvent.ActivatedById, notification.IntegrationEvent.UserId);
+                notification.IntegrationEvent.ActivatedById.GetValueOrDefault(), notification.IntegrationEvent.UserId);
         }
         catch (Exception ex)
         {
+
         }
     }
 }

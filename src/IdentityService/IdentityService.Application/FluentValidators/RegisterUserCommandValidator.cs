@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using IdentityService.Application.CommandsAndHandlers.Users;
 using System;
 using System.Text.RegularExpressions;
 

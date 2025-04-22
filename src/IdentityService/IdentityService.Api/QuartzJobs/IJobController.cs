@@ -1,8 +1,9 @@
 ﻿using Quartz;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.QuartzJobs;
 
 public interface IJobController
 {
-    void ReadAndProcessKafkaMessage(JobDataMap jobDataMap);
+    Task ReadAndProcessKafkaMessageAsync(JobDataMap jobDataMap);
 }

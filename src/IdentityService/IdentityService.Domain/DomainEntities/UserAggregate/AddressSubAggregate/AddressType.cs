@@ -1,6 +1,5 @@
-﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
+﻿using Serilog;
 using SharedKernel.DomainCoreInterfaces;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace EventDriven.Domain.PoC.Repository.EF.Migrations
+namespace IdentityService.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -651,7 +651,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<DateTimeOffset>("DateCreated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTimeOffset(new DateTime(2024, 4, 24, 9, 42, 11, 735, DateTimeKind.Unspecified).AddTicks(5348), new TimeSpan(0, 0, 0, 0, 0)));
+                        .HasDefaultValue(new DateTimeOffset(new DateTime(2024, 5, 27, 13, 54, 24, 757, DateTimeKind.Unspecified).AddTicks(7559), new TimeSpan(0, 0, 0, 0, 0)));
 
                     b.Property<DateTimeOffset?>("DateDeleted")
                         .HasColumnType("TEXT");
@@ -670,13 +670,16 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<Guid>("UserActedUponId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UserNameActedUpon")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("JournalId");
 
-                    b.HasIndex("ActingUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("AccountJournalEntry");
                 });
@@ -1018,6 +1021,12 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset?>("DateDeleted")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("DateModified")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -1312,7 +1321,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("LastVerificationFailureDate")
+                    b.Property<DateTimeOffset>("LastVerificationFailureDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LatestVerificationFailureMessage")
@@ -1338,7 +1347,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("PasswordReset")
+                    b.Property<DateTimeOffset?>("PasswordReset")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ReactivatedById")
@@ -1350,7 +1359,7 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                     b.Property<string>("ResetToken")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("ResetTokenExpires")
+                    b.Property<DateTimeOffset?>("ResetTokenExpires")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -1367,10 +1376,10 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("VerificationTokenExpirationDate")
+                    b.Property<DateTimeOffset?>("VerificationTokenExpirationDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("Verified")
+                    b.Property<DateTimeOffset?>("Verified")
                         .HasColumnType("TEXT");
 
                     b.Property<byte>("_status")
@@ -1489,20 +1498,9 @@ namespace EventDriven.Domain.PoC.Repository.EF.Migrations
 
             modelBuilder.Entity("IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal.AccountJournalEntry", b =>
                 {
-                    b.HasOne("IdentityService.Domain.DomainEntities.UserAggregate.User", "ActingUser")
-                        .WithMany()
-                        .HasForeignKey("ActingUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("IdentityService.Domain.DomainEntities.UserAggregate.User", "UserActedUpon")
+                    b.HasOne("IdentityService.Domain.DomainEntities.UserAggregate.User", null)
                         .WithMany("JournalEntries")
-                        .HasForeignKey("JournalId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.Navigation("ActingUser");
-
-                    b.Navigation("UserActedUpon");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate.Address", b =>

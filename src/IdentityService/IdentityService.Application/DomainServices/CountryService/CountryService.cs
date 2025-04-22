@@ -1,4 +1,4 @@
-﻿using IdentityService.Domain.DomainEntities;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using URF.Core.Abstractions.Trackable;
 using URF.Core.Services;
 

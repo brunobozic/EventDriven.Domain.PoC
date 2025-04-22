@@ -1,4 +1,5 @@
-﻿using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
+﻿using IdentityService.Application.ViewModels;
+using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 using System;
 using System.Threading.Tasks;
 using URF.Core.Abstractions.Services;

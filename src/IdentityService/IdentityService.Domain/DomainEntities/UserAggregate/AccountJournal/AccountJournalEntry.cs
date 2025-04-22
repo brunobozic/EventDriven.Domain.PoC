@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Serilog;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;
 
@@ -14,7 +13,7 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
     {
         if (activatedBy != null)
         {
-            ActingUser = activatedBy;
+            // ActingUser = activatedBy;
             ActingUserId = activatedBy.Id;
             ActingEmail = activatedBy.Email;
             ActingUserName = activatedBy.UserName;
@@ -23,7 +22,7 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
 
     public AccountJournalEntry AttachUser(User user)
     {
-        UserActedUpon = user;
+        //UserActedUpon = user;
         UserNameActedUpon = user.UserName;
         EmailActedUpon = user.Email;
         UserActedUponId = user.Id;
@@ -42,7 +41,6 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
     public AccountJournalEntry(string msg)
     {
         Message = msg;
-        JournalId = Guid.NewGuid();
     }
 
     private AccountJournalEntry()
@@ -64,8 +62,8 @@ public class AccountJournalEntry : JournalEntityOfT<Guid>
 
     #region Navigation
 
-    public virtual User ActingUser { get; private set; }
-    public virtual User UserActedUpon { get; private set; }
+    // public virtual User ActingUser { get; private set; }
+    // public virtual User UserActedUpon { get; private set; }
 
     #endregion Navigation
 

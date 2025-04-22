@@ -2,6 +2,7 @@
 using Dapper;
 using Newtonsoft.Json;
 using OpenTelemetry.Trace;
+using SharedKernel;
 using SharedKernel.DomainContracts;
 using SharedKernel.Helpers.Database;
 using System;

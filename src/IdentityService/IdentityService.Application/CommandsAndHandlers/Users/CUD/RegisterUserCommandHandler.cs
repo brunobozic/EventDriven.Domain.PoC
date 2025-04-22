@@ -92,9 +92,7 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, U
             , command.Origin
         );
 
-        //UserRepository.Attach(user);
         UserRepository.Insert(user);
-        //UserRepository.ApplyChanges(user);
 
         await UnitOfWork.SaveChangesAsync(cancellationToken);
 

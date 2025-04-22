@@ -10,6 +10,7 @@ using SharedKernel.Helpers.Configuration;
 using SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace IdentityService.Api.QuartzJobs;
 
@@ -32,7 +33,7 @@ public class KafkaPollJobController : IJobController
 
     #region Public methods
 
-    public void ReadAndProcessKafkaMessage(JobDataMap jobDataMap)
+    public async Task ReadAndProcessKafkaMessageAsync(JobDataMap jobDataMap)
     {
         ConsumeMessageResult kafkaMessage = null;
         PersistingResult persistResult = null;
@@ -85,7 +86,7 @@ public class KafkaPollJobController : IJobController
                             .Warning(
                                 " => retry count: [ {Retry} ], Offset: [ {Offset} ], partition: [ {Partition} ], Message reading topic: [ {KafkaConsumerTopic} ], retry reason: {ErrorMessage}");
                     }
-                    else 
+                    else
                     {
                         // skip the messages that dont contain the required header 
                         SkipProblematic(kafkaMessage);
@@ -121,7 +122,7 @@ public class KafkaPollJobController : IJobController
             // that persistance is futile :)
             var persistorRetryPolicy = Policy
                 .HandleResult<PersistingResult>(r => !r.Success && !r.IsFatal)
-                .WaitAndRetry(delay, (response, retryCount) =>
+                .WaitAndRetryAsync(delay, (response, retryCount, context) =>
                 {
                     persistResult = response.Result;
                     Log
@@ -132,12 +133,13 @@ public class KafkaPollJobController : IJobController
                         .Warning("Persistor retry count: [ {RetryCount} ] => " +
                                  "offset: [ {KafkaOffset} ] <{RequestMethod}>" + Environment.NewLine +
                                  "      ===> Retry reason: " + response.Result.Message + " ]");
+                    return Task.CompletedTask; // Ensure the lambda returns a Task
                 });
 
             /// =========================================================
             /// ===========       Message Persisting       ==============
             /// =========================================================
-            resultOfPersisting = persistorRetryPolicy.Execute(() => _messagePersistor.PersistToInbox(kafkaMessage));
+            resultOfPersisting = await persistorRetryPolicy.ExecuteAsync(() => _messagePersistor.PersistToInboxAsync(kafkaMessage));
 
             if (resultOfPersisting.Success)
                 try

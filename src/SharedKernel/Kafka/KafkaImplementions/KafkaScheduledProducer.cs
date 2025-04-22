@@ -56,8 +56,10 @@ public class KafkaScheduledProducer : IKafkaScheduledProducer
 
     public async Task<bool> WriteMessageAsync(string messageType, string messageData)
     {
-        var headers = new Headers();
-        headers.Add("MessageType", Encoding.UTF8.GetBytes(messageType));
+        var headers = new Headers
+        {
+            { "MessageType", Encoding.UTF8.GetBytes(messageType) }
+        };
 
         var message = new Message<string, string>
         {

@@ -5,7 +5,7 @@ using IdentityService.Application.DomainServices;
 using IdentityService.Application.ViewModels.ApplicationUsers.Request;
 using IdentityService.Application.ViewModels.Resource;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
-using IdentityService.Domain.DomainEntities;
+using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

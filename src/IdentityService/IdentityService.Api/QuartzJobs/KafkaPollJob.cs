@@ -15,7 +15,7 @@ public class KafkaPollJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        _jc.ReadAndProcessKafkaMessage(context.JobDetail.JobDataMap);
+        _jc.ReadAndProcessKafkaMessageAsync(context.JobDetail.JobDataMap);
 
         return Task.CompletedTask;
 

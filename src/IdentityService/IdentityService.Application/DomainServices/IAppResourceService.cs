@@ -1,4 +1,4 @@
-﻿using IdentityService.Domain.DomainEntities;
+﻿using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
 using URF.Core.Abstractions.Services;
 
 namespace IdentityService.Application.DomainServices;

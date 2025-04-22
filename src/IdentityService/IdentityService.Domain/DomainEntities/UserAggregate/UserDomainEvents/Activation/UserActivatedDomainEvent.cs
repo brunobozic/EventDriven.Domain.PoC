@@ -6,13 +6,15 @@ namespace IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.A
 public class UserActivatedDomainEvent : DomainEventBase
 {
     public UserActivatedDomainEvent(
-        string email
+        Guid userId
+        , string email
         , string userName
-        , Guid userId
         , string oib
-        , Guid activatedById
+        , Guid? activatedById
         , string activatedByUsername
         , string activationReason
+        , string origin
+        , EventTypeEnum eventType
     )
     {
         Email = email;
@@ -24,7 +26,7 @@ public class UserActivatedDomainEvent : DomainEventBase
         ActivationDateStamp = DateTime.UtcNow;
     }
 
-    public Guid ActivatedById { get; set; }
+    public Guid? ActivatedById { get; set; }
     public string ActivatedByUsername { get; set; }
     public string ActivationReason { get; set; }
     public DateTime ActivationDateStamp { get; set; }

@@ -1,13 +1,9 @@
 ﻿using IdentityService.Domain.DomainEntities.DomainExceptions;
 using Serilog;
-using SharedKernel.DomainContracts;
 using SharedKernel.DomainCoreInterfaces;
-using SharedKernel.DomainImplementations.BaseClasses;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;

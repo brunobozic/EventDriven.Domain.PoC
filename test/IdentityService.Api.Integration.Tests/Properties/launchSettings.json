@@ -1,0 +1,29 @@
+{
+  "Kafka": {
+    "ConsumerSettings": {
+      "BootstrapServers": "localhost:9092",
+      "GroupId": "test-group",
+      "KafkaTopic": "test-topic",
+      "AutoOffsetReset": "Earliest",
+      "EnableAutoCommit": false,
+      "EnablePartitionEof": true
+    },
+    "ProducerSettings": {
+      "BootstrapServers": "localhost:9092",
+      "KafkaTopic": "test-topic"
+    }
+  },
+  "MyConfigurationValues": {
+    "PollySettings": {
+      "KafkaSharedExponentialBackoff": {
+        "InitialDelayMiliseconds": 1000
+      },
+      "KafkaConsumerCircuitBreakerPolicy": {
+        "Tries": 3
+      },
+      "KafkaConsumerRetryPolicy": {
+        "RetryTimes": 3
+      }
+    }
+  }
+}

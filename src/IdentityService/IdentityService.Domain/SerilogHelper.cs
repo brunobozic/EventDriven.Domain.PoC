@@ -1,7 +1,6 @@
 ﻿using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AddressSubAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.RoleSubAggregate;
-using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -18,16 +17,16 @@ public static class SerilogHelper
         { "IsDeleted", user.IsDeleted },
         { "Id", user.Id },
         { "UserResourceId", user.UserResourceId }
-    }; 
+    };
     private static Dictionary<string, object> GetCommonProperties(Role role) => new()
     {
         { "IsActive", role.Active },
         { "RoleIdGuid", role.RoleIdGuid },
-        { "Name", role.Name }, 
+        { "Name", role.Name },
         { "Id", role.Id },
         { "IsDeleted", role.IsDeleted }
 
-    }; 
+    };
     private static Dictionary<string, object> GetCommonProperties(UserRole userRole) => new()
     {
         { "IsActive", userRole.Active },

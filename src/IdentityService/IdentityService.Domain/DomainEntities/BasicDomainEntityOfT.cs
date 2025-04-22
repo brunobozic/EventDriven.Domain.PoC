@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Text;
 using TrackableEntities.Common.Core;
 
 namespace IdentityService.Domain.DomainEntities;
@@ -36,8 +35,8 @@ public abstract class BasicDomainEntity<TK> : ITrackable, ICreationAuditedEntity
     public User? ActivatedBy { get; private set; }
     public Guid? ActivatedById { get; set; }
     public bool Active { get; set; } = true;
-    public DateTimeOffset? ActiveFrom { get; private set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? ActiveTo { get; private set; }
+    public DateTimeOffset? ActiveFrom { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ActiveTo { get; set; }
     public User? CreatedBy { get; private set; }
     public Guid? CreatedById { get; set; }
     public DateTimeOffset DateCreated { get; set; }

@@ -18,7 +18,8 @@ public class UserCreatedDomainEvent : DomainEventBase
     public Guid UserResourceId;
 
     public UserCreatedDomainEvent(
-        string email
+        Guid userId
+        , string email
         , string userName
         , string firstName
         , string lastName

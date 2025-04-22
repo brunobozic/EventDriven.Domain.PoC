@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using IdentityService.Application.DomainServices.EmailServices;
+using IdentityService.Application.ViewModels;
 using IdentityService.Data.CustomUnitOfWork.Interfaces;
 using IdentityService.Domain.DomainEntities.UserAggregate;
 using IdentityService.Domain.DomainEntities.UserAggregate.AccountJournal;

@@ -1,5 +1,4 @@
 ﻿using IdentityService.Domain.DomainEntities.UserAggregate.UserDomainEvents.CUD;
-using MimeKit;
 using Newtonsoft.Json;
 using SharedKernel.DomainImplementations.BaseClasses;
 using System;
@@ -39,10 +38,10 @@ public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEve
        string email,
        string userName,
        DateTimeOffset? activationLinkGenerated,
-       string Origin,
+       string origin,
        Guid resourceId,
        Guid messageId
-   ) : base(null)
+   ) : base(new UserCreatedDomainEvent(resourceId, email, userName, firstName, lastName, "", DateTimeOffset.MinValue, null, "", null, resourceId, origin, EventTypeEnum.UserCreatedDomainEvent))
     {
         ActivationLink = activationLink;
         FirstName = firstName;
@@ -51,7 +50,7 @@ public class UserCreatedNotification : IntegrationEventBase<UserCreatedDomainEve
         ActivationLink = activationLink;
         Email = email;
         UserName = userName;
-        Origin = this.Origin;
+        Origin = origin;
         ResourceId = resourceId;
         MessageId = messageId;
     }

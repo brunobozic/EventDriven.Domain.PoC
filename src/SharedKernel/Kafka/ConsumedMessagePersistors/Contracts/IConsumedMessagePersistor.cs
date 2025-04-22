@@ -1,5 +1,6 @@
 ﻿using Framework.Kafka.Core.DTOs.KafkaConsumer;
 using Framework.Kafka.Core.DTOs.MessageProcessor;
+using System.Threading.Tasks;
 
 namespace SharedKernel.Kafka.ConsumedMessagePersistors.Contracts;
 
@@ -12,5 +13,5 @@ public interface IConsumedMessagePersistor
     /// </summary>
     /// <param name="readResult"></param>
     /// <returns></returns>
-    PersistingResult PersistToInbox(ConsumeMessageResult kafkaMessage);
+    Task<PersistingResult> PersistToInboxAsync(ConsumeMessageResult kafkaMessage);
 }

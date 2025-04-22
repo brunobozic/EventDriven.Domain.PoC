@@ -39,14 +39,14 @@ public class AccountJournalEntryConfiguration : IEntityTypeConfiguration<Account
         builder.Property(p => p.DateDeleted)
             .IsRequired(false);
 
-        builder.HasOne(e => e.UserActedUpon)
-            .WithMany(e => e.JournalEntries)
-            .HasForeignKey(e => e.JournalId)
-            .OnDelete(DeleteBehavior.SetNull);
+        //builder.HasOne(e => e.UserActedUpon)
+        //    .WithMany(e => e.JournalEntries)
+        //    .HasForeignKey(e => e.JournalId)
+        //    .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasOne(e => e.ActingUser)
-            .WithMany()
-            .OnDelete(DeleteBehavior.SetNull);
+        //builder.HasOne(e => e.ActingUser)
+        //    .WithMany()
+        //    .OnDelete(DeleteBehavior.SetNull);
 
         //// DDD Patterns comment:
         ////Set as field (New since EF 1.1) to access the User property through its field
