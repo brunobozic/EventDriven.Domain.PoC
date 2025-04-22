@@ -101,19 +101,20 @@ public class UserController : BaseController, IUserController
         var greeterActivitySource = new ActivitySource("OtPrGrJa");
         using var activity = greeterActivitySource.StartActivity();
 
-#if DEBUG
         using (var scope = _lifetimeScope.BeginLifetimeScope())
         {
-            var handler = scope.Resolve<INotificationHandler<Application.EventsAndEventHandlers.Users.CUD.Notifications.UserCreatedNotification>>();
+            var handler = scope.Resolve<INotificationHandler<UserCreatedNotification>>();
             Console.WriteLine(handler.GetType().FullName);
         }
 
-        using (var scope = _lifetimeScope.BeginLifetimeScope())
-        {
-            var handler = scope.Resolve<INotificationHandler<UserCreatedDomainEvent>>();
-            Console.WriteLine(handler.GetType().FullName);
-        }
-#endif
+        //using (var scope = _lifetimeScope.BeginLifetimeScope())
+        //{
+        //    var handler = scope.Resolve<INotificationHandler<UserCreatedDomainEvent>>();
+        //    Console.WriteLine(handler.GetType().FullName);
+        //}
+
+
+
 
         try
         {
